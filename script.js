@@ -24,7 +24,7 @@
         }
       }
 
-      applyTheme(storage.get("theme") || systemTheme());
+      applyTheme(storage.get("theme") || "light");
 
       mql.addEventListener("change", function () {
         if (!storage.get("theme")) applyTheme(systemTheme());

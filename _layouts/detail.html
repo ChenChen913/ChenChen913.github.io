@@ -146,11 +146,15 @@
 
   <!-- KaTeX: 数学公式渲染 -->
   <script src="https://cdn.bootcdn.net/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
-  <script src="https://cdn.bootcdn.net/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"></script>
   <script>
   (function() {
-    // 将 <script type="math/tex"> 标签渲染为 KaTeX 公式
-    var scripts = document.querySelectorAll('script[type="math/tex"]');
+    // 仅渲染当前可见语言区域的公式，避免浪费性能
+    var isZh = document.documentElement.classList.contains('lang-zh');
+    var isEn = document.documentElement.classList.contains('lang-en');
+    var selector = 'script[type="math/tex"]';
+    if (isZh) selector = '.detail-zh script[type="math/tex"]';
+    else if (isEn) selector = '.detail-en script[type="math/tex"]';
+    var scripts = document.querySelectorAll(selector);
     scripts.forEach(function(s) {
       var display = s.getAttribute('type').indexOf('mode=display') > -1;
       try {

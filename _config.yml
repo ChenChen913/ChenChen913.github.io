@@ -39,6 +39,7 @@ exclude:
   - index_empty.html
   - portfolio-single-file.html
   - vendor/
+  - DEPLOY.md
 
 # 保留
 keep_files:

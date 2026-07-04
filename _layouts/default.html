@@ -3,9 +3,9 @@
 {% assign p = site.data.personal[l] %}
 {% assign s = site.data.social %}
 {% assign e = site.data.experience %}
-{% assign has_pubs = site.publications.size > 0 %}
-{% assign has_projs = site.projects.size > 0 %}
-{% assign has_exp = e.roles.size > 0 %}
+{% assign has_pubs = false %}{% if site.publications.size > 0 %}{% assign has_pubs = true %}{% endif %}
+{% assign has_projs = false %}{% if site.projects.size > 0 %}{% assign has_projs = true %}{% endif %}
+{% assign has_exp = false %}{% if e.roles.size > 0 %}{% assign has_exp = true %}{% endif %}
 <!DOCTYPE html>
 <html lang="{% if l == 'zh' %}zh-CN{% else %}en{% endif %}">
 <head>

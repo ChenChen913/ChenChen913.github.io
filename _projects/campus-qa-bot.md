@@ -38,7 +38,46 @@ demo: "#"
 
 整体采用经典的 RAG 三阶段流水线：文档预处理 → 向量检索 → 答案生成。
 
-![系统架构图](assets/projects/campus-qa-arch.png)
+<div style="background:#f8f9fa;border:1px solid #dee2e6;border-radius:8px;padding:20px;text-align:center;margin:1em 0;">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 180" width="100%" style="max-width:720px;">
+  <rect x="10" y="15" width="140" height="150" rx="8" fill="#e3f2fd" stroke="#1976d2" stroke-width="1.5"/>
+  <text x="80" y="55" text-anchor="middle" font-size="13" font-weight="bold" fill="#1565c0">📄 文档预处理</text>
+  <text x="80" y="75" text-anchor="middle" font-size="10" fill="#546e7a">PDF/Word → 纯文本</text>
+  <text x="80" y="92" text-anchor="middle" font-size="10" fill="#546e7a">语义段落切分</text>
+  <text x="80" y="109" text-anchor="middle" font-size="10" fill="#546e7a">→ 1,847 chunks</text>
+
+  <line x1="150" y1="90" x2="220" y2="90" stroke="#90a4ae" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <rect x="225" y="15" width="140" height="150" rx="8" fill="#e8f5e9" stroke="#388e3c" stroke-width="1.5"/>
+  <text x="295" y="55" text-anchor="middle" font-size="13" font-weight="bold" fill="#2e7d32">🔍 向量检索</text>
+  <text x="295" y="75" text-anchor="middle" font-size="10" fill="#546e7a">text-embedding-3</text>
+  <text x="295" y="92" text-anchor="middle" font-size="10" fill="#546e7a">→ 1536 维向量</text>
+  <text x="295" y="109" text-anchor="middle" font-size="10" fill="#546e7a">FAISS 向量数据库</text>
+  <text x="295" y="126" text-anchor="middle" font-size="10" fill="#546e7a">余弦相似度 Top-K</text>
+
+  <line x1="365" y1="90" x2="435" y2="90" stroke="#90a4ae" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <rect x="440" y="15" width="140" height="150" rx="8" fill="#fff3e0" stroke="#f57c00" stroke-width="1.5"/>
+  <text x="510" y="55" text-anchor="middle" font-size="13" font-weight="bold" fill="#e65100">💬 答案生成</text>
+  <text x="510" y="75" text-anchor="middle" font-size="10" fill="#546e7a">Top-5 chunks</text>
+  <text x="510" y="92" text-anchor="middle" font-size="10" fill="#546e7a">+ 用户问题</text>
+  <text x="510" y="109" text-anchor="middle" font-size="10" fill="#546e7a">→ GPT-4o</text>
+  <text x="510" y="126" text-anchor="middle" font-size="10" fill="#546e7a">自然语言答案</text>
+
+  <line x1="580" y1="90" x2="650" y2="90" stroke="#90a4ae" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <rect x="655" y="40" width="55" height="100" rx="8" fill="#f3e5f5" stroke="#7b1fa2" stroke-width="1.5"/>
+  <text x="682" y="85" text-anchor="middle" font-size="11" fill="#6a1b9a">带来源</text>
+  <text x="682" y="102" text-anchor="middle" font-size="11" fill="#6a1b9a">引用</text>
+
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M0,0 L10,5 L0,10 Z" fill="#90a4ae"/>
+    </marker>
+  </defs>
+</svg>
+<p style="color:#78909c;font-size:12px;margin-top:8px;">▲ RAG 三阶段流水线架构</p>
+</div>
 
 ### 阶段一：文档预处理
 
@@ -50,11 +89,19 @@ demo: "#"
 
 检索相似度采用余弦相似度：
 
-$$ \text{similarity}(\mathbf{q}, \mathbf{d}) = \frac{\mathbf{q} \cdot \mathbf{d}}{\|\mathbf{q}\| \cdot \|\mathbf{d}\|} $$
+<div>
+$$
+\text{similarity}(\mathbf{q}, \mathbf{d}) = \frac{\mathbf{q} \cdot \mathbf{d}}{\|\mathbf{q}\| \cdot \|\mathbf{d}\|}
+$$
+</div>
 
 对于 Top-K 的选取，实验对比了 $K \in \{3, 5, 7, 10\}$ 的效果，最终 $K=5$ 在召回率和响应速度之间达到最佳平衡：
 
-$$ \text{Recall}@5 = \frac{|\text{相关文档} \cap \text{Top-5 检索结果}|}{|\text{相关文档}|} = 91.2\% $$
+<div>
+$$
+\text{Recall}@5 = \frac{|\text{相关文档} \cap \text{Top-5 检索结果}|}{|\text{相关文档}|} = 91.2\%
+$$
+</div>
 
 ### 阶段三：答案生成
 
@@ -229,7 +276,46 @@ This project builds a RAG (Retrieval-Augmented Generation) powered Q&A bot that 
 
 The system follows the classic three-stage RAG pipeline: Document Preprocessing → Vector Retrieval → Answer Generation.
 
-![System Architecture](assets/projects/campus-qa-arch.png)
+<div style="background:#f8f9fa;border:1px solid #dee2e6;border-radius:8px;padding:20px;text-align:center;margin:1em 0;">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 180" width="100%" style="max-width:720px;">
+  <rect x="10" y="15" width="140" height="150" rx="8" fill="#e3f2fd" stroke="#1976d2" stroke-width="1.5"/>
+  <text x="80" y="55" text-anchor="middle" font-size="12" font-weight="bold" fill="#1565c0">📄 Preprocessing</text>
+  <text x="80" y="75" text-anchor="middle" font-size="10" fill="#546e7a">PDF/Word → Plain text</text>
+  <text x="80" y="92" text-anchor="middle" font-size="10" fill="#546e7a">Semantic chunking</text>
+  <text x="80" y="109" text-anchor="middle" font-size="10" fill="#546e7a">→ 1,847 chunks</text>
+
+  <line x1="150" y1="90" x2="220" y2="90" stroke="#90a4ae" stroke-width="2" marker-end="url(#arrow2)"/>
+
+  <rect x="225" y="15" width="140" height="150" rx="8" fill="#e8f5e9" stroke="#388e3c" stroke-width="1.5"/>
+  <text x="295" y="55" text-anchor="middle" font-size="12" font-weight="bold" fill="#2e7d32">🔍 Retrieval</text>
+  <text x="295" y="75" text-anchor="middle" font-size="10" fill="#546e7a">text-embedding-3</text>
+  <text x="295" y="92" text-anchor="middle" font-size="10" fill="#546e7a">→ 1536-dim vectors</text>
+  <text x="295" y="109" text-anchor="middle" font-size="10" fill="#546e7a">FAISS vector store</text>
+  <text x="295" y="126" text-anchor="middle" font-size="10" fill="#546e7a">Cosine similarity Top-K</text>
+
+  <line x1="365" y1="90" x2="435" y2="90" stroke="#90a4ae" stroke-width="2" marker-end="url(#arrow2)"/>
+
+  <rect x="440" y="15" width="140" height="150" rx="8" fill="#fff3e0" stroke="#f57c00" stroke-width="1.5"/>
+  <text x="510" y="55" text-anchor="middle" font-size="12" font-weight="bold" fill="#e65100">💬 Generation</text>
+  <text x="510" y="75" text-anchor="middle" font-size="10" fill="#546e7a">Top-5 chunks</text>
+  <text x="510" y="92" text-anchor="middle" font-size="10" fill="#546e7a">+ User query</text>
+  <text x="510" y="109" text-anchor="middle" font-size="10" fill="#546e7a">→ GPT-4o</text>
+  <text x="510" y="126" text-anchor="middle" font-size="10" fill="#546e7a">Natural language answer</text>
+
+  <line x1="580" y1="90" x2="650" y2="90" stroke="#90a4ae" stroke-width="2" marker-end="url(#arrow2)"/>
+
+  <rect x="655" y="40" width="55" height="100" rx="8" fill="#f3e5f5" stroke="#7b1fa2" stroke-width="1.5"/>
+  <text x="682" y="85" text-anchor="middle" font-size="10" fill="#6a1b9a">With</text>
+  <text x="682" y="102" text-anchor="middle" font-size="10" fill="#6a1b9a">Citations</text>
+
+  <defs>
+    <marker id="arrow2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M0,0 L10,5 L0,10 Z" fill="#90a4ae"/>
+    </marker>
+  </defs>
+</svg>
+<p style="color:#78909c;font-size:12px;margin-top:8px;">▲ RAG Three-Stage Pipeline Architecture</p>
+</div>
 
 ### Stage 1: Document Preprocessing
 
@@ -241,11 +327,19 @@ Each chunk is embedded into a 1536-dimensional vector via the `text-embedding-3-
 
 Cosine similarity is used for retrieval:
 
-$$ \text{similarity}(\mathbf{q}, \mathbf{d}) = \frac{\mathbf{q} \cdot \mathbf{d}}{\|\mathbf{q}\| \cdot \|\mathbf{d}\|} $$
+<div>
+$$
+\text{similarity}(\mathbf{q}, \mathbf{d}) = \frac{\mathbf{q} \cdot \mathbf{d}}{\|\mathbf{q}\| \cdot \|\mathbf{d}\|}
+$$
+</div>
 
 Experiments compared $K \in \{3, 5, 7, 10\}$, and $K=5$ achieved the best balance between recall and response speed:
 
-$$ \text{Recall}@5 = \frac{|\text{Relevant Docs} \cap \text{Top-5 Retrieved}|}{|\text{Relevant Docs}|} = 91.2\% $$
+<div>
+$$
+\text{Recall}@5 = \frac{|\text{Relevant Docs} \cap \text{Top-5 Retrieved}|}{|\text{Relevant Docs}|} = 91.2\%
+$$
+</div>
 
 ### Stage 3: Answer Generation
 

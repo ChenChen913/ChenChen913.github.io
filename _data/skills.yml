@@ -4,7 +4,7 @@ zh:
   - category: AI / 机器学习
     items: [Prompt Engineering, RAG, LangChain]
   - category: Web 开发基础
-    items: [HTML / CSS, React 基础, FastAPI]
+    items: [HTML / CSS, React, FastAPI]
   - category: 工具与协作
     items: [Git, Docker, Linux, Claude Code, Codex, Openclaw, Hermes, Trae]
   

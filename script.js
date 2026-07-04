@@ -12,7 +12,6 @@
          深浅色主题
          ------------------------------------------------------------ */
       var mql = window.matchMedia("(prefers-color-scheme: dark)");
-      function systemTheme() { return mql.matches ? "dark" : "light"; }
 
       function applyTheme(theme) {
         htmlEl.setAttribute("data-theme", theme);
@@ -155,7 +154,7 @@
           var top = target.getBoundingClientRect().top + window.scrollY - NAV_OFFSET;
           window.scrollTo({ top: top, behavior: "smooth" });
           if (history.pushState) {
-            history.pushState(null, null, "#" + id);
+            try { history.pushState(null, null, "#" + id); } catch (e) {}
           }
           setActive(id);
         });
@@ -287,14 +286,11 @@
         });
       }
 
-      // 点击返回顶部：尊重 prefers-reduced-motion 设置（含动态变化监听）
+      // 点击返回顶部：尊重 prefers-reduced-motion 设置
       var _motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
       function getScrollBehavior() {
         return _motionQuery.matches ? "auto" : "smooth";
       }
-      _motionQuery.addEventListener("change", function () {
-        // 无障碍设置变化时自动调整，无需刷新页面
-      });
       bttBtn.addEventListener("click", function () {
         window.scrollTo({ top: 0, behavior: getScrollBehavior() });
       });

@@ -31,7 +31,10 @@
 <script>
   (function () {
     var m = location.search.match(/[?&]lang=(zh|en)/);
-    if (m) document.documentElement.classList.add('lang-' + m[1]);
+    if (m) {
+      document.documentElement.classList.add('lang-' + m[1]);
+      document.documentElement.setAttribute('lang', m[1] === 'en' ? 'en' : 'zh-CN');
+    }
   })();
 </script>
 

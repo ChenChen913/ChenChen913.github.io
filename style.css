@@ -80,6 +80,7 @@
     position: sticky;
     top: 0;
     z-index: 50;
+    background: var(--bg-elevated); /* fallback for browsers without color-mix */
     background: color-mix(in srgb, var(--bg-elevated) 94%, transparent);
     border-bottom: 1px solid var(--border);
     backdrop-filter: saturate(120%);

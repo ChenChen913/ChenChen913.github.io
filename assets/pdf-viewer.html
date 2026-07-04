@@ -200,6 +200,16 @@ document.getElementById('btn-zoomout').onclick = function() {
   scale = Math.max(0.5, scale - 0.2);
   renderPage(pageNum);
 };
+
+// 响应容器尺寸变化（横竖屏、窗口缩放）
+var _resizeTimer = null;
+window.addEventListener('resize', function() {
+  clearTimeout(_resizeTimer);
+  _resizeTimer = setTimeout(function() {
+    autoScale();
+    if (pdfDoc) renderPage(pageNum);
+  }, 200);
+});
 </script>
 
 </body>

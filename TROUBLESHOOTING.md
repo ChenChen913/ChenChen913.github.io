@@ -363,29 +363,99 @@ permissions:
 
 ---
 
-## 十、构建经验总结
+## 十、PDF 在手机/平板端触发下载而非内嵌显示
+
+### 问题现象
+
+详情页使用 `<iframe src=".pdf">` 嵌入 PDF。桌面端浏览器内置 PDF 查看器正常显示；手机/平板端浏览器不支持 iframe 内嵌 PDF，自动弹出下载对话框。
+
+### 尝试过的错误方案
+
+| 方案 | 结果 |
+|------|------|
+| 移动端检测 + fallback 卡片链接 | 用户不接受，点击卡片仍然触发下载；要求"和电脑端一样直接看到 PDF" |
+
+### 最终方案：PDF.js 自建查看器
+
+**原理**：放弃依赖浏览器原生 PDF 渲染，改用 pdf.js 在 canvas 上纯 JS 渲染，全平台一致。
+
+**实现**：
+1. 创建 `assets/pdf-viewer.html`，引入 pdf.js CDN
+2. 支持翻页（◀ ▶）、缩放（＋－）、下载（📥）、全屏（⛶）
+3. 详情页 iframe src 从 `.pdf` 改为 `pdf-viewer.html?file=.pdf`
+4. `disableAutoFetch: true` — 按需加载页面，大幅加速首屏
+5. 进度条 + 百分比反馈，改善等待体验
+
+**全屏按钮的特殊处理**：不能直接链接原始 PDF（手机端点击 PDF 链接仍会触发下载）。改为链接查看器页面自身（`pdf-viewer.html?file=.pdf`），手机端同样用 pdf.js 渲染。
+
+**教训**：不要依赖浏览器原生 PDF 渲染做跨平台方案。手机浏览器对 `<iframe src=".pdf">` 的支持极差，pdf.js 是唯一可靠的跨平台方案。
+
+---
+
+## 十一、导航首次点击偏移到错误位置
+
+### 问题现象
+
+首次打开主页后点击导航栏某标签，页面跳到上一节而非目标位置。后续点击正常。
+
+### 根因
+
+导航链接使用浏览器默认锚点滚动（`<a href="#projects">`），首次加载时页面布局未完全稳定（头像图片加载、字体渲染改变页面高度），`scroll-margin-top` 计算偏移。
+
+### 解决方案
+
+在 `script.js` 中拦截所有 `#hash` 导航链接，用 `getBoundingClientRect().top` 实时计算滚动位置，替代浏览器默认锚点：
+
+```javascript
+navLinks.forEach(function (link) {
+  link.addEventListener("click", function (e) {
+    var href = this.getAttribute("href");
+    if (!href || href.charAt(0) !== "#") return;  // 放行普通页面跳转
+    e.preventDefault();
+    var target = document.getElementById(href.replace("#", ""));
+    if (!target) return;
+    var top = target.getBoundingClientRect().top + window.scrollY - NAV_OFFSET;
+    window.scrollTo({ top: top, behavior: "smooth" });
+    history.pushState(null, null, "#" + id);
+    setActive(id);
+  });
+});
+```
+
+### 衍生 Bug：返回主页失效
+
+拦截所有导航链接后，详情页"返回主页"（`href="/index.html"`）也被拦截，因无对应元素导致链接被吞。修复：加 `href.charAt(0) !== "#"` 守卫，放行所有非哈希链接。
+
+**教训**：对导航链接做事件拦截时，务必用 `href.charAt(0) === "#"` 区分哈希锚点和普通页面跳转，否则会破坏所有页面间导航。
+
+---
+
+## 十二、构建经验总结
 
 ### 必做事项
 
-1. **Jekyll 项目必须本地验证或使用 GitHub Actions。** 不要依赖 GitHub 内置 Pages 构建的错误提示（太简略）。
+1. **Jekyll 项目必须本地验证或使用 GitHub Actions。**
 2. **任何包含 Liquid 语法的文档文件必须加入 exclude。**
-3. **Liquid `assign` 不能做比较运算。** 需要布尔值时必须用 `if/endif` 包裹。
-4. **双语内容的摘要不要用 `excerpt`。** 在 frontmatter 中维护语言特定的 `desc` 字段。
-5. **GitHub Pages 对特定文件名有未知限制。** 遇到 404 时，尝试简化文件名（去掉连字符）。
-6. **push + Actions 构建成功 ≠ 部署成功。** 必须单独验证 Pages 部署状态（`gh api .../pages --jq '{status}'`）和线上页面实际内容。
-7. **在 `.nojekyll` 环境下先验证 Pages 配置本身是否正常，再排查 Jekyll 问题。**
+3. **Liquid `assign` 不能做比较运算。**
+4. **双语内容的摘要不要用 `excerpt`。**
+5. **GitHub Pages 对特定文件名有未知限制。**
+6. **push + Actions 成功 ≠ 部署成功。** 必须验证 Pages 部署状态和线上内容。
+7. **手机端不依赖浏览器原生 PDF 渲染。** 统一用 pdf.js。
+8. **导航链接拦截必须区分 #hash 和普通链接。** 否则破坏页面跳转。
+9. **首次点击偏移用 getBoundingClientRect 替代锚点。** 实时位置不受布局时序影响。
 
 ### 推荐的工作流
 
 ```
-修改代码 → 本地 commit → git push → GitHub Actions 构建（约 2 分钟）
-                                    ↓
-                              查看 Actions 日志
-                                    ↓
-                         有错误 → 读详细日志 → 修复 → 重新 push
-                         无错误 → 浏览器验证页面
+修改代码 → commit → push → Actions 构建+部署
+                              ↓
+                     gh api .../pages --jq '{status}'
+                              ↓
+                      built → curl 验证线上内容
+                              ↓
+                      CDN 缓存后浏览器确认
 ```
 
 ---
 
-> 最后更新：2026-07-04（新增第九章：部署验证教训）
+> 最后更新：2026-07-04（新增第十～十一章：PDF.js 方案、导航偏移修复）

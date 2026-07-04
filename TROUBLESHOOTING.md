@@ -232,7 +232,54 @@ en:
 
 ---
 
-## 七、构建经验总结
+## 七、kramdown 数学公式渲染失败
+
+### 问题现象
+
+Markdown 中使用 `$$ E=mc^2 $$` 写数学公式，页面显示为 `[E=mc^2]` 原始文本，未渲染为数学公式。
+
+### 尝试过的方案（均失败）
+
+| 方案 | 结果 |
+|---|---|
+| `_config.yml` 添加 `kramdown.math_engine: mathjax` | 不生效，kramdown 仍将 `$$` 转换为方括号 |
+| 添加 MathJax CDN 到 `_layouts/detail.html` | MathJax 已加载，但 kramdown 输出的不是 `<script type="math/tex">` 标签，MathJax 无法处理 |
+
+### 根因
+
+GitHub Pages 的 kramdown 版本在 GFM 输入模式下，`math_engine` 配置不生效。kramdown 将 `$$...$$` 当作普通段落处理，转换为了 HTML 中的方括号格式。
+
+### 解决方案
+
+将所有 `$$...$$` 公式用 HTML `<div>` 标签包裹：
+
+```html
+<div>
+$$
+\text{similarity}(\mathbf{q}, \mathbf{d}) = \frac{\mathbf{q} \cdot \mathbf{d}}{\|\mathbf{q}\| \cdot \|\mathbf{d}\|}
+$$
+</div>
+```
+
+原理：kramdown 不处理 `<div>` 内部的 Markdown 语法，`$$` 原样输出到 HTML。浏览器端的 MathJax 直接识别并渲染。
+
+---
+
+## 八、Markdown 图片引用本地文件不显示
+
+### 问题现象
+
+Markdown 中使用 `![架构图](assets/projects/campus-qa-arch.png)` 引用本地图片，但文件不存在，图片无法显示。
+
+### 解决方案
+
+**方案 A（本次采用）：** 使用内嵌 SVG，直接在 Markdown 中以 HTML 方式写入 `<svg>` 标签。适合流程图、架构图等简单图表，无需外部文件。
+
+**方案 B（推荐用于照片/截图）：** 将图片文件放入 `assets/` 对应子目录，在 Markdown 中用相对路径引用即可自动显示。
+
+---
+
+## 九、构建经验总结
 
 ### 必做事项
 

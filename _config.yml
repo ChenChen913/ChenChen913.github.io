@@ -44,6 +44,3 @@ exclude:
 # 保留
 keep_files:
   - .git
-
-# 输出
-permalink: /:title/

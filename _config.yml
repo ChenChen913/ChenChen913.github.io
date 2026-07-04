@@ -1,11 +1,20 @@
 # Jekyll 站点配置
 
+title: 王晨 · 个人主页
+description: 王晨的个人主页
+url: ""
+baseurl: ""
+
+# 集合
 collections:
   publications:
     output: true
+    permalink: /:collection/:path/
   projects:
     output: true
+    permalink: /:collection/:path/
 
+# 默认布局
 defaults:
   - scope:
       path: ""
@@ -18,10 +27,24 @@ defaults:
     values:
       layout: detail
 
+# Markdown 处理
+markdown: kramdown
+markdown_ext: "markdown,mkdown,mkdn,mkd,md"
+kramdown:
+  input: GFM
+
+# 排除
 exclude:
   - backups/
   - index_empty.html
   - portfolio-single-file.html
   - vendor/
+  - Gemfile
+  - Gemfile.lock
 
-markdown: kramdown
+# 保留
+keep_files:
+  - .git
+
+# 输出
+permalink: /:title/

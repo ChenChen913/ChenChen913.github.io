@@ -6,7 +6,7 @@ zh:
   - category: Web 开发基础
     items: [HTML / CSS, React 基础, FastAPI]
   - category: 工具与协作
-    items: [Git, Docker 基础, Linux 基础, Claude Code, Codex, OpenCode, Hermes]
+    items: [Git, Docker 基础, Linux 基础, Claude Code, Codex, OpenCode, Hermes, Trae]
 
 en:
   - category: Languages
@@ -16,4 +16,4 @@ en:
   - category: Web Fundamentals
     items: [HTML / CSS, React Basics, FastAPI]
   - category: Tools & Collaboration
-    items: [Git, Docker Basics, Linux Basics, Claude Code, Codex, OpenCode, Hermes]
+    items: [Git, Docker Basics, Linux Basics, Claude Code, Codex, OpenCode, Hermes, Trae]

@@ -39,8 +39,6 @@ exclude:
   - index_empty.html
   - portfolio-single-file.html
   - vendor/
-  - Gemfile
-  - Gemfile.lock
 
 # 保留
 keep_files:

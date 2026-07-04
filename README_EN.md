@@ -1,6 +1,6 @@
-<p align="right"><a href="README.md">中文</a></p>
-
 # Chen Wang · Personal Homepage
+
+<p align="right"><a href="README.md">中文</a></p>
 
 A personal homepage built with Jekyll, deployed on GitHub Pages.
 

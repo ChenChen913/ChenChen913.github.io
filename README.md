@@ -1,6 +1,6 @@
-<p align="right"><a href="README_EN.md">English</a></p>
-
 # 王晨 · 个人主页
+
+<p align="right"><a href="README_EN.md">English</a></p>
 
 基于 Jekyll 构建的个人主页，部署于 GitHub Pages。
 

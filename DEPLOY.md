@@ -150,6 +150,43 @@ English abstract content.
 
 编辑 `_data/experience.yml`，把 `roles:` 下的内容清空为 `roles: []`。
 
+### 通用更新流程（改完内容后如何推送）
+
+无论修改了什么（数据文件、Markdown、样式），推送步骤都一样：
+
+```bash
+# 第一步：进入项目文件夹
+cd /c/Users/11853/Desktop/个人主页2
+
+# 第二步：把所有改动加入暂存区
+git add .
+
+# 第三步：提交（备注写清楚改了什么）
+git commit -m "更新了个人信息"
+
+# 第四步：推送到 GitHub
+git push
+```
+
+推送后，GitHub Actions 自动构建并部署，约 **1-2 分钟**后网站更新。不需要手动点任何按钮。
+
+### 常见修改速查
+
+| 想改的内容 | 编辑哪个文件 | 改什么字段 |
+|---|---|---|
+| 姓名 | `_data/personal.yml` | `zh.name` / `en.name` |
+| 头衔/简介 | `_data/personal.yml` | `zh.tagline` / `en.tagline` |
+| 邮箱 | `_data/social.yml` | `email` |
+| GitHub / Gitee / X 链接 | `_data/social.yml` | `github` / `gitee` / `x` 等 |
+| 微信公众号 | `_data/social.yml` | `zh.wechat` / `en.wechat` |
+| Footer 版权/更新日期 | `_data/personal.yml` | `zh.footer_copyright` 等 |
+| 教育背景 | `_data/education.yml` | `zh` / `en` 下的对应字段 |
+| 工作经历 | `_data/experience.yml` | `roles` 下的条目 |
+| 技能 | `_data/skills.yml` | `zh` / `en` 下的分类和标签 |
+| 新增论文 | `_publications/` 下新建 `.md` | 参考已有文件的 frontmatter |
+| 新增项目 | `_projects/` 下新建 `.md` | 参考已有文件的 frontmatter |
+| 头像 | 替换 `assets/avatar.jpg` | 保持文件名不变 |
+
 ---
 
 ## 三、本地预览

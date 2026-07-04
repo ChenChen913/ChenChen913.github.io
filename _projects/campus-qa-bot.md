@@ -231,6 +231,105 @@ if prompt := st.chat_input("请输入你的问题..."):
     st.session_state.messages.append({"role": "assistant", "content": response["result"]})
 ```
 
+## 数学公式测试
+
+以下为各种数学公式类型的渲染测试，覆盖项目文档中常用的公式场景。
+
+### 积分
+
+定积分：
+
+<script type="math/tex; mode=display">
+\int_{0}^{\infty} e^{-x^2}\,dx = \frac{\sqrt{\pi}}{2}
+</script>
+
+重积分：
+
+<script type="math/tex; mode=display">
+\iint_{D} f(x,y)\,dx\,dy = \int_{a}^{b}\int_{c}^{d} f(x,y)\,dy\,dx
+</script>
+
+### 求和与极限
+
+无穷级数求和：
+
+<script type="math/tex; mode=display">
+\sum_{n=1}^{\infty} \frac{1}{n^2} = \frac{\pi^2}{6}
+</script>
+
+极限：
+
+<script type="math/tex; mode=display">
+\lim_{x \to 0} \frac{\sin x}{x} = 1
+</script>
+
+极限的链式定义：
+
+<script type="math/tex; mode=display">
+\lim_{n \to \infty} \left(1 + \frac{1}{n}
+ight)^{n} = e
+</script>
+
+### 矩阵
+
+<script type="math/tex; mode=display">
+\mathbf{A} = \begin{bmatrix}
+a_{11} & a_{12} & \cdots & a_{1n} \\
+a_{21} & a_{22} & \cdots & a_{2n} \\
+\vdots & \vdots & \ddots & \vdots \\
+a_{m1} & a_{m2} & \cdots & a_{mn}
+\end{bmatrix}
+</script>
+
+### 行列式
+
+<script type="math/tex; mode=display">
+\det(\mathbf{A}) = \begin{vmatrix}
+a_{11} & a_{12} & a_{13} \\
+a_{21} & a_{22} & a_{23} \\
+a_{31} & a_{32} & a_{33}
+\end{vmatrix}
+</script>
+
+### 向量与范数
+
+向量内积与 $L_2$ 范数：
+
+<script type="math/tex; mode=display">
+\mathbf{u} \cdot \mathbf{v} = \sum_{i=1}^{n} u_i v_i, \quad
+\|\mathbf{u}\|_2 = \sqrt{\sum_{i=1}^{n} u_i^2}
+</script>
+
+### 概率与统计
+
+条件概率（贝叶斯定理）：
+
+<script type="math/tex; mode=display">
+P(A|B) = \frac{P(B|A) \cdot P(A)}{P(B)}
+</script>
+
+正态分布概率密度函数：
+
+<script type="math/tex; mode=display">
+f(x) = \frac{1}{\sigma\sqrt{2\pi}} \exp\left(-\frac{(x-\mu)^2}{2\sigma^2}
+ight)
+</script>
+
+### 梯度下降
+
+<script type="math/tex; mode=display">
+\theta_{t+1} = \theta_t - \eta \nabla_{\theta} \mathcal{L}(\theta_t)
+</script>
+
+### 注意力机制
+
+缩放点积注意力（Scaled Dot-Product Attention）：
+
+<script type="math/tex; mode=display">
+\text{Attention}(Q, K, V) = \text{softmax}\!\left(\frac{QK^{\mathrm{T}}}{\sqrt{d_k}}
+ight) V
+</script>
+
 ## 效果展示
 
 > **学生提问**：我想申请辅修计算机科学，需要满足什么条件？
@@ -463,6 +562,105 @@ if prompt := st.chat_input("Ask your question..."):
                     st.caption(f"📄 {doc.metadata.get('source', 'Unknown')}")
     st.session_state.messages.append({"role": "assistant", "content": response["result"]})
 ```
+
+## Math Formula Test
+
+A comprehensive test of various math formula types for documentation purposes.
+
+### Integrals
+
+Definite integral:
+
+<script type="math/tex; mode=display">
+\int_{0}^{\infty} e^{-x^2}\,dx = \frac{\sqrt{\pi}}{2}
+</script>
+
+Double integral:
+
+<script type="math/tex; mode=display">
+\iint_{D} f(x,y)\,dx\,dy = \int_{a}^{b}\int_{c}^{d} f(x,y)\,dy\,dx
+</script>
+
+### Summation & Limits
+
+Infinite series:
+
+<script type="math/tex; mode=display">
+\sum_{n=1}^{\infty} \frac{1}{n^2} = \frac{\pi^2}{6}
+</script>
+
+Limit:
+
+<script type="math/tex; mode=display">
+\lim_{x \to 0} \frac{\sin x}{x} = 1
+</script>
+
+Compound limit definition of $e$:
+
+<script type="math/tex; mode=display">
+\lim_{n \to \infty} \left(1 + \frac{1}{n}
+ight)^{n} = e
+</script>
+
+### Matrix
+
+<script type="math/tex; mode=display">
+\mathbf{A} = \begin{bmatrix}
+a_{11} & a_{12} & \cdots & a_{1n} \\
+a_{21} & a_{22} & \cdots & a_{2n} \\
+\vdots & \vdots & \ddots & \vdots \\
+a_{m1} & a_{m2} & \cdots & a_{mn}
+\end{bmatrix}
+</script>
+
+### Determinant
+
+<script type="math/tex; mode=display">
+\det(\mathbf{A}) = \begin{vmatrix}
+a_{11} & a_{12} & a_{13} \\
+a_{21} & a_{22} & a_{23} \\
+a_{31} & a_{32} & a_{33}
+\end{vmatrix}
+</script>
+
+### Vector & Norm
+
+Dot product and $L_2$ norm:
+
+<script type="math/tex; mode=display">
+\mathbf{u} \cdot \mathbf{v} = \sum_{i=1}^{n} u_i v_i, \quad
+\|\mathbf{u}\|_2 = \sqrt{\sum_{i=1}^{n} u_i^2}
+</script>
+
+### Probability & Statistics
+
+Bayes' theorem:
+
+<script type="math/tex; mode=display">
+P(A|B) = \frac{P(B|A) \cdot P(A)}{P(B)}
+</script>
+
+Normal distribution PDF:
+
+<script type="math/tex; mode=display">
+f(x) = \frac{1}{\sigma\sqrt{2\pi}} \exp\left(-\frac{(x-\mu)^2}{2\sigma^2}
+ight)
+</script>
+
+### Gradient Descent
+
+<script type="math/tex; mode=display">
+\theta_{t+1} = \theta_t - \eta \nabla_{\theta} \mathcal{L}(\theta_t)
+</script>
+
+### Attention Mechanism
+
+Scaled Dot-Product Attention:
+
+<script type="math/tex; mode=display">
+\text{Attention}(Q, K, V) = \text{softmax}\!\left(\frac{QK^{\mathrm{T}}}{\sqrt{d_k}}
+ight) V
+</script>
 
 ## Live Demo
 

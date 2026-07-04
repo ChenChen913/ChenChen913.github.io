@@ -32,6 +32,7 @@ markdown: kramdown
 markdown_ext: "markdown,mkdown,mkdn,mkd,md"
 kramdown:
   input: GFM
+  math_engine: mathjax
 
 # 排除
 exclude:

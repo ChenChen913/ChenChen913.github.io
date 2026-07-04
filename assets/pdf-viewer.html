@@ -48,11 +48,27 @@
   }
   #loading {
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     height: 200px;
     color: #aaa;
     font-size: 14px;
+    gap: 10px;
+  }
+  #progress-bar {
+    width: 200px;
+    height: 4px;
+    background: #444;
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  #progress-fill {
+    width: 0%;
+    height: 100%;
+    background: #5a9fd4;
+    border-radius: 2px;
+    transition: width 0.3s;
   }
   #error {
     display: none;
@@ -71,7 +87,7 @@
 
 <div id="toolbar">
   <button id="btn-prev" disabled>◀</button>
-  <span id="page-num">0 / 0</span>
+  <span id="page-num">—</span>
   <button id="btn-next" disabled>▶</button>
   <span class="spacer"></span>
   <button id="btn-zoomin" title="放大">＋</button>
@@ -80,7 +96,10 @@
   <a id="btn-fullscreen" class="btn" href="#" target="_blank">⛶ 全屏</a>
 </div>
 
-<div id="loading">正在加载 PDF…</div>
+<div id="loading">
+  <span id="loading-text">正在加载 PDF…</span>
+  <div id="progress-bar"><div id="progress-fill"></div></div>
+</div>
 <div id="error">
   <span>PDF 加载失败。<br><a href="#" id="error-link">点击此处直接打开</a></span>
 </div>
@@ -91,20 +110,41 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
   'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
 var params = new URLSearchParams(location.search);
-var url = params.get('file');
-if (!url) {
-  document.getElementById('loading').textContent = '未指定 PDF 文件';
+var pdfUrl = params.get('file');
+if (!pdfUrl) {
+  document.getElementById('loading-text').textContent = '未指定 PDF 文件';
+  document.getElementById('progress-bar').style.display = 'none';
 } else {
-  document.getElementById('btn-download').href = url;
-  document.getElementById('btn-fullscreen').href = url;
-  document.getElementById('error-link').href = url;
-  init(url);
+  // 下载链接指向原始 PDF
+  document.getElementById('btn-download').href = pdfUrl;
+  // 全屏按钮打开当前查看器页面（而非原始 PDF），避免手机端触发下载弹窗
+  document.getElementById('btn-fullscreen').href = location.href;
+  document.getElementById('error-link').href = pdfUrl;
+  init(pdfUrl);
 }
 
 var pdfDoc = null, pageNum = 1, totalPages = 0, scale = 1.2;
 
 function init(url) {
-  pdfjsLib.getDocument(url).promise.then(function(pdf) {
+  var fill = document.getElementById('progress-fill');
+  var text = document.getElementById('loading-text');
+
+  var task = pdfjsLib.getDocument({
+    url: url,
+    disableAutoFetch: true,   // 只按需拉取页面，大幅加快首屏
+    disableStream: false,      // 启用流式加载，边下载边解析
+  });
+
+  // 显示下载进度
+  task.onProgress = function(evt) {
+    if (evt.total > 0) {
+      var pct = Math.round(evt.loaded / evt.total * 100);
+      fill.style.width = pct + '%';
+      text.textContent = '正在加载 PDF… ' + pct + '%';
+    }
+  };
+
+  task.promise.then(function(pdf) {
     pdfDoc = pdf;
     totalPages = pdf.numPages;
     document.getElementById('loading').style.display = 'none';
@@ -121,28 +161,28 @@ function init(url) {
 }
 
 function autoScale() {
-  // 根据容器宽度自动计算缩放比例，确保 canvas 填满宽度
-  var container = document.getElementById('pages');
-  var w = container.clientWidth;
-  scale = Math.max(0.5, (w - 20) / 612); // 612 = letter width in pt
+  var w = document.getElementById('pages').clientWidth;
+  scale = Math.max(0.5, (w - 20) / 612);
 }
 
 function renderPage(num) {
   if (!pdfDoc) return;
+  document.getElementById('page-num').textContent = num + ' / ' + totalPages;
+  document.getElementById('btn-prev').disabled = num <= 1;
+  document.getElementById('btn-next').disabled = num >= totalPages;
+  document.getElementById('pages').innerHTML =
+    '<div style="text-align:center;padding:40px;color:#aaa;">加载中…</div>';
+
   pdfDoc.getPage(num).then(function(page) {
     var viewport = page.getViewport({ scale: scale });
     var canvas = document.createElement('canvas');
     canvas.width = viewport.width;
     canvas.height = viewport.height;
     var ctx = canvas.getContext('2d');
-    var container = document.getElementById('pages');
-    container.innerHTML = '';
-    container.appendChild(canvas);
+    document.getElementById('pages').innerHTML = '';
+    document.getElementById('pages').appendChild(canvas);
     page.render({ canvasContext: ctx, viewport: viewport });
     pageNum = num;
-    document.getElementById('page-num').textContent = num + ' / ' + totalPages;
-    document.getElementById('btn-prev').disabled = num <= 1;
-    document.getElementById('btn-next').disabled = num >= totalPages;
   });
 }
 

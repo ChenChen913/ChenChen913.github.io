@@ -23,6 +23,18 @@
   })();
 </script>
 
+<!-- 语言过滤：根据 ?lang=zh 或 ?lang=en 只显示对应语言 -->
+<style>
+  .lang-zh .detail-en, .lang-zh .detail-divider { display: none; }
+  .lang-en .detail-zh, .lang-en .detail-divider { display: none; }
+</style>
+<script>
+  (function () {
+    var m = location.search.match(/[?&]lang=(zh|en)/);
+    if (m) document.documentElement.classList.add('lang-' + m[1]);
+  })();
+</script>
+
 <link rel="stylesheet" href="/style.css">
 </head>
 <body>
@@ -44,37 +56,35 @@
     <article class="section" style="border-top:none; padding-top:40px;">
 
       <!-- 中文 -->
-      <span class="tag tag-accent pub-type"></span>
-      <h1 class="section-title" style="font-size:1.4rem; margin-bottom:0.3em;">垃圾分类图像识别（课程作业）</h1>
-      <p class="pub-meta" style="margin-bottom:1.5em;">课程项目 · 2024.11</p>
-      <div style="max-width:60ch; line-height:2; color:var(--ink-secondary);">
-
-        <!-- 中文内容 -->
-        <p>深度学习课程的期末作业，用卷积神经网络做垃圾分类识别，
+      <div class="detail-zh">
+        <span class="tag tag-accent pub-type"></span>
+        <h1 class="section-title" style="font-size:1.4rem; margin-bottom:0.3em;">垃圾分类图像识别（课程作业）</h1>
+        <p class="pub-meta" style="margin-bottom:1.5em;">课程项目 · 2024.11</p>
+        <div style="max-width:60ch; line-height:2; color:var(--ink-secondary);">
+          <p>深度学习课程的期末作业，用卷积神经网络做垃圾分类识别，
 在验证集上跑到了 91% 的准确率。</p>
 
 
-
+        </div>
       </div>
 
       <!-- 分隔线 -->
-      <hr style="border:none; border-top:1px solid var(--border); margin:2em 0;">
+      <hr class="detail-divider" style="border:none; border-top:1px solid var(--border); margin:2em 0;">
 
       <!-- 英文 -->
-      <span class="tag tag-accent pub-type" style="margin-bottom:1em;"></span>
-      <h2 class="section-title" style="font-size:1.2rem; margin-bottom:0.3em;">Waste Classification with Image Recognition (Coursework)</h2>
-      <p class="pub-meta" style="margin-bottom:1.5em;">Course Project · Nov 2024</p>
-      <div style="max-width:60ch; line-height:2; color:var(--ink-secondary);">
-
-        <!-- 英文内容 -->
-        
-        
+      <div class="detail-en">
+        <span class="tag tag-accent pub-type" style="margin-bottom:1em;"></span>
+        <h2 class="section-title" style="font-size:1.2rem; margin-bottom:0.3em;">Waste Classification with Image Recognition (Coursework)</h2>
+        <p class="pub-meta" style="margin-bottom:1.5em;">Course Project · Nov 2024</p>
+        <div style="max-width:60ch; line-height:2; color:var(--ink-secondary);">
           
+          
+            
 <p>Final assignment for a Deep Learning course — a CNN-based waste classifier
 reaching 91% accuracy on the validation set.</p>
 
-        
-
+          
+        </div>
       </div>
 
     </article>

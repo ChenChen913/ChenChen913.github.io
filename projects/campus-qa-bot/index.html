@@ -23,6 +23,18 @@
   })();
 </script>
 
+<!-- 语言过滤：根据 ?lang=zh 或 ?lang=en 只显示对应语言 -->
+<style>
+  .lang-zh .detail-en, .lang-zh .detail-divider { display: none; }
+  .lang-en .detail-zh, .lang-en .detail-divider { display: none; }
+</style>
+<script>
+  (function () {
+    var m = location.search.match(/[?&]lang=(zh|en)/);
+    if (m) document.documentElement.classList.add('lang-' + m[1]);
+  })();
+</script>
+
 <link rel="stylesheet" href="/style.css">
 </head>
 <body>
@@ -44,37 +56,35 @@
     <article class="section" style="border-top:none; padding-top:40px;">
 
       <!-- 中文 -->
-      <span class="tag tag-accent pub-type"></span>
-      <h1 class="section-title" style="font-size:1.4rem; margin-bottom:0.3em;">校园知识库问答机器人（毕业设计）</h1>
-      <p class="pub-meta" style="margin-bottom:1.5em;">独立开发 · 2025.09 — 2026.03</p>
-      <div style="max-width:60ch; line-height:2; color:var(--ink-secondary);">
-
-        <!-- 中文内容 -->
-        <p>基于 RAG 架构做的毕业设计项目，把校园教务文档向量化存储，
+      <div class="detail-zh">
+        <span class="tag tag-accent pub-type"></span>
+        <h1 class="section-title" style="font-size:1.4rem; margin-bottom:0.3em;">校园知识库问答机器人（毕业设计）</h1>
+        <p class="pub-meta" style="margin-bottom:1.5em;">独立开发 · 2025.09 — 2026.03</p>
+        <div style="max-width:60ch; line-height:2; color:var(--ink-secondary);">
+          <p>基于 RAG 架构做的毕业设计项目，把校园教务文档向量化存储，
 支持多轮问答与来源引用，用来解决新生找不到教务信息的问题。</p>
 
 
-
+        </div>
       </div>
 
       <!-- 分隔线 -->
-      <hr style="border:none; border-top:1px solid var(--border); margin:2em 0;">
+      <hr class="detail-divider" style="border:none; border-top:1px solid var(--border); margin:2em 0;">
 
       <!-- 英文 -->
-      <span class="tag tag-accent pub-type" style="margin-bottom:1em;"></span>
-      <h2 class="section-title" style="font-size:1.2rem; margin-bottom:0.3em;">Campus Knowledge-Base Q&A Bot (Capstone Project)</h2>
-      <p class="pub-meta" style="margin-bottom:1.5em;">Solo Developer · Sep 2025 — Mar 2026</p>
-      <div style="max-width:60ch; line-height:2; color:var(--ink-secondary);">
-
-        <!-- 英文内容 -->
-        
-        
+      <div class="detail-en">
+        <span class="tag tag-accent pub-type" style="margin-bottom:1em;"></span>
+        <h2 class="section-title" style="font-size:1.2rem; margin-bottom:0.3em;">Campus Knowledge-Base Q&A Bot (Capstone Project)</h2>
+        <p class="pub-meta" style="margin-bottom:1.5em;">Solo Developer · Sep 2025 — Mar 2026</p>
+        <div style="max-width:60ch; line-height:2; color:var(--ink-secondary);">
           
+          
+            
 <p>A RAG-based capstone project that vectorizes campus admin documents to power
 multi-turn Q&amp;A with source citations, built to help new students find academic-affairs info.</p>
 
-        
-
+          
+        </div>
       </div>
 
     </article>

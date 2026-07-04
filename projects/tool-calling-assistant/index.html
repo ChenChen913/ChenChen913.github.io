@@ -23,6 +23,18 @@
   })();
 </script>
 
+<!-- 语言过滤：根据 ?lang=zh 或 ?lang=en 只显示对应语言 -->
+<style>
+  .lang-zh .detail-en, .lang-zh .detail-divider { display: none; }
+  .lang-en .detail-zh, .lang-en .detail-divider { display: none; }
+</style>
+<script>
+  (function () {
+    var m = location.search.match(/[?&]lang=(zh|en)/);
+    if (m) document.documentElement.classList.add('lang-' + m[1]);
+  })();
+</script>
+
 <link rel="stylesheet" href="/style.css">
 </head>
 <body>
@@ -44,37 +56,35 @@
     <article class="section" style="border-top:none; padding-top:40px;">
 
       <!-- 中文 -->
-      <span class="tag tag-accent pub-type"></span>
-      <h1 class="section-title" style="font-size:1.4rem; margin-bottom:0.3em;">AI 工具调用小助手（实习产出）</h1>
-      <p class="pub-meta" style="margin-bottom:1.5em;">实习生 · 2025.06 — 2025.09</p>
-      <div style="max-width:60ch; line-height:2; color:var(--ink-secondary);">
-
-        <!-- 中文内容 -->
-        <p>实习期间参与开发的内部小工具，支持自定义工具注册和链式调用，
+      <div class="detail-zh">
+        <span class="tag tag-accent pub-type"></span>
+        <h1 class="section-title" style="font-size:1.4rem; margin-bottom:0.3em;">AI 工具调用小助手（实习产出）</h1>
+        <p class="pub-meta" style="margin-bottom:1.5em;">实习生 · 2025.06 — 2025.09</p>
+        <div style="max-width:60ch; line-height:2; color:var(--ink-secondary);">
+          <p>实习期间参与开发的内部小工具，支持自定义工具注册和链式调用，
 用来自动生成团队周报草稿，减少了同事们手动整理的时间。</p>
 
 
-
+        </div>
       </div>
 
       <!-- 分隔线 -->
-      <hr style="border:none; border-top:1px solid var(--border); margin:2em 0;">
+      <hr class="detail-divider" style="border:none; border-top:1px solid var(--border); margin:2em 0;">
 
       <!-- 英文 -->
-      <span class="tag tag-accent pub-type" style="margin-bottom:1em;"></span>
-      <h2 class="section-title" style="font-size:1.2rem; margin-bottom:0.3em;">AI Tool-Calling Assistant (Internship)</h2>
-      <p class="pub-meta" style="margin-bottom:1.5em;">Intern · Jun 2025 — Sep 2025</p>
-      <div style="max-width:60ch; line-height:2; color:var(--ink-secondary);">
-
-        <!-- 英文内容 -->
-        
-        
+      <div class="detail-en">
+        <span class="tag tag-accent pub-type" style="margin-bottom:1em;"></span>
+        <h2 class="section-title" style="font-size:1.2rem; margin-bottom:0.3em;">AI Tool-Calling Assistant (Internship)</h2>
+        <p class="pub-meta" style="margin-bottom:1.5em;">Intern · Jun 2025 — Sep 2025</p>
+        <div style="max-width:60ch; line-height:2; color:var(--ink-secondary);">
           
+          
+            
 <p>An internal tool I helped build during my internship, supporting custom tool
 registration and chained calls, used to auto-draft weekly team reports.</p>
 
-        
-
+          
+        </div>
       </div>
 
     </article>

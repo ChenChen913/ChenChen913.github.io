@@ -23,6 +23,18 @@
   })();
 </script>
 
+<!-- 语言过滤：根据 ?lang=zh 或 ?lang=en 只显示对应语言 -->
+<style>
+  .lang-zh .detail-en, .lang-zh .detail-divider { display: none; }
+  .lang-en .detail-zh, .lang-en .detail-divider { display: none; }
+</style>
+<script>
+  (function () {
+    var m = location.search.match(/[?&]lang=(zh|en)/);
+    if (m) document.documentElement.classList.add('lang-' + m[1]);
+  })();
+</script>
+
 <link rel="stylesheet" href="/style.css">
 </head>
 <body>
@@ -44,40 +56,38 @@
     <article class="section" style="border-top:none; padding-top:40px;">
 
       <!-- 中文 -->
-      <span class="tag tag-accent pub-type">毕业论文</span>
-      <h1 class="section-title" style="font-size:1.4rem; margin-bottom:0.3em;">基于检索增强生成的校园知识库问答系统设计与实现</h1>
-      <p class="pub-meta" style="margin-bottom:1.5em;">本科毕业论文 · 指导教师：李教授 · 2026.06</p>
-      <div style="max-width:60ch; line-height:2; color:var(--ink-secondary);">
-
-        <!-- 中文内容 -->
-        <!-- 中文摘要 -->
+      <div class="detail-zh">
+        <span class="tag tag-accent pub-type">毕业论文</span>
+        <h1 class="section-title" style="font-size:1.4rem; margin-bottom:0.3em;">基于检索增强生成的校园知识库问答系统设计与实现</h1>
+        <p class="pub-meta" style="margin-bottom:1.5em;">本科毕业论文 · 指导教师：李教授 · 2026.06</p>
+        <div style="max-width:60ch; line-height:2; color:var(--ink-secondary);">
+          <!-- 中文摘要 -->
 <p>围绕毕业设计项目展开，系统性梳理了 RAG 架构在校园场景下的工程实践，
 并对检索准确率与回答质量做了对比评估。</p>
 
 <!-- 以下为英文内容，详情页会自动渲染 -->
 
-
+        </div>
       </div>
 
       <!-- 分隔线 -->
-      <hr style="border:none; border-top:1px solid var(--border); margin:2em 0;">
+      <hr class="detail-divider" style="border:none; border-top:1px solid var(--border); margin:2em 0;">
 
       <!-- 英文 -->
-      <span class="tag tag-accent pub-type" style="margin-bottom:1em;">Thesis</span>
-      <h2 class="section-title" style="font-size:1.2rem; margin-bottom:0.3em;">RAG-based Design and Implementation of a Campus Knowledge-Base Q&A System</h2>
-      <p class="pub-meta" style="margin-bottom:1.5em;">Undergraduate Thesis · Advisor: Prof. Li · Jun 2026</p>
-      <div style="max-width:60ch; line-height:2; color:var(--ink-secondary);">
-
-        <!-- 英文内容 -->
-        
-        
+      <div class="detail-en">
+        <span class="tag tag-accent pub-type" style="margin-bottom:1em;">Thesis</span>
+        <h2 class="section-title" style="font-size:1.2rem; margin-bottom:0.3em;">RAG-based Design and Implementation of a Campus Knowledge-Base Q&A System</h2>
+        <p class="pub-meta" style="margin-bottom:1.5em;">Undergraduate Thesis · Advisor: Prof. Li · Jun 2026</p>
+        <div style="max-width:60ch; line-height:2; color:var(--ink-secondary);">
           
+          
+            
 <p>Written around the capstone project, systematically reviewing the engineering
 practice of RAG in a campus setting, with a comparative evaluation of retrieval
 accuracy and answer quality.</p>
 
-        
-
+          
+        </div>
       </div>
 
     </article>

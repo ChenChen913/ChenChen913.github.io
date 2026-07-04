@@ -142,6 +142,66 @@ English abstract content.
 
 同上，在 `_projects/` 下新建 `.md`，额外可填 `github` 和 `demo` 链接。
 
+### 原理：Markdown 如何变成网页
+
+每篇论文和项目都是一个 Markdown 文件，Jekyll 自动把它转成独立的 HTML 页面。
+
+**文件映射关系：**
+
+```
+_projects/campus-qa-bot.md
+  → 网址 /projects/campus-qa-bot/?lang=zh
+  → 网址 /projects/campus-qa-bot/?lang=en
+
+_publications/rag-thesis.md
+  → 网址 /publications/rag-thesis/?lang=zh
+  → 网址 /publications/rag-thesis/?lang=en
+```
+
+**转换流程：**
+
+```
+Markdown 文件                         Jekyll 构建
+┌─────────────────────┐              ┌──────────────────┐
+│ ---                 │              │                  │
+│ zh:                 │  frontmatter │ 读取 title/meta  │
+│   title: 论文标题    │ ──────────→ │ 等结构化数据     │
+│   desc: 摘要        │              │                  │
+│ en: ...             │              ├──────────────────┤
+│ ---                 │              │                  │
+│                     │   正文       │ 读取 Markdown    │
+│ 中文正文...          │ ──────────→ │ → 转 HTML        │
+│                     │              │                  │
+│ <!-- English -->    │   分隔符     │ 按分隔符切分     │
+│                     │ ──────────→ │ 中英文内容       │
+│ English content...  │              │                  │
+│                     │              ├──────────────────┤
+└─────────────────────┘              │                  │
+                                     │ _layouts/        │
+                                     │ detail.html      │
+                                     │ （详情页模板）    │
+                                     │ 套入数据+内容    │
+                                     │                  │
+                                     └──────────────────┘
+```
+
+**关键配置（`_config.yml` 中不需要改动）：**
+
+| 配置 | 作用 |
+|---|---|
+| `collections.publications.output: true` | 让每篇论文 `.md` 生成独立页面 |
+| `collections.projects.output: true` | 让每个项目 `.md` 生成独立页面 |
+| `defaults.type.publications.layout: detail` | 论文页面用 `_layouts/detail.html` 模板 |
+| `defaults.type.projects.layout: detail` | 项目页面用同一个模板 |
+
+**`<!-- English -->` 分隔符的作用：**
+
+每篇论文/项目的正文中，用 `<!-- English -->` 把中文和英文内容分开。模板（`_layouts/detail.html`）会按这个分隔符切成两段，分别放入中文区和英文区。根据来源页面语言（`?lang=zh` 或 `?lang=en`），只显示对应语言的内容。
+
+**新增内容无需改代码：**
+
+只需在 `_publications/` 或 `_projects/` 下新建 `.md` 文件，写好 frontmatter 和正文 → `git push` → 主页自动出现新卡片 → 点击跳转到自动生成的详情页。
+
 ### 删除论文/项目栏目
 
 把 `_publications/` 或 `_projects/` 下所有 `.md` 文件删掉即可。栏目和导航项自动隐藏。

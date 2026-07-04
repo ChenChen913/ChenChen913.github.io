@@ -64,6 +64,8 @@
       var NAV_OFFSET = 80; // 略大于吸顶导航高度 + scroll-margin-top
 
       var lastActiveId = null;
+      var _spyPaused = false;    // 导航点击后短暂抑制 scroll spy
+      var _spyResumeTimer = null;
 
       function getDocHeight() {
         return Math.max(
@@ -106,6 +108,7 @@
 
       var ticking = false;
       function computeActiveSection() {
+        if (_spyPaused) { ticking = false; return; }
         var scrollY = window.scrollY || window.pageYOffset;
         var pos = scrollY + NAV_OFFSET;
         var currentId = sections.length ? sections[0].id : null;
@@ -157,6 +160,10 @@
             try { history.pushState(null, null, "#" + id); } catch (e) {}
           }
           setActive(id);
+          // 抑制 scroll spy 800ms，避免平滑滚动经过中间章节时短暂切换高亮
+          _spyPaused = true;
+          clearTimeout(_spyResumeTimer);
+          _spyResumeTimer = setTimeout(function () { _spyPaused = false; }, 800);
         });
       });
 

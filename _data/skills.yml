@@ -2,7 +2,7 @@ zh:
   - category: 编程语言
     items: [C, C++, Java, Python]
   - category: AI / 机器学习
-    items: [Prompt Engineering, RAG 检索增强, LangChain]
+    items: [Prompt Engineering, RAG, LangChain]
   - category: Web 开发基础
     items: [HTML / CSS, React 基础, FastAPI]
   - category: 工具与协作

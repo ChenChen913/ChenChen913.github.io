@@ -1,6 +1,6 @@
 # Chen Wang · Personal Homepage
 
-<p align="right"><a href="README.md">中文</a></p>
+[中文](README.md)
 
 A personal homepage built with Jekyll, deployed on GitHub Pages.
 
@@ -12,10 +12,3 @@ A personal homepage built with Jekyll, deployed on GitHub Pages.
 - GitHub Pages hosting + GitHub Actions CI/CD
 - Bilingual standalone pages (Chinese / English)
 - Responsive design (desktop / tablet / mobile)
-
-## Local Development
-
-```bash
-bundle install
-bundle exec jekyll serve
-```

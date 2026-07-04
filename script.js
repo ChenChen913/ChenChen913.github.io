@@ -27,7 +27,7 @@
       applyTheme(storage.get("theme") || "light");
 
       mql.addEventListener("change", function () {
-        if (!storage.get("theme")) applyTheme(systemTheme());
+        // 不再自动跟随系统主题变化，保持用户看到的或手动选择的主题
       });
 
       var themeToggle = document.getElementById("theme-toggle");
@@ -265,11 +265,16 @@
         });
       }
 
-      // 点击返回顶部：尊重 prefers-reduced-motion 设置
+      // 点击返回顶部：尊重 prefers-reduced-motion 设置（含动态变化监听）
       var _motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+      function getScrollBehavior() {
+        return _motionQuery.matches ? "auto" : "smooth";
+      }
+      _motionQuery.addEventListener("change", function () {
+        // 无障碍设置变化时自动调整，无需刷新页面
+      });
       bttBtn.addEventListener("click", function () {
-        var behavior = _motionQuery.matches ? "auto" : "smooth";
-        window.scrollTo({ top: 0, behavior: behavior });
+        window.scrollTo({ top: 0, behavior: getScrollBehavior() });
       });
 
       // 绑定滚动更新（resize 时刷新缓存尺寸）

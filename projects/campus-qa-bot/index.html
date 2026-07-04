@@ -39,6 +39,19 @@
 
 <!-- Rouge 语法高亮样式 -->
 <style>
+  /* 代码块容器 */
+  .highlight pre {
+    background: #f6f8fa;
+    border: 1px solid #d0d7de;
+    border-radius: 6px;
+    padding: 16px;
+    overflow-x: auto;
+    font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Monaco', monospace;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  /* 语法高亮颜色 */
   .highlight .kn { color: #d73a49; font-weight: bold; }  /* keyword */
   .highlight .k { color: #d73a49; font-weight: bold; }   /* keyword */
   .highlight .nn { color: #6f42c1; }                      /* namespace */
@@ -52,6 +65,10 @@
   .highlight .nb { color: #005cc5; }                      /* builtin */
 
   /* 深色模式下适配 */
+  html[data-theme="dark"] .highlight pre {
+    background: #161b22;
+    border-color: #30363d;
+  }
   html[data-theme="dark"] .highlight .n,
   html[data-theme="dark"] .highlight .p { color: #e1e4e8; }
   html[data-theme="dark"] .highlight .s,
@@ -336,6 +353,105 @@
     <span class="n">st</span><span class="p">.</span><span class="n">session_state</span><span class="p">.</span><span class="n">messages</span><span class="p">.</span><span class="n">append</span><span class="p">({</span><span class="s">"role"</span><span class="p">:</span> <span class="s">"assistant"</span><span class="p">,</span> <span class="s">"content"</span><span class="p">:</span> <span class="n">response</span><span class="p">[</span><span class="s">"result"</span><span class="p">]})</span>
 </code></pre></div></div>
 
+<h2 id="数学公式测试">数学公式测试</h2>
+
+<p>以下为各种数学公式类型的渲染测试，覆盖项目文档中常用的公式场景。</p>
+
+<h3 id="积分">积分</h3>
+
+<p>定积分：</p>
+
+<script type="math/tex; mode=display">
+\int_{0}^{\infty} e^{-x^2}\,dx = \frac{\sqrt{\pi}}{2}
+</script>
+
+<p>重积分：</p>
+
+<script type="math/tex; mode=display">
+\iint_{D} f(x,y)\,dx\,dy = \int_{a}^{b}\int_{c}^{d} f(x,y)\,dy\,dx
+</script>
+
+<h3 id="求和与极限">求和与极限</h3>
+
+<p>无穷级数求和：</p>
+
+<script type="math/tex; mode=display">
+\sum_{n=1}^{\infty} \frac{1}{n^2} = \frac{\pi^2}{6}
+</script>
+
+<p>极限：</p>
+
+<script type="math/tex; mode=display">
+\lim_{x \to 0} \frac{\sin x}{x} = 1
+</script>
+
+<p>极限的链式定义：</p>
+
+<script type="math/tex; mode=display">
+\lim_{n \to \infty} \left(1 + \frac{1}{n}
+ight)^{n} = e
+</script>
+
+<h3 id="矩阵">矩阵</h3>
+
+<script type="math/tex; mode=display">
+\mathbf{A} = \begin{bmatrix}
+a_{11} & a_{12} & \cdots & a_{1n} \\
+a_{21} & a_{22} & \cdots & a_{2n} \\
+\vdots & \vdots & \ddots & \vdots \\
+a_{m1} & a_{m2} & \cdots & a_{mn}
+\end{bmatrix}
+</script>
+
+<h3 id="行列式">行列式</h3>
+
+<script type="math/tex; mode=display">
+\det(\mathbf{A}) = \begin{vmatrix}
+a_{11} & a_{12} & a_{13} \\
+a_{21} & a_{22} & a_{23} \\
+a_{31} & a_{32} & a_{33}
+\end{vmatrix}
+</script>
+
+<h3 id="向量与范数">向量与范数</h3>
+
+<p>向量内积与 $L_2$ 范数：</p>
+
+<script type="math/tex; mode=display">
+\mathbf{u} \cdot \mathbf{v} = \sum_{i=1}^{n} u_i v_i, \quad
+\|\mathbf{u}\|_2 = \sqrt{\sum_{i=1}^{n} u_i^2}
+</script>
+
+<h3 id="概率与统计">概率与统计</h3>
+
+<p>条件概率（贝叶斯定理）：</p>
+
+<script type="math/tex; mode=display">
+P(A|B) = \frac{P(B|A) \cdot P(A)}{P(B)}
+</script>
+
+<p>正态分布概率密度函数：</p>
+
+<script type="math/tex; mode=display">
+f(x) = \frac{1}{\sigma\sqrt{2\pi}} \exp\left(-\frac{(x-\mu)^2}{2\sigma^2}
+ight)
+</script>
+
+<h3 id="梯度下降">梯度下降</h3>
+
+<script type="math/tex; mode=display">
+\theta_{t+1} = \theta_t - \eta \nabla_{\theta} \mathcal{L}(\theta_t)
+</script>
+
+<h3 id="注意力机制">注意力机制</h3>
+
+<p>缩放点积注意力（Scaled Dot-Product Attention）：</p>
+
+<script type="math/tex; mode=display">
+\text{Attention}(Q, K, V) = \text{softmax}\!\left(\frac{QK^{\mathrm{T}}}{\sqrt{d_k}}
+ight) V
+</script>
+
 <h2 id="效果展示">效果展示</h2>
 
 <blockquote>
@@ -605,6 +721,105 @@ Respond in a friendly, clear tone, and cite reference document numbers at the en
                     <span class="n">st</span><span class="p">.</span><span class="n">caption</span><span class="p">(</span><span class="sa">f</span><span class="s">"📄 </span><span class="si">{</span><span class="n">doc</span><span class="p">.</span><span class="n">metadata</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="s">'source'</span><span class="p">,</span> <span class="s">'Unknown'</span><span class="p">)</span><span class="si">}</span><span class="s">"</span><span class="p">)</span>
     <span class="n">st</span><span class="p">.</span><span class="n">session_state</span><span class="p">.</span><span class="n">messages</span><span class="p">.</span><span class="n">append</span><span class="p">({</span><span class="s">"role"</span><span class="p">:</span> <span class="s">"assistant"</span><span class="p">,</span> <span class="s">"content"</span><span class="p">:</span> <span class="n">response</span><span class="p">[</span><span class="s">"result"</span><span class="p">]})</span>
 </code></pre></div></div>
+
+<h2 id="math-formula-test">Math Formula Test</h2>
+
+<p>A comprehensive test of various math formula types for documentation purposes.</p>
+
+<h3 id="integrals">Integrals</h3>
+
+<p>Definite integral:</p>
+
+<script type="math/tex; mode=display">
+\int_{0}^{\infty} e^{-x^2}\,dx = \frac{\sqrt{\pi}}{2}
+</script>
+
+<p>Double integral:</p>
+
+<script type="math/tex; mode=display">
+\iint_{D} f(x,y)\,dx\,dy = \int_{a}^{b}\int_{c}^{d} f(x,y)\,dy\,dx
+</script>
+
+<h3 id="summation--limits">Summation &amp; Limits</h3>
+
+<p>Infinite series:</p>
+
+<script type="math/tex; mode=display">
+\sum_{n=1}^{\infty} \frac{1}{n^2} = \frac{\pi^2}{6}
+</script>
+
+<p>Limit:</p>
+
+<script type="math/tex; mode=display">
+\lim_{x \to 0} \frac{\sin x}{x} = 1
+</script>
+
+<p>Compound limit definition of $e$:</p>
+
+<script type="math/tex; mode=display">
+\lim_{n \to \infty} \left(1 + \frac{1}{n}
+ight)^{n} = e
+</script>
+
+<h3 id="matrix">Matrix</h3>
+
+<script type="math/tex; mode=display">
+\mathbf{A} = \begin{bmatrix}
+a_{11} & a_{12} & \cdots & a_{1n} \\
+a_{21} & a_{22} & \cdots & a_{2n} \\
+\vdots & \vdots & \ddots & \vdots \\
+a_{m1} & a_{m2} & \cdots & a_{mn}
+\end{bmatrix}
+</script>
+
+<h3 id="determinant">Determinant</h3>
+
+<script type="math/tex; mode=display">
+\det(\mathbf{A}) = \begin{vmatrix}
+a_{11} & a_{12} & a_{13} \\
+a_{21} & a_{22} & a_{23} \\
+a_{31} & a_{32} & a_{33}
+\end{vmatrix}
+</script>
+
+<h3 id="vector--norm">Vector &amp; Norm</h3>
+
+<p>Dot product and $L_2$ norm:</p>
+
+<script type="math/tex; mode=display">
+\mathbf{u} \cdot \mathbf{v} = \sum_{i=1}^{n} u_i v_i, \quad
+\|\mathbf{u}\|_2 = \sqrt{\sum_{i=1}^{n} u_i^2}
+</script>
+
+<h3 id="probability--statistics">Probability &amp; Statistics</h3>
+
+<p>Bayes’ theorem:</p>
+
+<script type="math/tex; mode=display">
+P(A|B) = \frac{P(B|A) \cdot P(A)}{P(B)}
+</script>
+
+<p>Normal distribution PDF:</p>
+
+<script type="math/tex; mode=display">
+f(x) = \frac{1}{\sigma\sqrt{2\pi}} \exp\left(-\frac{(x-\mu)^2}{2\sigma^2}
+ight)
+</script>
+
+<h3 id="gradient-descent">Gradient Descent</h3>
+
+<script type="math/tex; mode=display">
+\theta_{t+1} = \theta_t - \eta \nabla_{\theta} \mathcal{L}(\theta_t)
+</script>
+
+<h3 id="attention-mechanism">Attention Mechanism</h3>
+
+<p>Scaled Dot-Product Attention:</p>
+
+<script type="math/tex; mode=display">
+\text{Attention}(Q, K, V) = \text{softmax}\!\left(\frac{QK^{\mathrm{T}}}{\sqrt{d_k}}
+ight) V
+</script>
 
 <h2 id="live-demo">Live Demo</h2>
 

@@ -160,9 +160,9 @@ accuracy and answer quality.</p>
     // 仅渲染当前可见语言区域的公式，避免浪费性能
     var isZh = document.documentElement.classList.contains('lang-zh');
     var isEn = document.documentElement.classList.contains('lang-en');
-    var selector = 'script[type="math/tex"]';
-    if (isZh) selector = '.detail-zh script[type="math/tex"]';
-    else if (isEn) selector = '.detail-en script[type="math/tex"]';
+    var selector = 'script[type^="math/tex"]';
+    if (isZh) selector = '.detail-zh script[type^="math/tex"]';
+    else if (isEn) selector = '.detail-en script[type^="math/tex"]';
     var scripts = document.querySelectorAll(selector);
     scripts.forEach(function(s) {
       var display = s.getAttribute('type').indexOf('mode=display') > -1;

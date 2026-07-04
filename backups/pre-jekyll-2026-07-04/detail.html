@@ -1,0 +1,85 @@
+---
+# 详情页布局 — 论文 / 项目
+---
+{% assign meta_zh = page.zh %}
+{% assign meta_en = page.en %}
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{ meta_zh.title }} — 王晨</title>
+<meta property="og:title" content="{{ meta_zh.title }}">
+<meta property="og:type" content="article">
+
+<!-- 防止深浅色主题闪烁 -->
+<script>
+  (function () {
+    try {
+      var saved = localStorage.getItem("theme");
+      var theme = saved || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+      document.documentElement.setAttribute("data-theme", theme);
+    } catch (e) {
+      document.documentElement.setAttribute("data-theme", "light");
+    }
+  })();
+</script>
+
+<link rel="stylesheet" href="{{ '/style.css' | relative_url }}">
+</head>
+<body>
+
+  <div class="top-ribbon-wrap"><div class="top-ribbon" aria-hidden="true"></div></div>
+
+  <div class="nav-wrap">
+    <div class="nav-inner">
+      <div class="nav-links-wrap">
+        <nav class="nav-links" id="nav-links">
+          <a href="{{ '/index.html' | relative_url }}">← 返回主页</a>
+          <a href="{{ '/index-en.html' | relative_url }}">← Back to Home</a>
+        </nav>
+      </div>
+    </div>
+  </div>
+
+  <main class="container">
+    <article class="section" style="border-top:none; padding-top:40px;">
+
+      <!-- 中文 -->
+      <span class="tag tag-accent pub-type">{{ meta_zh.type }}</span>
+      <h1 class="section-title" style="font-size:1.4rem; margin-bottom:0.3em;">{{ meta_zh.title }}</h1>
+      <p class="pub-meta" style="margin-bottom:1.5em;">{{ meta_zh.meta }}</p>
+      <div style="max-width:60ch; line-height:2; color:var(--ink-secondary);">
+
+        <!-- 中文内容 -->
+        {{ content | split: '<!-- English -->' | first | markdownify }}
+
+      </div>
+
+      <!-- 分隔线 -->
+      <hr style="border:none; border-top:1px solid var(--border); margin:2em 0;">
+
+      <!-- 英文 -->
+      <span class="tag tag-accent pub-type" style="margin-bottom:1em;">{{ meta_en.type }}</span>
+      <h2 class="section-title" style="font-size:1.2rem; margin-bottom:0.3em;">{{ meta_en.title }}</h2>
+      <p class="pub-meta" style="margin-bottom:1.5em;">{{ meta_en.meta }}</p>
+      <div style="max-width:60ch; line-height:2; color:var(--ink-secondary);">
+
+        <!-- 英文内容 -->
+        {% assign parts = content | split: '<!-- English -->' %}
+        {% if parts.size > 1 %}
+          {{ parts[1] | markdownify }}
+        {% endif %}
+
+      </div>
+
+    </article>
+  </main>
+
+  <footer class="site-footer container" style="padding-bottom:60px;">
+    <span>&copy; 2026 王晨</span>
+  </footer>
+
+  <script src="{{ '/script.js' | relative_url }}"></script>
+</body>
+</html>

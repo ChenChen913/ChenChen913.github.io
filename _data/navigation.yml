@@ -1,0 +1,37 @@
+# ============================================================
+# 导航菜单（中文 / 英文）
+# 增加栏目：在对应语言下按相同格式添加即可
+# 删除栏目：删除对应条目，模板自动隐藏对应 section
+# ============================================================
+
+zh:
+  - id: about
+    label: 关于
+  - id: education
+    label: 教育背景
+  - id: experience
+    label: 工作经历
+  - id: skills
+    label: 技能
+  - id: projects
+    label: 项目经历
+  - id: publications
+    label: 论文发表
+  - id: contact
+    label: 联系方式
+
+en:
+  - id: about
+    label: About
+  - id: education
+    label: Education
+  - id: experience
+    label: Experience
+  - id: skills
+    label: Skills
+  - id: projects
+    label: Projects
+  - id: publications
+    label: Publications
+  - id: contact
+    label: Contact

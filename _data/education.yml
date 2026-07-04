@@ -1,0 +1,40 @@
+# ============================================================
+# 教育背景
+# TODO: 替换为你的真实教育经历
+# 多段学历：复制整个条目，按时间倒序排列
+# 删除字段：如果某字段（如 honors/courses）为空，模板自动隐藏该部分
+# ============================================================
+
+zh:
+  school: 青岛理工大学
+  detail: 理学院 · 信息与计算科学专业 · 本科
+  period: 2016.09 — 2020.06
+  honors:
+    - 专业成绩排名前 15%，连续两年获得校级奖学金
+    - '"互联网 +"创新创业大赛校赛二等奖'
+    - GPA 3.6 / 4.0
+  courses_label: 核心主修课程
+  courses:
+    - 数据结构与算法
+    - 机器学习
+    - 深度学习
+    - 自然语言处理
+    - 数据库系统
+    - 计算机网络
+
+en:
+  school: Qingdao University of Technology
+  detail: School of Science · B.Sc. in Information and Computing Science
+  period: 2016.09 — 2020.06
+  honors:
+    - Top 15% of the cohort; university scholarship for two consecutive years
+    - '2nd Prize, university-level "Internet+" Innovation Competition'
+    - GPA 3.6 / 4.0
+  courses_label: Core Coursework
+  courses:
+    - Data Structures & Algorithms
+    - Machine Learning
+    - Deep Learning
+    - Natural Language Processing
+    - Database Systems
+    - Computer Networks

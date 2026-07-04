@@ -1,0 +1,26 @@
+# ============================================================
+# 技能
+# TODO: 替换为你的真实技能
+# 增删分类：复制/删除整个 category 条目
+# 增删标签：修改 items 列表
+# ============================================================
+
+zh:
+  - category: 编程语言
+    items: [Python, JavaScript, SQL]
+  - category: AI / 机器学习
+    items: [PyTorch, Prompt Engineering, RAG 检索增强, LangChain]
+  - category: Web 开发基础
+    items: [HTML / CSS, React 基础, FastAPI]
+  - category: 工具与协作
+    items: [Git, Docker 基础, Linux 基础]
+
+en:
+  - category: Languages
+    items: [Python, JavaScript, SQL]
+  - category: AI / Machine Learning
+    items: [PyTorch, Prompt Engineering, RAG, LangChain]
+  - category: Web Fundamentals
+    items: [HTML / CSS, React Basics, FastAPI]
+  - category: Tools & Collaboration
+    items: [Git, Docker Basics, Linux Basics]

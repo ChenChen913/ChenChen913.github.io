@@ -1,0 +1,48 @@
+# ============================================================
+# Jekyll 站点配置
+# ============================================================
+
+title: 王晨 · 个人主页
+description: 王晨的个人主页 —— 青岛理工大学信息与计算科学专业毕业生
+
+# URL（部署时改为你的域名）
+url: ""
+baseurl: ""
+
+# 集合：论文发表 & 项目经历
+collections:
+  publications:
+    output: true
+  projects:
+    output: true
+
+# GitHub Pages 内置插件
+plugins:
+  - jekyll-sitemap
+
+# 默认布局
+defaults:
+  - scope:
+      path: ""
+      type: "publications"
+    values:
+      layout: detail
+  - scope:
+      path: ""
+      type: "projects"
+    values:
+      layout: detail
+
+# 排除不需要编译的文件
+exclude:
+  - backups/
+  - index_empty.html
+  - portfolio-single-file.html
+  - Gemfile
+  - Gemfile.lock
+  - vendor/
+
+# Markdown 渲染
+markdown: kramdown
+kramdown:
+  input: GFM

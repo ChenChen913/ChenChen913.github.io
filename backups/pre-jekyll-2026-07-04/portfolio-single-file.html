@@ -1,0 +1,1136 @@
+<!DOCTYPE html>
+<!--
+  ============================================================
+  个人主页 —— 王晨的作品集 · 单文件版本
+
+  此文件为完全独立的 HTML 文件，内嵌所有 CSS 和 JS，
+  双击即可在浏览器中打开，无需其他文件。
+
+  内容与主版本（index.html + style.css + script.js）同步。
+  中文版，不含语言切换按钮。
+  ============================================================
+-->
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>王晨 · 个人主页</title>
+<meta name="description" content="王晨的个人主页 —— 青岛理工大学信息与计算科学专业毕业生">
+
+<!-- 防止深浅色主题闪烁 -->
+<script>
+  (function () {
+    try {
+      var saved = localStorage.getItem("theme");
+      var theme = saved || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+      document.documentElement.setAttribute("data-theme", theme);
+    } catch (e) {
+      document.documentElement.setAttribute("data-theme", "light");
+    }
+  })();
+</script>
+
+<style>
+  /* ============================================================
+     CSS 变量:冷色调浅灰白(浅色)与冷灰(深色)
+     ============================================================ */
+  :root,
+  html[data-theme="light"] {
+    --bg: #F4F5F7;
+    --bg-elevated: #FFFFFF;
+    --bg-tag: #EDEFF2;
+    --ink: #1F2328;
+    --ink-secondary: #52585F;
+    --ink-tertiary: #868D96;
+    --border: #E1E4E8;
+    --border-strong: #CBD1D7;
+    --accent: #4A6FA0;
+    --accent-soft: rgba(74, 111, 160, 0.08);
+    --accent-soft-strong: rgba(74, 111, 160, 0.14);
+    --shadow: 0 1px 2px rgba(31, 35, 40, 0.05), 0 4px 16px rgba(31, 35, 40, 0.05);
+    --shadow-hover: 0 2px 4px rgba(31, 35, 40, 0.06), 0 10px 24px rgba(31, 35, 40, 0.08);
+  }
+
+  html[data-theme="dark"] {
+    --bg: #14161A;
+    --bg-elevated: #1B1E23;
+    --bg-tag: #22262C;
+    --ink: #E7E9EC;
+    --ink-secondary: #A3A9B2;
+    --ink-tertiary: #6E7580;
+    --border: #262A31;
+    --border-strong: #343A42;
+    --accent: #8FB0D9;
+    --accent-soft: rgba(143, 176, 217, 0.10);
+    --accent-soft-strong: rgba(143, 176, 217, 0.18);
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 6px 20px rgba(0, 0, 0, 0.28);
+    --shadow-hover: 0 2px 6px rgba(0, 0, 0, 0.34), 0 14px 30px rgba(0, 0, 0, 0.32);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; font-size: 16px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    * { transition-duration: 0.001ms !important; animation-duration: 0.001ms !important; }
+  }
+
+  body {
+    font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.8;
+    -webkit-font-smoothing: antialiased;
+    transition: background 0.3s ease, color 0.3s ease;
+  }
+
+  .font-serif { font-family: Georgia, "Songti SC", "STSong", "SimSun", serif; }
+
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; text-underline-offset: 2px; }
+
+  .container { max-width: 760px; margin: 0 auto; padding: 0 24px; }
+
+  section[id], header[id] { scroll-margin-top: 80px; }
+
+  /* ============================================================
+     顶部装饰渐变条 —— 宽度与正文对齐,不再撑满整屏
+     ============================================================ */
+  .top-ribbon-wrap { padding: 0 24px; }
+  .top-ribbon {
+    height: 4px;
+    max-width: 760px;
+    margin: 0 auto;
+    background: linear-gradient(90deg, #AEC0D6 0%, #C7D3C7 33%, #D3CBE0 66%, #9FB8CC 100%);
+    opacity: 0.55;
+    border-radius: 0 0 3px 3px;
+  }
+
+  /* ============================================================
+     吸顶导航
+     ============================================================ */
+  .nav-wrap {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: color-mix(in srgb, var(--bg-elevated) 94%, transparent);
+    border-bottom: 1px solid var(--border);
+    backdrop-filter: saturate(120%);
+  }
+
+  .nav-inner {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 0 24px;
+    height: 54px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  /* nav-links-wrap:渐隐提示层(.nav-fade)的定位参照,自己会随可用空间伸缩收窄 */
+  .nav-links-wrap { position: relative; min-width: 0; flex: 1; }
+
+  .nav-links { display: flex; gap: 2px; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; scroll-behavior: smooth; }
+  .nav-links::-webkit-scrollbar { display: none; }
+
+  /* 左右渐隐提示:默认透明,JS 检测到该方向还有没显示完的链接时才淡入,
+     用来提示"这里还能横向滑动看更多",不用额外做汉堡菜单 */
+  .nav-fade {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 28px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+  .nav-fade-left { left: 0; background: linear-gradient(to right, var(--bg-elevated), transparent); }
+  .nav-fade-right { right: 0; background: linear-gradient(to left, var(--bg-elevated), transparent); }
+  .nav-links-wrap.can-scroll-left .nav-fade-left { opacity: 1; }
+  .nav-links-wrap.can-scroll-right .nav-fade-right { opacity: 1; }
+
+  .nav-links a {
+    font-size: 13px;
+    color: var(--ink-secondary);
+    padding: 7px 10px;
+    border-radius: 6px;
+    white-space: nowrap;
+    transition: background 0.2s ease, color 0.2s ease;
+  }
+  .nav-links a:hover { color: var(--ink); text-decoration: none; background: var(--accent-soft); }
+  .nav-links a.active { color: var(--accent); background: var(--accent-soft); font-weight: 600; }
+
+  .nav-controls { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+
+  /* 语言切换按钮:显示"将要切换到的语言" */
+  .lang-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--ink-secondary);
+    border-radius: 999px;
+    padding: 6px 13px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    text-decoration: none;
+    transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
+  }
+  .lang-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); text-decoration: none; }
+
+  /* 深浅色切换按钮:纯图标,圆形 */
+  .theme-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--ink-secondary);
+    border-radius: 999px;
+    width: 30px;
+    height: 30px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
+  }
+  .theme-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+  .theme-btn svg { width: 15px; height: 15px; }
+
+  /* ============================================================
+     Header / 个人信息区
+     ============================================================ */
+  header.profile { position: relative; padding: 56px 0 34px; overflow: hidden; }
+
+  header.profile::before {
+    content: "";
+    position: absolute;
+    top: -80px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 640px;
+    height: 300px;
+    background: radial-gradient(ellipse at center, var(--accent-soft), transparent 70%);
+    pointer-events: none;
+  }
+
+  .profile-inner { position: relative; }
+
+  .profile-header-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 22px;
+    margin-bottom: 1em;
+  }
+
+  .profile-text { flex: 1; min-width: 0; }
+
+  /* 头像:长方形(圆角矩形),更像证件照比例 */
+  .avatar {
+    position: relative;
+    width: 112px;
+    height: 144px;
+    border-radius: 12px;
+    overflow: hidden;
+    flex-shrink: 0;
+    border: 1px solid var(--border-strong);
+    box-shadow: var(--shadow);
+    background: var(--accent-soft);
+  }
+  .avatar img {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .avatar-fallback {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: Georgia, "Songti SC", "STSong", serif;
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--accent);
+  }
+
+  .name { font-size: 2.3rem; font-weight: 700; letter-spacing: 0.03em; margin-bottom: 0.3em; }
+  .tagline { font-size: 1rem; color: var(--ink-secondary); }
+
+  /* ============================================================
+     通用板块 & 卡片
+     ============================================================ */
+  .section { padding: 40px 0; border-top: 1px solid var(--border); }
+  .section:first-of-type { border-top: none; }
+
+  .section-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-family: Georgia, "Songti SC", "STSong", "SimSun", serif;
+    font-size: 1.6rem;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    margin-bottom: 1.4em;
+  }
+  .section-title::before {
+    content: "";
+    display: inline-block;
+    width: 4px;
+    height: 1.05em;
+    border-radius: 2px;
+    background: var(--accent);
+    flex-shrink: 0;
+  }
+
+  .card {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    padding: 22px 24px;
+    transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .card:hover { border-color: var(--border-strong); transform: translateY(-2px); box-shadow: var(--shadow-hover); }
+  .card + .card { margin-top: 14px; }
+
+  /* 两种标签胶囊:强调色(能力/类别标签)与中性色(事实性标签) */
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    font-size: 12px;
+    letter-spacing: 0.02em;
+    padding: 4px 12px;
+    border-radius: 999px;
+    background: var(--bg-tag);
+    border: 1px solid var(--border);
+    color: var(--ink-secondary);
+  }
+  .tag-accent {
+    background: var(--accent-soft);
+    border-color: transparent;
+    color: var(--accent);
+    font-weight: 600;
+  }
+  .tag-row { display: flex; flex-wrap: wrap; gap: 8px; }
+
+  /* ============================================================
+     教育背景
+     ============================================================ */
+  .edu-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 0.4em;
+    margin-bottom: 0.2em;
+  }
+  .edu-school { font-family: Georgia, "Songti SC", serif; font-size: 1.12rem; font-weight: 700; }
+  .edu-meta { font-size: 0.82rem; color: var(--ink-tertiary); }
+  .edu-detail { font-size: 0.9rem; color: var(--ink-secondary); margin-bottom: 1em; }
+
+  .dash-list { list-style: none; margin-bottom: 1.1em; }
+  .dash-list li {
+    font-size: 0.9rem;
+    color: var(--ink-secondary);
+    padding-left: 1.1em;
+    position: relative;
+    line-height: 1.9;
+  }
+  .dash-list li::before { content: "–"; position: absolute; left: 0; color: var(--ink-tertiary); }
+
+  .sub-label {
+    font-size: 0.8rem;
+    color: var(--ink-tertiary);
+    margin-bottom: 0.6em;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+  }
+
+  /* ============================================================
+     工作经历
+     ============================================================ */
+  .work-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 0.4em;
+    margin-bottom: 0.9em;
+  }
+  .work-role { font-size: 1.02rem; font-weight: 700; margin-bottom: 0.15em; }
+  .work-company { font-size: 0.88rem; color: var(--ink-secondary); }
+  .work-meta { font-size: 0.8rem; color: var(--ink-tertiary); white-space: nowrap; }
+
+  /* ============================================================
+     技能
+     ============================================================ */
+  .skill-category { margin-bottom: 1.1em; }
+  .skill-category:last-child { margin-bottom: 0; }
+  .skill-category-label { display: block; font-size: 0.88rem; font-weight: 700; margin-bottom: 0.55em; }
+
+  /* ============================================================
+     项目经历(带右下角虚化序号)
+     ============================================================ */
+  .project-entry { position: relative; overflow: hidden; }
+  .project-index {
+    position: absolute;
+    right: 22px;
+    top: 18px;
+    font-family: Georgia, "Songti SC", serif;
+    font-size: 80px;
+    font-weight: 700;
+    color: var(--ink);
+    opacity: 0.07;
+    line-height: 1;
+    pointer-events: none;
+    user-select: none;
+  }
+  .project-title { font-size: 1.02rem; font-weight: 700; margin-bottom: 0.2em; position: relative; padding-right: 76px; }
+  .project-meta { font-size: 0.8rem; color: var(--ink-tertiary); margin-bottom: 0.7em; position: relative; }
+  .project-desc { font-size: 0.9rem; color: var(--ink-secondary); margin-bottom: 0.9em; position: relative; max-width: 46ch; }
+  .project-tech-label { font-size: 0.78rem; color: var(--ink-tertiary); margin-bottom: 0.5em; position: relative; }
+  .project-links { font-size: 0.85rem; position: relative; }
+  .project-links a { margin-right: 1.3em; }
+
+  /* ============================================================
+     论文发表(卡片 + 类型徽章)
+     ============================================================ */
+  .pub-type { margin-bottom: 0.8em; }
+  .pub-title {
+    font-family: Georgia, "Songti SC", serif;
+    font-weight: 700;
+    font-size: 1rem;
+    margin-bottom: 0.35em;
+    line-height: 1.5;
+  }
+  .pub-meta { font-size: 0.8rem; color: var(--ink-tertiary); margin-bottom: 0.7em; }
+  .pub-desc { font-size: 0.88rem; color: var(--ink-secondary); }
+
+  /* ============================================================
+     联系方式
+     ============================================================ */
+  .contact-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px 20px;
+    margin-top: 0.6em;
+  }
+  .contact-item { display: inline-flex; align-items: center; gap: 8px; font-size: 0.875rem; color: var(--ink-secondary); }
+  .contact-item a { color: var(--ink-secondary); }
+  .contact-item a:hover { color: var(--accent); }
+  .contact-item svg { width: 16px; height: 16px; flex-shrink: 0; color: var(--ink-tertiary); }
+
+  /* ============================================================
+     页脚
+     ============================================================ */
+  footer.site-footer {
+    border-top: 1px solid var(--border);
+    padding: 28px 0 clamp(200px, 25vh, 300px);
+    font-size: 0.8rem;
+    color: var(--ink-tertiary);
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.5em;
+  }
+
+  /* ============================================================
+     返回顶部按钮 + 阅读进度圆环
+     ============================================================ */
+  .back-to-top {
+    position: fixed;
+    /* 桌面端：紧贴主题内容(.container)右侧，12px 间距 */
+    left: calc(50% + 392px);  /* 760/2 + 12px gap */
+    right: auto;
+    bottom: 30px;
+    z-index: 40;
+    width: 48px;
+    height: 48px;
+    border: none;
+    background: var(--bg-elevated);
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: var(--shadow);
+    opacity: 0;
+    transform: translateY(12px);
+    pointer-events: none;
+    transition: opacity 0.3s ease, transform 0.3s ease, box-shadow 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+    outline: none;
+  }
+  .back-to-top.visible {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+  .back-to-top:hover {
+    box-shadow: var(--shadow-hover);
+    transform: translateY(-2px);
+  }
+  .back-to-top:active {
+    transform: scale(0.94);
+  }
+  .back-to-top svg {
+    width: 48px;
+    height: 48px;
+    display: block;
+  }
+
+  /* 轨道圆环（背景） */
+  .back-to-top__track {
+    stroke: var(--border-strong);
+  }
+
+  /* 进度圆环 */
+  .back-to-top__progress {
+    stroke: var(--accent);
+    transition: stroke-dashoffset 0.15s linear;
+  }
+
+  /* 向上箭头 */
+  .back-to-top__arrow {
+    stroke: var(--accent);
+  }
+
+  /* ============================================================
+     响应式
+     ============================================================ */
+  /* 平板端 */
+  @media (max-width: 1024px) and (min-width: 641px) {
+    .back-to-top {
+      left: auto;
+      right: 24px;
+      bottom: 24px;
+    }
+    .contact-row {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 640px) {
+    .container, .nav-inner { padding-left: 18px; padding-right: 18px; }
+    .top-ribbon-wrap { padding: 0 18px; }
+    .name { font-size: 1.85rem; }
+    header.profile { padding: 40px 0 24px; }
+
+    /* 导航链接与按钮的触控热区在手机端适当放大,更符合触屏最小可点击尺寸建议 */
+    .nav-links a { font-size: 12px; padding: 9px 9px; }
+    .theme-btn { width: 34px; height: 34px; }
+    .lang-btn { padding: 8px 13px; }
+
+    .avatar { width: 82px; height: 106px; }
+    .avatar-fallback { font-size: 1.7rem; }
+    .profile-header-row { gap: 14px; }
+    .section-title { font-size: 1.35rem; }
+    .project-index { font-size: 52px; right: 16px; top: 12px; }
+    .project-title { padding-right: 54px; }
+
+    /* 底部版权信息 + 更新时间：窄屏下两行文字并排容易挤在一起、
+       space-between 会让它们别扭地贴在左边，改成居中竖排更舒服 */
+    footer.site-footer { flex-direction: column; align-items: center; text-align: center; gap: 6px; }
+
+    /* 返回顶部按钮 — 手机端适配，考虑 iPhone Safe Area */
+    .back-to-top {
+      left: auto;
+      right: 16px;
+      bottom: max(20px, calc(20px + env(safe-area-inset-bottom)));
+    }
+
+    /* 联系方式 — 手机端单列 */
+    .contact-row {
+      grid-template-columns: 1fr;
+    }
+  }
+
+</style>
+</head>
+<body>
+
+
+  <div class="top-ribbon-wrap"><div class="top-ribbon" aria-hidden="true"></div></div>
+
+  <!-- ============================================================
+       吸顶导航
+       ============================================================ -->
+  <div class="nav-wrap">
+    <div class="nav-inner">
+      <div class="nav-links-wrap">
+        <nav class="nav-links" id="nav-links" aria-label="页面导航">
+          <a href="#about" class="active">关于</a>
+          <a href="#education">教育背景</a>
+          <a href="#experience">工作经历</a>
+          <a href="#skills">技能</a>
+          <a href="#projects">项目经历</a>
+          <a href="#publications">论文发表</a>
+          <a href="#contact">联系方式</a>
+        </nav>
+        <div class="nav-fade nav-fade-left" aria-hidden="true"></div>
+        <div class="nav-fade nav-fade-right" aria-hidden="true"></div>
+      </div>
+
+      <div class="nav-controls">
+        <!-- 单文件版本，无语言切换 -->
+        <!-- 深浅色按钮 -->
+        <button id="theme-toggle" class="theme-btn" type="button" aria-label="切换深浅色模式">
+          <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4.3"/><path d="M12 2.5v3M12 18.5v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2.5 12h3M18.5 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg>
+          <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" style="display:none;"><path d="M20 14.2A8.2 8.2 0 1 1 9.8 4a6.6 6.6 0 0 0 10.2 10.2z"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <main class="container">
+
+    <!-- ============================================================
+         Header / 个人信息
+         ============================================================ -->
+    <header class="profile" id="about">
+      <div class="profile-inner">
+        <div class="profile-header-row">
+          <div class="profile-text">
+            <h1 class="name font-serif">王晨</h1>
+            <!-- TODO(重要)：请改为真实的身份定位 -->
+            <p class="tagline">计算机科学与技术 · 2026 届本科毕业生 · AI 应用开发方向</p>
+          </div>
+
+          <div class="avatar">
+            <!-- TODO: 把照片放到 assets/avatar.jpg -->
+            <img src="assets/avatar.jpg" alt="王晨" onerror="this.style.display='none';">
+            <div class="avatar-fallback" id="avatar-fallback" aria-hidden="true"></div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- ============================================================
+         教育背景
+         ============================================================ -->
+    <section class="section" id="education">
+      <h2 class="section-title">教育背景</h2>
+
+      <div class="card">
+        <div class="edu-header">
+          <span class="edu-school">青岛理工大学</span>
+          <span class="edu-meta">2016.09 — 2020.06</span>
+        </div>
+        <p class="edu-detail">理学院 · 信息与计算科学专业 · 本科</p>
+
+        <ul class="dash-list">
+          <li>专业成绩排名前 15%，连续两年获得校级奖学金</li>
+          <li>"互联网 +"创新创业大赛校赛二等奖</li>
+          <li>GPA 3.6 / 4.0</li>
+        </ul>
+
+        <p class="sub-label">核心主修课程</p>
+        <div class="tag-row">
+          <span class="tag">数据结构与算法</span>
+          <span class="tag">机器学习</span>
+          <span class="tag">深度学习</span>
+          <span class="tag">自然语言处理</span>
+          <span class="tag">数据库系统</span>
+          <span class="tag">计算机网络</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         工作经历
+         ============================================================ -->
+    <section class="section" id="experience">
+      <h2 class="section-title">工作经历</h2>
+
+      <div class="card">
+        <div class="work-header">
+          <div>
+            <div class="work-role">AI 应用开发实习生</div>
+            <div class="work-company">某科技公司 · 智能化产品组</div>
+          </div>
+          <div class="work-meta">2025.06 — 2025.09</div>
+        </div>
+        <ul class="dash-list">
+          <li>独立负责一个内部 AI 工具模块的设计与实现，用于自动生成团队周报草稿</li>
+          <li>参与团队的 Prompt 调优与效果评估，配合工程师排查线上问题</li>
+          <li>协助整理内部技术文档，帮助新同事更快上手现有工具链</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         技能
+         ============================================================ -->
+    <section class="section" id="skills">
+      <h2 class="section-title">技能</h2>
+
+      <div class="card">
+        <div class="skill-category">
+          <span class="skill-category-label">编程语言</span>
+          <div class="tag-row">
+            <span class="tag tag-accent">Python</span><span class="tag tag-accent">JavaScript</span><span class="tag tag-accent">SQL</span>
+          </div>
+        </div>
+
+        <div class="skill-category">
+          <span class="skill-category-label">AI / 机器学习</span>
+          <div class="tag-row">
+            <span class="tag tag-accent">PyTorch</span><span class="tag tag-accent">Prompt Engineering</span><span class="tag tag-accent">RAG 检索增强</span><span class="tag tag-accent">LangChain</span>
+          </div>
+        </div>
+
+        <div class="skill-category">
+          <span class="skill-category-label">Web 开发基础</span>
+          <div class="tag-row">
+            <span class="tag tag-accent">HTML / CSS</span><span class="tag tag-accent">React 基础</span><span class="tag tag-accent">FastAPI</span>
+          </div>
+        </div>
+
+        <div class="skill-category">
+          <span class="skill-category-label">工具与协作</span>
+          <div class="tag-row">
+            <span class="tag tag-accent">Git</span><span class="tag tag-accent">Docker 基础</span><span class="tag tag-accent">Linux 基础</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         项目经历
+         ============================================================ -->
+    <section class="section" id="projects">
+      <h2 class="section-title">项目经历</h2>
+
+      <article class="card project-entry">
+        <span class="project-index" aria-hidden="true">01</span>
+        <div class="project-title">校园知识库问答机器人（毕业设计）</div>
+        <div class="project-meta">独立开发 · 2025.09 — 2026.03</div>
+        <p class="project-desc">
+          基于 RAG 架构做的毕业设计项目，把校园教务文档向量化存储，
+          支持多轮问答与来源引用，用来解决新生找不到教务信息的问题。
+        </p>
+        <div class="tag-row" style="margin-bottom:0.9em;">
+          <span class="tag">Python</span><span class="tag">LangChain</span><span class="tag">FAISS</span><span class="tag">Streamlit</span>
+        </div>
+        <div class="project-links">
+          <a href="#">GitHub 仓库</a>
+          <a href="#">在线演示</a>
+        </div>
+      </article>
+
+      <article class="card project-entry">
+        <span class="project-index" aria-hidden="true">02</span>
+        <div class="project-title">AI 工具调用小助手（实习产出）</div>
+        <div class="project-meta">实习生 · 2025.06 — 2025.09</div>
+        <p class="project-desc">
+          实习期间参与开发的内部小工具，支持自定义工具注册和链式调用，
+          用来自动生成团队周报草稿，减少了同事们手动整理的时间。
+        </p>
+        <div class="tag-row" style="margin-bottom:0.9em;">
+          <span class="tag">Python</span><span class="tag">FastAPI</span><span class="tag">OpenAI API</span>
+        </div>
+        <div class="project-links">
+          <a href="#">GitHub 仓库</a>
+        </div>
+      </article>
+
+      <article class="card project-entry">
+        <span class="project-index" aria-hidden="true">03</span>
+        <div class="project-title">简历关键词匹配小工具（个人项目）</div>
+        <div class="project-meta">个人练手 · 2025.04</div>
+        <p class="project-desc">
+          周末自己练手写的小工具，输入简历和岗位描述，
+          能给出关键词匹配度打分，顺便练习了一下轻量模型的部署。
+        </p>
+        <div class="tag-row" style="margin-bottom:0.9em;">
+          <span class="tag">Python</span><span class="tag">scikit-learn</span><span class="tag">Streamlit</span>
+        </div>
+        <div class="project-links">
+          <a href="#">GitHub 仓库</a>
+          <a href="#">在线演示</a>
+        </div>
+      </article>
+
+      <article class="card project-entry">
+        <span class="project-index" aria-hidden="true">04</span>
+        <div class="project-title">垃圾分类图像识别（课程作业）</div>
+        <div class="project-meta">课程项目 · 2024.11</div>
+        <p class="project-desc">
+          深度学习课程的期末作业，用卷积神经网络做垃圾分类识别，
+          在验证集上跑到了 91% 的准确率。
+        </p>
+        <div class="tag-row" style="margin-bottom:0.9em;">
+          <span class="tag">PyTorch</span><span class="tag">ResNet18</span>
+        </div>
+        <div class="project-links">
+          <a href="#">GitHub 仓库</a>
+        </div>
+      </article>
+    </section>
+
+    <!-- ============================================================
+         论文发表
+         ============================================================ -->
+    <section class="section" id="publications">
+      <h2 class="section-title">论文发表</h2>
+
+      <div class="card">
+        <span class="tag tag-accent pub-type">毕业论文</span>
+        <div class="pub-title">基于检索增强生成的校园知识库问答系统设计与实现</div>
+        <div class="pub-meta">本科毕业论文 · 指导教师：李教授 · 2026.06</div>
+        <p class="pub-desc">
+          围绕毕业设计项目展开，系统性梳理了 RAG 架构在校园场景下的工程实践，
+          并对检索准确率与回答质量做了对比评估。
+        </p>
+      </div>
+
+      <div class="card">
+        <span class="tag tag-accent pub-type">科研报告</span>
+        <div class="pub-title">面向轻量化部署的文本分类模型对比研究</div>
+        <div class="pub-meta">校级本科生科研创新项目结题报告 · 第二作者 · 2025.05</div>
+        <p class="pub-desc">
+          参与导师的科研项目，对比了几种轻量文本分类模型在边缘设备上的
+          推理效率与准确率权衡。
+        </p>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         联系方式
+         ============================================================ -->
+    <section class="section" id="contact">
+      <h2 class="section-title">联系方式</h2>
+      <p class="edu-detail">
+        如果你看到了合适的机会，或者只是想聊聊 AI 应用方向的东西，都欢迎联系我。
+      </p>
+      <div class="contact-row">
+        <!-- TODO: 换成真实联系方式 -->
+        <span class="contact-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>
+          <a href="mailto:wcn913@gmail.com">wcn913@gmail.com</a>
+        </span>
+        <span class="contact-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6 0 0 0-1.3-3.2 4.2 4.2 0 0 0-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3 0 0 0-6.2 0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2 0 0 0-.1 3.2A4.6 4.6 0 0 0 4 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"/></svg>
+          <a href="https://github.com/ChenChen913" target="_blank" rel="noopener noreferrer">github.com/ChenChen913</a>
+        </span>
+        <span class="contact-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2.5"/><path d="M7.5 9.5l3 2.5-3 2.5"/><path d="M13 14.5h3.5"/></svg>
+          <a href="https://gitee.com/ChenChen913" target="_blank" rel="noopener noreferrer">gitee.com/ChenChen913</a>
+        </span>
+        <span class="contact-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4l16 16M20 4L4 20"/></svg>
+          <a href="https://x.com/ChenWang282708" target="_blank" rel="noopener noreferrer">x.com/ChenWang282708</a>
+        </span>
+        <span class="contact-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10v4a1 1 0 0 0 1 1h2l5 4V5L6 9H4a1 1 0 0 0-1 1z"/><path d="M14.5 8.2c1.3 1 1.3 6.6 0 7.6"/><path d="M18 6c2.6 2 2.6 10 0 12"/></svg>
+          <span>微信公众号：MaoMaoTech</span>
+        </span>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer container">
+    <span>&copy; 2026 王晨，保留所有权利</span>
+    <span>页面最后更新：2026 年 07 月 01 日</span>
+  </footer>
+
+
+
+
+<script>
+    (function () {
+      "use strict";
+
+      var storage = {
+        get: function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+        set: function (k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+      };
+
+      var htmlEl = document.documentElement;
+
+      /* ------------------------------------------------------------
+         深浅色主题
+         ------------------------------------------------------------ */
+      var mql = window.matchMedia("(prefers-color-scheme: dark)");
+      function systemTheme() { return mql.matches ? "dark" : "light"; }
+
+      function applyTheme(theme) {
+        htmlEl.setAttribute("data-theme", theme);
+        var sun = document.querySelector(".icon-sun");
+        var moon = document.querySelector(".icon-moon");
+        if (sun && moon) {
+          sun.style.display = theme === "dark" ? "none" : "block";
+          moon.style.display = theme === "dark" ? "block" : "none";
+        }
+      }
+
+      applyTheme(storage.get("theme") || systemTheme());
+
+      mql.addEventListener("change", function () {
+        if (!storage.get("theme")) applyTheme(systemTheme());
+      });
+
+      var themeToggle = document.getElementById("theme-toggle");
+      if (themeToggle) {
+        themeToggle.addEventListener("click", function () {
+          var next = htmlEl.getAttribute("data-theme") === "dark" ? "light" : "dark";
+          storage.set("theme", next);
+          applyTheme(next);
+        });
+      }
+
+      /* ------------------------------------------------------------
+         头像占位字母：从 h1.name 取第一个字（中文页取"王"，英文页取"C"）
+         ------------------------------------------------------------ */
+      function updateAvatarFallback() {
+        var el = document.getElementById("avatar-fallback");
+        if (!el) return;
+        var nameEl = document.querySelector("h1.name");
+        var fullName = nameEl ? nameEl.textContent.trim() : "";
+        el.textContent = fullName.charAt(0) || "";
+      }
+      updateAvatarFallback();
+
+      /* ------------------------------------------------------------
+         滚动高亮当前板块
+         修复方案：
+         1. 对比每个 section 的 offsetTop 来确定当前板块；
+         2. 当用户滚动到页面最底部时，强制激活最后一个 section（联系方式）；
+         3. 增加底部留白确保最后一个 section 能进入触发区域。
+         ------------------------------------------------------------ */
+      var sections = Array.prototype.slice.call(document.querySelectorAll("section[id], header[id]"));
+      var navLinks = Array.prototype.slice.call(document.querySelectorAll(".nav-links a"));
+      var navLinksEl = document.getElementById("nav-links");
+      var navLinksWrap = navLinksEl ? navLinksEl.parentElement : null;
+      var NAV_OFFSET = 80; // 略大于吸顶导航高度 + scroll-margin-top
+
+      var lastActiveId = null;
+
+      function getDocHeight() {
+        return Math.max(
+          document.body.scrollHeight, document.documentElement.scrollHeight,
+          document.body.offsetHeight, document.documentElement.offsetHeight,
+          document.body.clientHeight, document.documentElement.clientHeight
+        );
+      }
+
+      function scrollActiveLinkIntoView(link) {
+        if (!navLinksEl || !link) return;
+        var linkLeft = link.offsetLeft;
+        var linkRight = linkLeft + link.offsetWidth;
+        var viewLeft = navLinksEl.scrollLeft;
+        var viewRight = viewLeft + navLinksEl.clientWidth;
+        if (linkLeft < viewLeft || linkRight > viewRight) {
+          var target = linkLeft - (navLinksEl.clientWidth - link.offsetWidth) / 2;
+          navLinksEl.scrollTo({ left: Math.max(0, target), behavior: "smooth" });
+        }
+      }
+
+      function setActive(id) {
+        var activeLink = null;
+        navLinks.forEach(function (a) {
+          var isActive = a.getAttribute("href") === "#" + id;
+          a.classList.toggle("active", isActive);
+          if (isActive) activeLink = a;
+        });
+        if (id !== lastActiveId) {
+          lastActiveId = id;
+          scrollActiveLinkIntoView(activeLink);
+          // 更新语言切换链接的 hash（单文件版无此元素，自动跳过）
+          var langBtn = document.querySelector(".lang-btn");
+          if (langBtn) {
+            var baseHref = langBtn.getAttribute("href").split("#")[0];
+            langBtn.setAttribute("href", baseHref + "#" + id);
+          }
+        }
+      }
+
+      var ticking = false;
+      function computeActiveSection() {
+        var scrollY = window.scrollY || window.pageYOffset;
+        var pos = scrollY + NAV_OFFSET;
+        var currentId = sections.length ? sections[0].id : null;
+
+        // 常规判断：找到最后一个 offsetTop <= pos 的 section
+        for (var i = 0; i < sections.length; i++) {
+          if (sections[i].offsetTop <= pos) currentId = sections[i].id;
+        }
+
+        // 关键修复：如果页面已经滚动到底部，强制激活最后一个 section
+        // 使用缓存高度避免每帧强制 layout；回退到 getDocHeight() 兜底
+        var docHeight = _cachedDocHeight || getDocHeight();
+        var atBottom = scrollY + window.innerHeight >= docHeight - 5;
+        if (atBottom && sections.length > 0) {
+          currentId = sections[sections.length - 1].id;
+        }
+
+        if (currentId) setActive(currentId);
+        ticking = false;
+      }
+
+      function onScroll() {
+        if (!ticking) {
+          window.requestAnimationFrame(computeActiveSection);
+          ticking = true;
+        }
+      }
+
+      window.addEventListener("scroll", onScroll, { passive: true });
+      window.addEventListener("resize", onScroll);
+      computeActiveSection(); // 首次加载时立即计算
+
+      /* ------------------------------------------------------------
+         导航栏横向滑动的渐隐提示
+         ------------------------------------------------------------ */
+      function updateNavFade() {
+        if (!navLinksEl || !navLinksWrap) return;
+        var maxScroll = navLinksEl.scrollWidth - navLinksEl.clientWidth;
+        navLinksWrap.classList.toggle("can-scroll-left", navLinksEl.scrollLeft > 4);
+        navLinksWrap.classList.toggle("can-scroll-right", navLinksEl.scrollLeft < maxScroll - 4);
+      }
+
+      if (navLinksEl) {
+        navLinksEl.addEventListener("scroll", updateNavFade, { passive: true });
+        window.addEventListener("resize", updateNavFade);
+        updateNavFade();
+      }
+
+      /* ============================================================
+         返回顶部按钮 + 阅读进度圆环
+         ============================================================ */
+
+      // 创建按钮 DOM
+      function createBackToTopButton() {
+        var btn = document.createElement("button");
+        btn.className = "back-to-top";
+        // 根据页面语言设置 aria-label
+        var pageLang = htmlEl.getAttribute("lang") || "";
+        btn.setAttribute("aria-label", pageLang === "en" ? "Back to top" : "返回顶部");
+
+        // SVG: 外圈背景环 + 进度环 + 箭头图标
+        // 圆周长 = 2 * π * 22 ≈ 138.23
+        var svgNS = "http://www.w3.org/2000/svg";
+        var svg = document.createElementNS(svgNS, "svg");
+        svg.setAttribute("viewBox", "0 0 48 48");
+        svg.setAttribute("width", "48");
+        svg.setAttribute("height", "48");
+
+        // 背景圆环（轨道）
+        var bgCircle = document.createElementNS(svgNS, "circle");
+        bgCircle.setAttribute("cx", "24");
+        bgCircle.setAttribute("cy", "24");
+        bgCircle.setAttribute("r", "22");
+        bgCircle.setAttribute("fill", "none");
+        bgCircle.setAttribute("stroke-width", "2");
+        bgCircle.classList.add("back-to-top__track");
+
+        // 进度圆环（从顶部12点方向顺时针增长）
+        var progressCircle = document.createElementNS(svgNS, "circle");
+        progressCircle.setAttribute("cx", "24");
+        progressCircle.setAttribute("cy", "24");
+        progressCircle.setAttribute("r", "22");
+        progressCircle.setAttribute("fill", "none");
+        progressCircle.setAttribute("stroke-width", "2");
+        progressCircle.setAttribute("stroke-linecap", "round");
+        progressCircle.setAttribute("stroke-dasharray", "138.23");
+        progressCircle.setAttribute("stroke-dashoffset", "138.23"); // 初始空圆
+        progressCircle.setAttribute("transform", "rotate(-90 24 24)");
+        progressCircle.classList.add("back-to-top__progress");
+
+        // 向上箭头
+        var arrow = document.createElementNS(svgNS, "path");
+        arrow.setAttribute("d", "M24 32V16M18 22l6-6 6 6");
+        arrow.setAttribute("fill", "none");
+        arrow.setAttribute("stroke-width", "2");
+        arrow.setAttribute("stroke-linecap", "round");
+        arrow.setAttribute("stroke-linejoin", "round");
+        arrow.classList.add("back-to-top__arrow");
+
+        svg.appendChild(bgCircle);
+        svg.appendChild(progressCircle);
+        svg.appendChild(arrow);
+        btn.appendChild(svg);
+
+        document.body.appendChild(btn);
+
+        return {
+          btn: btn,
+          progressCircle: progressCircle
+        };
+      }
+
+      var backToTop = createBackToTopButton();
+      var bttBtn = backToTop.btn;
+      var bttProgress = backToTop.progressCircle;
+      var CIRCUMFERENCE = 138.23; // 2 * π * 22
+
+      // 缓存文档高度，避免每次 scroll 事件都强制 layout
+      var _cachedDocHeight = 0;
+      var _cachedWinHeight = 0;
+
+      function refreshCachedSizes() {
+        // getDocHeight() 会触发 layout，只在 resize 或首次计算时调用
+        _cachedDocHeight = getDocHeight();
+        _cachedWinHeight = window.innerHeight;
+      }
+
+      // 更新进度圆环 + 按钮显示/隐藏（rAF 节流）
+      var _bttTicking = false;
+      function updateBackToTop() {
+        if (_bttTicking) return;
+        _bttTicking = true;
+        window.requestAnimationFrame(function () {
+          var scrollY = window.scrollY || window.pageYOffset;
+          var docHeight = _cachedDocHeight;
+          var winHeight = _cachedWinHeight;
+          var maxScroll = docHeight - winHeight;
+
+          if (maxScroll <= 0) {
+            bttBtn.classList.remove("visible");
+            bttProgress.setAttribute("stroke-dashoffset", CIRCUMFERENCE);
+            _bttTicking = false;
+            return;
+          }
+
+          var progress = Math.min(1, Math.max(0, scrollY / maxScroll));
+          var offset = CIRCUMFERENCE * (1 - progress);
+          bttProgress.setAttribute("stroke-dashoffset", offset);
+
+          if (scrollY > 300) {
+            bttBtn.classList.add("visible");
+          } else {
+            bttBtn.classList.remove("visible");
+          }
+          _bttTicking = false;
+        });
+      }
+
+      // 点击返回顶部：尊重 prefers-reduced-motion 设置
+      var _motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+      bttBtn.addEventListener("click", function () {
+        var behavior = _motionQuery.matches ? "auto" : "smooth";
+        window.scrollTo({ top: 0, behavior: behavior });
+      });
+
+      // 绑定滚动更新（resize 时刷新缓存尺寸）
+      window.addEventListener("scroll", updateBackToTop, { passive: true });
+      window.addEventListener("resize", function () {
+        refreshCachedSizes();
+        updateBackToTop();
+      });
+      refreshCachedSizes(); // 初始化缓存
+      updateBackToTop();    // 初始计算
+
+    })();
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<!--
+  ============================================================
+  index_empty.html — 主页暂时关闭提示页
+
+  用途：当你想让已分享的主页链接失效时，用此文件覆盖
+        GitHub 仓库中的 index.html，push 后约 1 分钟生效。
+
+  恢复：将 index.html 原始内容重新 push 回去，
+        或从 backups/ 文件夹恢复。
+
+  此文件风格与主页一致，让访问者知道是主动关闭而非网站挂了。
+  ============================================================
+-->
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>主页暂时关闭</title>
+<style>
+  :root {
+    --bg: #F4F5F7;
+    --ink: #1F2328;
+    --ink-secondary: #52585F;
+    --ink-tertiary: #868D96;
+    --accent: #4A6FA0;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 24px;
+    -webkit-font-smoothing: antialiased;
+  }
+  .card {
+    max-width: 420px;
+  }
+  h1 {
+    font-family: Georgia, "Songti SC", serif;
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.6em;
+  }
+  p {
+    color: var(--ink-secondary);
+    font-size: 0.95rem;
+    line-height: 1.8;
+    margin-bottom: 1.5em;
+  }
+  a {
+    color: var(--accent);
+    text-decoration: none;
+  }
+  a:hover {
+    text-decoration: underline;
+  }
+  .divider {
+    width: 40px;
+    height: 3px;
+    background: var(--accent);
+    border-radius: 2px;
+    margin: 0 auto 1.5em;
+    opacity: 0.6;
+  }
+</style>
+</head>
+<body>
+  <div class="card">
+    <h1>主页暂时关闭</h1>
+    <div class="divider"></div>
+    <p>你好，我是王晨。</p>
+    <p>我的个人主页目前暂时关闭，稍后会重新开放。</p>
+    <p>如有需要，可以通过邮箱联系我：<br><a href="mailto:wcn913@gmail.com">wcn913@gmail.com</a></p>
+  </div>
+</body>
+</html>

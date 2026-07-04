@@ -1,0 +1,267 @@
+---
+# 默认布局 — 中英文主页共用
+# page.lang = "zh" 或 "en"
+---
+{% assign l = page.lang %}
+{% assign nav = site.data.navigation[l] %}
+{% assign p = site.data.personal[l] %}
+{% assign s = site.data.social %}
+{% assign e = site.data.experience %}
+{% assign has_pubs = site.publications.size > 0 %}
+{% assign has_projs = site.projects.size > 0 %}
+{% assign has_exp = e.roles.size > 0 %}
+<!DOCTYPE html>
+<html lang="{% if l == 'zh' %}zh-CN{% else %}en{% endif %}">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{ p.name }} · {% if l == 'zh' %}个人主页{% else %}Personal Homepage{% endif %}</title>
+<meta name="description" content="{% if l == 'zh' %}{{ p.name }}的个人主页 —— 青岛理工大学信息与计算科学专业毕业生{% else %}{{ p.name }}'s personal homepage — B.Sc. in Information and Computing Science, Qingdao University of Technology{% endif %}">
+<meta property="og:title" content="{{ p.name }} · {% if l == 'zh' %}个人主页{% else %}Personal Homepage{% endif %}">
+<meta property="og:type" content="website">
+<meta property="og:description" content="{% if l == 'zh' %}{{ p.name }}的个人主页{% else %}{{ p.name }}'s personal homepage{% endif %}">
+
+<!-- 防止深浅色主题闪烁 -->
+<script>
+  (function () {
+    try {
+      var saved = localStorage.getItem("theme");
+      var theme = saved || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+      document.documentElement.setAttribute("data-theme", theme);
+    } catch (e) {
+      document.documentElement.setAttribute("data-theme", "light");
+    }
+  })();
+</script>
+
+<!-- 语言切换：读取 scrollRatio 恢复精确位置 -->
+<script>
+  (function () {
+    var saved = null;
+    try { saved = sessionStorage.getItem("_scrollRatio"); sessionStorage.removeItem("_scrollRatio"); } catch (e) {}
+    if (!saved && !window.location.hash) return;
+    document.documentElement.style.scrollBehavior = "auto";
+    window.addEventListener("load", function () {
+      requestAnimationFrame(function () {
+        requestAnimationFrame(function () {
+          if (saved) {
+            var dh = Math.max(
+              document.body.scrollHeight || 0, document.documentElement.scrollHeight || 0,
+              document.body.offsetHeight || 0, document.documentElement.offsetHeight || 0,
+              document.body.clientHeight || 0, document.documentElement.clientHeight || 0
+            );
+            if (dh > 0) window.scrollTo({ top: parseFloat(saved) * dh, behavior: "auto" });
+          }
+          document.documentElement.style.scrollBehavior = "";
+        });
+      });
+    });
+  })();
+</script>
+
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="top-ribbon-wrap"><div class="top-ribbon" aria-hidden="true"></div></div>
+
+  <!-- 吸顶导航 -->
+  <div class="nav-wrap">
+    <div class="nav-inner">
+      <div class="nav-links-wrap">
+        <nav class="nav-links" id="nav-links" aria-label="{% if l == 'zh' %}页面导航{% else %}Page navigation{% endif %}">
+          {% for item in nav %}
+            {% assign show = true %}
+            {% if item.id == 'publications' and has_pubs == false %}{% assign show = false %}{% endif %}
+            {% if item.id == 'projects' and has_projs == false %}{% assign show = false %}{% endif %}
+            {% if item.id == 'experience' and has_exp == false %}{% assign show = false %}{% endif %}
+            {% if show %}
+              <a href="#{{ item.id }}" {% if forloop.first %}class="active"{% endif %}>{{ item.label }}</a>
+            {% endif %}
+          {% endfor %}
+        </nav>
+        <div class="nav-fade nav-fade-left" aria-hidden="true"></div>
+        <div class="nav-fade nav-fade-right" aria-hidden="true"></div>
+      </div>
+
+      <div class="nav-controls">
+        {% if l == 'zh' %}
+        <a href="index-en.html" class="lang-btn" aria-label="切换到英文版">EN</a>
+        {% else %}
+        <a href="index.html" class="lang-btn" aria-label="Switch to Chinese">中文</a>
+        {% endif %}
+        <button id="theme-toggle" class="theme-btn" type="button" aria-label="{% if l == 'zh' %}切换深浅色模式{% else %}Toggle dark/light mode{% endif %}">
+          <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4.3"/><path d="M12 2.5v3M12 18.5v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2.5 12h3M18.5 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg>
+          <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" style="display:none;"><path d="M20 14.2A8.2 8.2 0 1 1 9.8 4a6.6 6.6 0 0 0 10.2 10.2z"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <main class="container">
+
+    <!-- Header / 个人信息 -->
+    <header class="profile" id="about">
+      <div class="profile-inner">
+        <div class="profile-header-row">
+          <div class="profile-text">
+            <h1 class="name font-serif">{{ p.name }}</h1>
+            <p class="tagline">{{ p.tagline }}</p>
+          </div>
+          <div class="avatar">
+            <img src="assets/avatar.jpg" alt="{{ p.name }}" onerror="this.style.display='none';">
+            <div class="avatar-fallback" id="avatar-fallback" aria-hidden="true"></div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- 教育背景 -->
+    {% assign edu = site.data.education[l] %}
+    <section class="section" id="education">
+      <h2 class="section-title">{% if l == 'zh' %}教育背景{% else %}Education{% endif %}</h2>
+      <div class="card">
+        <div class="edu-header">
+          <span class="edu-school">{{ edu.school }}</span>
+          <span class="edu-meta">{{ edu.period }}</span>
+        </div>
+        <p class="edu-detail">{{ edu.detail }}</p>
+        {% if edu.honors %}
+        <ul class="dash-list">
+          {% for h in edu.honors %}<li>{{ h }}</li>{% endfor %}
+        </ul>
+        {% endif %}
+        {% if edu.courses %}
+        <p class="sub-label">{{ edu.courses_label }}</p>
+        <div class="tag-row">
+          {% for c in edu.courses %}<span class="tag">{{ c }}</span>{% endfor %}
+        </div>
+        {% endif %}
+      </div>
+    </section>
+
+    <!-- 工作经历 -->
+    {% if has_exp %}
+    <section class="section" id="experience">
+      <h2 class="section-title">{% if l == 'zh' %}工作经历{% else %}Experience{% endif %}</h2>
+      {% for role in e.roles %}
+      <div class="card">
+        <div class="work-header">
+          <div>
+            <div class="work-role">{{ role[l].role }}</div>
+            <div class="work-company">{{ role[l].company }}</div>
+          </div>
+          <div class="work-meta">{{ role[l].period }}</div>
+        </div>
+        <ul class="dash-list">
+          {% for b in role[l].bullets %}<li>{{ b }}</li>{% endfor %}
+        </ul>
+      </div>
+      {% endfor %}
+    </section>
+    {% endif %}
+
+    <!-- 技能 -->
+    <section class="section" id="skills">
+      <h2 class="section-title">{% if l == 'zh' %}技能{% else %}Skills{% endif %}</h2>
+      <div class="card">
+        {% for cat in site.data.skills[l] %}
+        <div class="skill-category">
+          <span class="skill-category-label">{{ cat.category }}</span>
+          <div class="tag-row">
+            {% for item in cat.items %}<span class="tag tag-accent">{{ item }}</span>{% endfor %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </section>
+
+    <!-- 项目经历 -->
+    {% if has_projs %}
+    <section class="section" id="projects">
+      <h2 class="section-title">{% if l == 'zh' %}项目经历{% else %}Projects{% endif %}</h2>
+      {% for proj in site.projects %}
+      <article class="card project-entry">
+        <span class="project-index" aria-hidden="true">{{ forloop.index | prepend: '00' | slice: -2, 2 }}</span>
+        <div class="project-title">
+          <a href="{{ proj.url | relative_url }}" style="color:inherit;text-decoration:none;">{{ proj[l].title }}</a>
+        </div>
+        <div class="project-meta">{{ proj[l].meta }}</div>
+        <p class="project-desc">{{ proj.excerpt | strip_html | truncate: 120 }}</p>
+        <div class="tag-row" style="margin-bottom:0.9em;">
+          {% for t in proj[l].tech %}<span class="tag">{{ t }}</span>{% endfor %}
+        </div>
+        <div class="project-links">
+          {% if proj.github and proj.github != '#' %}
+          <a href="{{ proj.github }}" target="_blank" rel="noopener noreferrer">{% if l == 'zh' %}GitHub 仓库{% else %}GitHub Repo{% endif %}</a>
+          {% endif %}
+          {% if proj.demo and proj.demo != '#' %}
+          <a href="{{ proj.demo }}" target="_blank" rel="noopener noreferrer">{% if l == 'zh' %}在线演示{% else %}Live Demo{% endif %}</a>
+          {% endif %}
+        </div>
+      </article>
+      {% endfor %}
+    </section>
+    {% endif %}
+
+    <!-- 论文发表 -->
+    {% if has_pubs %}
+    <section class="section" id="publications">
+      <h2 class="section-title">{% if l == 'zh' %}论文发表{% else %}Publications{% endif %}</h2>
+      {% for pub in site.publications %}
+      <div class="card">
+        <span class="tag tag-accent pub-type">{{ pub[l].type }}</span>
+        <div class="pub-title">
+          <a href="{{ pub.url | relative_url }}" style="color:inherit;text-decoration:none;">{{ pub[l].title }}</a>
+        </div>
+        <div class="pub-meta">{{ pub[l].meta }}</div>
+        <p class="pub-desc">{{ pub.excerpt | strip_html | truncate: 120 }}</p>
+      </div>
+      {% endfor %}
+    </section>
+    {% endif %}
+
+    <!-- 联系方式 -->
+    <section class="section" id="contact">
+      <h2 class="section-title">{% if l == 'zh' %}联系方式{% else %}Contact{% endif %}</h2>
+      <p class="edu-detail">
+        {% if l == 'zh' %}
+        如果你看到了合适的机会，或者只是想聊聊 AI 应用方向的东西，都欢迎联系我。
+        {% else %}
+        If you've got a role that might be a fit, or just want to talk about AI applications, I'd love to hear from you.
+        {% endif %}
+      </p>
+      <div class="contact-row">
+        <span class="contact-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>
+          <a href="mailto:{{ s.email }}">{{ s.email }}</a>
+        </span>
+        <span class="contact-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6 0 0 0-1.3-3.2 4.2 4.2 0 0 0-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3 0 0 0-6.2 0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2 0 0 0-.1 3.2A4.6 4.6 0 0 0 4 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"/></svg>
+          <a href="{{ s.github }}" target="_blank" rel="noopener noreferrer">{{ s.github_display }}</a>
+        </span>
+        <span class="contact-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2.5"/><path d="M7.5 9.5l3 2.5-3 2.5"/><path d="M13 14.5h3.5"/></svg>
+          <a href="{{ s.gitee }}" target="_blank" rel="noopener noreferrer">{{ s.gitee_display }}</a>
+        </span>
+        <span class="contact-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4l16 16M20 4L4 20"/></svg>
+          <a href="{{ s.x }}" target="_blank" rel="noopener noreferrer">{{ s.x_display }}</a>
+        </span>
+        <span class="contact-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10v4a1 1 0 0 0 1 1h2l5 4V5L6 9H4a1 1 0 0 0-1 1z"/><path d="M14.5 8.2c1.3 1 1.3 6.6 0 7.6"/><path d="M18 6c2.6 2 2.6 10 0 12"/></svg>
+          <span>{{ s[l].wechat }}</span>
+        </span>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer container">
+    <span>{{ p.footer_copyright }}</span>
+    <span>{{ p.footer_updated }}</span>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

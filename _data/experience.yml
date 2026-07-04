@@ -1,0 +1,24 @@
+# ============================================================
+# 工作经历
+# TODO: 替换为你的真实工作经历
+# 多段经历：复制整个条目，按时间倒序排列
+# 没有经历：删除此文件中 roles 下的所有条目，模板自动隐藏整个 section
+# ============================================================
+
+roles:
+  - zh:
+      role: AI 应用开发实习生
+      company: 某科技公司 · 智能化产品组
+      period: 2025.06 — 2025.09
+      bullets:
+        - 独立负责一个内部 AI 工具模块的设计与实现，用于自动生成团队周报草稿
+        - 参与团队的 Prompt 调优与效果评估，配合工程师排查线上问题
+        - 协助整理内部技术文档，帮助新同事更快上手现有工具链
+    en:
+      role: AI Application Development Intern
+      company: A Tech Company · Intelligent Products Team
+      period: 2025.06 — 2025.09
+      bullets:
+        - Independently designed and built an internal AI tool module for auto-drafting weekly team reports
+        - Contributed to prompt tuning and evaluation, and helped engineers debug production issues
+        - Helped organize internal technical docs to speed up onboarding for new teammates

@@ -4,9 +4,6 @@ zh:
   period: 2016.09 — 2020.06
   honors:
     - 专业成绩排名前 10%，通过英语六级（CET-6）
-    - GPA 3.6 / 4.0
-    - 高等数学类课程：数学分析上 99 分，大学物理上 90 分，离散数学 91 分
-    - 计算机类课程：Java 高级程序设计 97 分，计算机网络 91 分，数据结构 95 分，C++ 程序设计 96 分，外部程序设计 94 分
     - 2018 年 10 月 高教社杯全国大学生数学建模竞赛省二等奖
     - 2018 年 5 月 美国大学生数学建模比赛 H 奖
     - 2018 年 5 月 第九届蓝桥杯全国软件和信息技术专业人才大赛省三等奖
@@ -14,14 +11,14 @@ zh:
     - 2018 年 10 月 青岛理工大学优秀学生奖学金
   courses_label: 核心主修课程
   courses:
-    - 数学分析
-    - 高等代数
-    - 概率论与数理统计
-    - 离散数学
-    - 数据结构与算法
-    - C++ 程序设计
-    - Java 高级程序设计
-    - 计算机网络
+    - 数学分析上（99 分）
+    - 大学物理上（90 分）
+    - Java 高级程序设计（97 分）
+    - 计算机网络（91 分）
+    - 数据结构（95 分）
+    - C++ 程序设计（96 分）
+    - 外部程序设计（94 分）
+    - 离散数学（91 分）
     - 数据库系统
     - 操作系统
 
@@ -31,23 +28,20 @@ en:
   period: 2016.09 — 2020.06
   honors:
     - Top 10% of the cohort; CET-6 certified
-    - GPA 3.6 / 4.0
-    - Advanced Mathematics: Mathematical Analysis 99/100, University Physics 90/100, Discrete Mathematics 91/100
-    - Computer Science: Java Programming 97/100, Computer Networks 91/100, Data Structures 95/100, C++ Programming 96/100
-    - Oct 2018 — 2nd Prize (Provincial), China Undergraduate Mathematical Contest in Modeling (CUMCM)
-    - May 2018 — Honorable Mention, Mathematical Contest in Modeling (MCM/ICM)
-    - May 2018 — 3rd Prize (Provincial), 9th Lanqiao Cup National IT Competition
-    - Oct 2017 — President's Scholarship, Qingdao University of Technology
-    - Oct 2018 — Outstanding Student Scholarship, Qingdao University of Technology
+    - Oct 2018 — 2nd Prize (Provincial), CUMCM
+    - May 2018 — Honorable Mention, MCM/ICM
+    - May 2018 — 3rd Prize (Provincial), 9th Lanqiao Cup
+    - Oct 2017 — President's Scholarship
+    - Oct 2018 — Outstanding Student Scholarship
   courses_label: Core Coursework
   courses:
-    - Mathematical Analysis
-    - Advanced Algebra
-    - Probability & Statistics
-    - Discrete Mathematics
-    - Data Structures & Algorithms
-    - C++ Programming
-    - Java Programming
-    - Computer Networks
+    - Mathematical Analysis I (99/100)
+    - University Physics I (90/100)
+    - Java Programming (97/100)
+    - Computer Networks (91/100)
+    - Data Structures (95/100)
+    - C++ Programming (96/100)
+    - External Programming (94/100)
+    - Discrete Mathematics (91/100)
     - Database Systems
     - Operating Systems

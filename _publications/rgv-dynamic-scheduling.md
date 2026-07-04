@@ -5,13 +5,17 @@ zh:
   meta: 第二作者 · 《新型工业化》 · 2019 年第 1 期
   tech: [模拟退火算法, 差分进化算法, 动态调度, 多目标优化]
   desc: 针对智能加工系统中 RGV 的动态调度问题，用模拟退火算法求初始最短路径并构建实时动态模型。
+  pdf: 智能RGV的动态调度策略研究.pdf
 en:
   type: Journal Paper
   title: Research on Dynamic Scheduling Strategy for Intelligent RGV
   meta: Co-author · Journal of New Industrialization · Vol. 2019, No. 1
   tech: [Simulated Annealing, Differential Evolution, Dynamic Scheduling, Multi-objective Optimization]
   desc: Dynamic scheduling strategy for intelligent RGV using simulated annealing for initial path optimization and real-time modeling.
+  pdf: 智能RGV的动态调度策略研究.pdf
 ---
+
+## 项目介绍
 
 随着自动化、智能化的发展并逐步渗入到各个领域，相应的调控策略的算法也成为热点。本文针对智能加工系统中，智能轨道式自动引导车 RGV 在运行中的动态调度问题进行了研究。
 
@@ -19,9 +23,23 @@ en:
 
 发表期刊：《新型工业化》2019 年第 1 期，87-90 页。
 
+<iframe src="{{ '/assets/pdf-viewer.html?file=' | relative_url }}{{ '/assets/publications/智能RGV的动态调度策略研究.pdf' | relative_url }}"
+  width="100%" height="850px"
+  style="border:1px solid var(--border); border-radius:8px;"
+  title="智能 RGV 的动态调度策略研究 PDF">
+</iframe>
+
 <!-- English -->
+## Project Introduction
+
 As automation and intelligent technologies continue to permeate various fields, scheduling strategy algorithms have become a hot research topic. This paper studies the dynamic scheduling problem of intelligent Rail Guided Vehicles (RGV) in smart manufacturing systems.
 
 For single-process machining, a simulated annealing algorithm is employed to find the initial shortest path for RGV operations and a real-time dynamic model is constructed. For dual-process machining, a differential evolution-based multi-objective rescheduling periodic model applicable to general problems is established.
 
 Published in: *Journal of New Industrialization*, Vol. 2019, No. 1, pp. 87-90.
+
+<iframe src="{{ '/assets/pdf-viewer.html?file=' | relative_url }}{{ '/assets/publications/智能RGV的动态调度策略研究.pdf' | relative_url }}"
+  width="100%" height="850px"
+  style="border:1px solid var(--border); border-radius:8px;"
+  title="RGV Dynamic Scheduling Research PDF">
+</iframe>

@@ -3,10 +3,12 @@ zh:
   title: AI 工具调用小助手（实习产出）
   meta: 实习生 · 2025.06 — 2025.09
   tech: [Python, FastAPI, OpenAI API]
+  desc: 实习期间开发的内部 AI 工具，支持工具注册和链式调用。
 en:
   title: AI Tool-Calling Assistant (Internship)
   meta: Intern · Jun 2025 — Sep 2025
   tech: [Python, FastAPI, OpenAI API]
+  desc: Internal AI tool supporting custom tool registration and chained calls.
 
 github: "#"
 ---

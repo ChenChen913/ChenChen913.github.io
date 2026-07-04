@@ -3,10 +3,12 @@ zh:
   title: 垃圾分类图像识别（课程作业）
   meta: 课程项目 · 2024.11
   tech: [PyTorch, ResNet18]
+  desc: 深度学习课程作业，CNN 垃圾分类识别准确率 91%。
 en:
   title: Waste Classification with Image Recognition (Coursework)
   meta: Course Project · Nov 2024
   tech: [PyTorch, ResNet18]
+  desc: Deep Learning coursework — CNN waste classifier at 91% validation accuracy.
 
 github: "#"
 ---

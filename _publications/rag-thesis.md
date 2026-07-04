@@ -9,10 +9,12 @@ zh:
   type: 毕业论文
   title: 基于检索增强生成的校园知识库问答系统设计与实现
   meta: 本科毕业论文 · 指导教师：李教授 · 2026.06
+  desc: 围绕毕业设计展开，系统性梳理 RAG 在校园场景下的工程实践与效果评估。
 en:
   type: Thesis
   title: RAG-based Design and Implementation of a Campus Knowledge-Base Q&A System
   meta: "Undergraduate Thesis · Advisor: Prof. Li · Jun 2026"
+  desc: A systematic review of RAG engineering practice in a campus setting, with comparative evaluation of retrieval accuracy.
 ---
 
 <!-- 中文摘要 -->

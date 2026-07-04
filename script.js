@@ -66,6 +66,7 @@
       var lastActiveId = null;
       var _spyPaused = false;    // 导航点击后短暂抑制 scroll spy
       var _spyResumeTimer = null;
+      var _spyResumeOnScroll = null;  // 滚动停止后恢复 spy 的回调
 
       function getDocHeight() {
         return Math.max(
@@ -160,10 +161,18 @@
             try { history.pushState(null, null, "#" + id); } catch (e) {}
           }
           setActive(id);
-          // 抑制 scroll spy 800ms，避免平滑滚动经过中间章节时短暂切换高亮
+          // 抑制 scroll spy 直到平滑滚动完全停止 150ms，避免中间章节抢走高亮
           _spyPaused = true;
+          if (!_spyResumeOnScroll) {
+            _spyResumeOnScroll = function () {
+              clearTimeout(_spyResumeTimer);
+              _spyResumeTimer = setTimeout(function () {
+                _spyPaused = false;
+              }, 150);
+            };
+          }
           clearTimeout(_spyResumeTimer);
-          _spyResumeTimer = setTimeout(function () { _spyPaused = false; }, 800);
+          window.addEventListener("scroll", _spyResumeOnScroll, { passive: true, once: false });
         });
       });
 
@@ -269,8 +278,8 @@
         _bttTicking = true;
         window.requestAnimationFrame(function () {
           var scrollY = window.scrollY || window.pageYOffset;
-          var docHeight = _cachedDocHeight;
-          var winHeight = _cachedWinHeight;
+          var docHeight = _cachedDocHeight || getDocHeight();
+          var winHeight = _cachedWinHeight || window.innerHeight;
           var maxScroll = docHeight - winHeight;
 
           if (maxScroll <= 0) {

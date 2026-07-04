@@ -180,7 +180,7 @@
       <article class="card project-entry">
         <span class="project-index" aria-hidden="true">{{ forloop.index | prepend: '00' | slice: -2, 2 }}</span>
         <div class="project-title">
-          <a href="{{ proj.url | relative_url }}" style="color:inherit;text-decoration:none;">{{ proj[l].title }}</a>
+          <a href="{{ proj.url | relative_url }}?lang={{ l }}" style="color:inherit;text-decoration:none;">{{ proj[l].title }}</a>
         </div>
         <div class="project-meta">{{ proj[l].meta }}</div>
         <p class="project-desc">{{ proj[l].desc }}</p>
@@ -208,7 +208,7 @@
       <div class="card">
         <span class="tag tag-accent pub-type">{{ pub[l].type }}</span>
         <div class="pub-title">
-          <a href="{{ pub.url | relative_url }}" style="color:inherit;text-decoration:none;">{{ pub[l].title }}</a>
+          <a href="{{ pub.url | relative_url }}?lang={{ l }}" style="color:inherit;text-decoration:none;">{{ pub[l].title }}</a>
         </div>
         <div class="pub-meta">{{ pub[l].meta }}</div>
         <p class="pub-desc">{{ pub[l].desc }}</p>

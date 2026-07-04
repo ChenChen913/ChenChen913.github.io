@@ -23,14 +23,8 @@ demo: "#"
 
 本项目的目标就是用一个基于 RAG（Retrieval-Augmented Generation，检索增强生成）架构的智能问答机器人，把散落的教务文档"喂"给大模型，让学生用自然语言提问就能拿到带来源引用的准确答案。
 
-<p style="margin:1.5em 0 6px 0; text-align:right;">
-  <a href="{{ '/assets/projects/campus-qa-report.pdf' | relative_url }}" target="_blank"
-     style="display:inline-block; background:var(--bg-elevated); border:1px solid var(--border); border-radius:6px; padding:5px 14px; font-size:13px; color:var(--ink-secondary); text-decoration:none;">
-    ⛶ 全屏查看
-  </a>
-</p>
-<iframe src="{{ '/assets/projects/campus-qa-report.pdf' | relative_url }}#view=FitH&pagemode=none&toolbar=1"
-  width="100%" height="800px"
+<iframe src="{{ '/assets/pdf-viewer.html?file=' | relative_url }}{{ '/assets/projects/campus-qa-report.pdf' | relative_url }}"
+  width="100%" height="850px"
   style="border:1px solid var(--border); border-radius:8px;"
   title="项目完整报告 PDF">
 </iframe>
@@ -42,14 +36,8 @@ Every year during freshman orientation, the academic affairs office gets flooded
 
 This project builds a RAG (Retrieval-Augmented Generation) powered Q&A bot that ingests all those scattered academic documents and feeds them to an LLM. Students ask questions in natural language and get accurate answers with source citations.
 
-<p style="margin:1.5em 0 6px 0; text-align:right;">
-  <a href="{{ '/assets/projects/campus-qa-report.pdf' | relative_url }}" target="_blank"
-     style="display:inline-block; background:var(--bg-elevated); border:1px solid var(--border); border-radius:6px; padding:5px 14px; font-size:13px; color:var(--ink-secondary); text-decoration:none;">
-    ⛶ Open Fullscreen
-  </a>
-</p>
-<iframe src="{{ '/assets/projects/campus-qa-report.pdf' | relative_url }}#view=FitH&pagemode=none&toolbar=1"
-  width="100%" height="800px"
+<iframe src="{{ '/assets/pdf-viewer.html?file=' | relative_url }}{{ '/assets/projects/campus-qa-report.pdf' | relative_url }}"
+  width="100%" height="850px"
   style="border:1px solid var(--border); border-radius:8px;"
   title="Full Project Report PDF">
 </iframe>

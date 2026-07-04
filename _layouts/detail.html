@@ -71,27 +71,6 @@
   }
 </style>
 
-<!-- 移动端 PDF 回退：触屏设备隐藏 iframe，显示卡片式链接避免自动下载 -->
-<style>
-  .pdf-fallback-card {
-    display: none;
-    background: var(--bg-elevated, #f8f9fa);
-    border: 2px dashed var(--border, #d0d7de);
-    border-radius: 12px;
-    padding: 36px 20px;
-    text-align: center;
-    margin: 1.5em 0;
-    cursor: pointer;
-    transition: background 0.2s, border-color 0.2s;
-    text-decoration: none;
-  }
-  .pdf-fallback-card:hover,
-  .pdf-fallback-card:active { background: var(--border, #e8eaed); border-color: var(--ink-secondary, #666); }
-  .pdf-fallback-card .pdf-fallback-icon { font-size: 44px; margin-bottom: 10px; display: block; }
-  .pdf-fallback-card .pdf-fallback-label { font-size: 16px; font-weight: 600; color: var(--ink, #333); margin-bottom: 4px; }
-  .pdf-fallback-card .pdf-fallback-hint { font-size: 13px; color: var(--ink-secondary, #888); }
-</style>
-
 </head>
 <body>
 
@@ -187,43 +166,6 @@
       } catch(e) {
         // 渲染失败则显示原始文本
         s.parentNode.replaceChild(document.createTextNode(s.textContent), s);
-      }
-    });
-  })();
-  </script>
-
-  <!-- 移动端/平板 PDF 回退：避免浏览器自动触发下载 -->
-  <script>
-  (function() {
-    var isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
-    var isNarrow = window.innerWidth < 1024;
-
-    if (!isTouch && !isNarrow) return;
-
-    // 找到所有 PDF iframe，用卡片链接替换
-    document.querySelectorAll('iframe[src*=".pdf"]').forEach(function(iframe) {
-      var rawSrc = iframe.getAttribute('src') || '';
-      var pdfUrl = rawSrc.replace(/#.*$/, '');  // 去掉 #view=FitH 等参数
-
-      var card = document.createElement('a');
-      card.href = pdfUrl;
-      card.target = '_blank';
-      card.rel = 'noopener';
-      card.className = 'pdf-fallback-card';
-      card.style.display = 'block';
-      card.innerHTML =
-        '<span class="pdf-fallback-icon">📄</span>' +
-        '<span class="pdf-fallback-label">点击查看完整 PDF 报告</span>' +
-        '<span class="pdf-fallback-hint">（将在新标签页中打开，不会自动下载）</span>';
-
-      iframe.parentNode.replaceChild(card, iframe);
-    });
-
-    // 隐藏"全屏查看"链接（卡片已承担跳转功能）
-    document.querySelectorAll('a[href*=".pdf"]').forEach(function(link) {
-      var txt = (link.textContent || '').trim();
-      if (txt.includes('全屏') || txt.includes('Fullscreen') || txt.includes('⛶')) {
-        link.style.display = 'none';
       }
     });
   })();

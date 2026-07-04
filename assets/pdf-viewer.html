@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PDF 查看器</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #525659;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+  #toolbar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    background: #323639;
+    color: #ccc;
+    font-size: 13px;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  #toolbar button, #toolbar a.btn {
+    background: #565a5e;
+    color: #fff;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  #toolbar button:hover, #toolbar a.btn:hover { background: #6c7176; }
+  #toolbar button:disabled { opacity: 0.4; cursor: default; }
+  #toolbar span { margin: 0 4px; }
+  #toolbar .spacer { flex: 1; }
+  #pages {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  canvas {
+    display: block;
+    margin: 0 auto;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  }
+  #loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 200px;
+    color: #aaa;
+    font-size: 14px;
+  }
+  #error {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    height: 200px;
+    color: #f88;
+    font-size: 14px;
+    text-align: center;
+    padding: 20px;
+  }
+  #error a { color: #8cf; }
+</style>
+</head>
+<body>
+
+<div id="toolbar">
+  <button id="btn-prev" disabled>◀</button>
+  <span id="page-num">0 / 0</span>
+  <button id="btn-next" disabled>▶</button>
+  <span class="spacer"></span>
+  <button id="btn-zoomin" title="放大">＋</button>
+  <button id="btn-zoomout" title="缩小">－</button>
+  <a id="btn-download" class="btn" href="#" download>📥 下载</a>
+  <a id="btn-fullscreen" class="btn" href="#" target="_blank">⛶ 全屏</a>
+</div>
+
+<div id="loading">正在加载 PDF…</div>
+<div id="error">
+  <span>PDF 加载失败。<br><a href="#" id="error-link">点击此处直接打开</a></span>
+</div>
+<div id="pages"></div>
+
+<script>
+pdfjsLib.GlobalWorkerOptions.workerSrc =
+  'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+var params = new URLSearchParams(location.search);
+var url = params.get('file');
+if (!url) {
+  document.getElementById('loading').textContent = '未指定 PDF 文件';
+} else {
+  document.getElementById('btn-download').href = url;
+  document.getElementById('btn-fullscreen').href = url;
+  document.getElementById('error-link').href = url;
+  init(url);
+}
+
+var pdfDoc = null, pageNum = 1, totalPages = 0, scale = 1.2;
+
+function init(url) {
+  pdfjsLib.getDocument(url).promise.then(function(pdf) {
+    pdfDoc = pdf;
+    totalPages = pdf.numPages;
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('btn-prev').disabled = true;
+    document.getElementById('btn-next').disabled = totalPages <= 1;
+    document.getElementById('page-num').textContent = '1 / ' + totalPages;
+    autoScale();
+    renderPage(1);
+  }).catch(function(err) {
+    console.error(err);
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('error').style.display = 'flex';
+  });
+}
+
+function autoScale() {
+  // 根据容器宽度自动计算缩放比例，确保 canvas 填满宽度
+  var container = document.getElementById('pages');
+  var w = container.clientWidth;
+  scale = Math.max(0.5, (w - 20) / 612); // 612 = letter width in pt
+}
+
+function renderPage(num) {
+  if (!pdfDoc) return;
+  pdfDoc.getPage(num).then(function(page) {
+    var viewport = page.getViewport({ scale: scale });
+    var canvas = document.createElement('canvas');
+    canvas.width = viewport.width;
+    canvas.height = viewport.height;
+    var ctx = canvas.getContext('2d');
+    var container = document.getElementById('pages');
+    container.innerHTML = '';
+    container.appendChild(canvas);
+    page.render({ canvasContext: ctx, viewport: viewport });
+    pageNum = num;
+    document.getElementById('page-num').textContent = num + ' / ' + totalPages;
+    document.getElementById('btn-prev').disabled = num <= 1;
+    document.getElementById('btn-next').disabled = num >= totalPages;
+  });
+}
+
+document.getElementById('btn-prev').onclick = function() {
+  if (pageNum > 1) renderPage(pageNum - 1);
+};
+document.getElementById('btn-next').onclick = function() {
+  if (pageNum < totalPages) renderPage(pageNum + 1);
+};
+document.getElementById('btn-zoomin').onclick = function() {
+  scale = Math.min(3, scale + 0.2);
+  renderPage(pageNum);
+};
+document.getElementById('btn-zoomout').onclick = function() {
+  scale = Math.max(0.5, scale - 0.2);
+  renderPage(pageNum);
+};
+</script>
+
+</body>
+</html>

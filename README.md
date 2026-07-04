@@ -2,7 +2,7 @@
 
 [English](README_EN.md)
 
-基于 Jekyll 构建的个人主页，部署于 GitHub Pages。
+基于 Jekyll 构建的个人主页，部署于 GitHub Pages。 
 
 🔗 在线访问：**[chenchen913.github.io](https://chenchen913.github.io)**
 

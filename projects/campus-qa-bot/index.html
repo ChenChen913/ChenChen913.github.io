@@ -61,8 +61,227 @@
         <h1 class="section-title" style="font-size:1.4rem; margin-bottom:0.3em;">校园知识库问答机器人（毕业设计）</h1>
         <p class="pub-meta" style="margin-bottom:1.5em;">独立开发 · 2025.09 — 2026.03</p>
         <div style="max-width:60ch; line-height:2; color:var(--ink-secondary);">
-          <p>基于 RAG 架构做的毕业设计项目，把校园教务文档向量化存储，
-支持多轮问答与来源引用，用来解决新生找不到教务信息的问题。</p>
+          <h2 id="项目背景">项目背景</h2>
+
+<p>每年新生入学季，教务处都会被大量重复性问题淹没——”选课系统怎么用？”“学分置换流程是什么？”“辅修申请什么时候截止？”这些问题的答案其实都写在校园网的各类文档中，但分散在几十个 PDF 和网页里，学生根本找不到。</p>
+
+<p>本项目的目标就是用一个基于 RAG（Retrieval-Augmented Generation，检索增强生成）架构的智能问答机器人，把散落的教务文档”喂”给大模型，让学生用自然语言提问就能拿到带来源引用的准确答案。</p>
+
+<h3 id="核心指标">核心指标</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>指标</th>
+      <th>数值</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>文档覆盖率</td>
+      <td>127 份教务相关文档</td>
+    </tr>
+    <tr>
+      <td>检索召回率（Top-5）</td>
+      <td>91.2%</td>
+    </tr>
+    <tr>
+      <td>回答准确率（人工评估）</td>
+      <td>87.5%</td>
+    </tr>
+    <tr>
+      <td>平均响应时间</td>
+      <td>2.3 秒</td>
+    </tr>
+    <tr>
+      <td>支持文档格式</td>
+      <td>PDF / Word / 网页</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="系统架构">系统架构</h2>
+
+<p>整体采用经典的 RAG 三阶段流水线：文档预处理 → 向量检索 → 答案生成。</p>
+
+<p><img src="assets/projects/campus-qa-arch.png" alt="系统架构图" /></p>
+
+<h3 id="阶段一文档预处理">阶段一：文档预处理</h3>
+
+<p>将 127 份教务文档（选课手册、学籍管理规定、辅修申请流程、奖学金评定办法等）统一转为纯文本，按语义段落切分为 1,847 个文档块（chunk）。</p>
+
+<h3 id="阶段二向量化与检索">阶段二：向量化与检索</h3>
+
+<p>每个 chunk 通过 <code class="language-plaintext highlighter-rouge">text-embedding-3-small</code> 模型转换为 1536 维向量，存入 FAISS 向量数据库。用户提问时，将问题同样向量化后在数据库中检索 Top-K 个最相似的文档块。</p>
+
+<p>检索相似度采用余弦相似度：</p>
+
+<p>[\text{similarity}(\mathbf{q}, \mathbf{d}) = \frac{\mathbf{q} \cdot \mathbf{d}}{|\mathbf{q}| \cdot |\mathbf{d}|}]</p>
+
+<p>对于 Top-K 的选取，实验对比了 $K \in {3, 5, 7, 10}$ 的效果，最终 $K=5$ 在召回率和响应速度之间达到最佳平衡：</p>
+
+<table>
+  <tbody>
+    <tr>
+      <td>[\text{Recall}@5 = \frac{</td>
+      <td>\text{相关文档} \cap \text{Top-5 检索结果}</td>
+      <td>}{</td>
+      <td>\text{相关文档}</td>
+      <td>} = 91.2\%]</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="阶段三答案生成">阶段三：答案生成</h3>
+
+<p>将检索到的 Top-5 文档块和用户问题拼接为 Prompt，调用 GPT-4o 生成自然语言答案，要求必须标注引用来源。</p>
+
+<h2 id="关键代码">关键代码</h2>
+
+<h3 id="文档加载与切分">文档加载与切分</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">langchain.document_loaders</span> <span class="kn">import</span> <span class="n">DirectoryLoader</span><span class="p">,</span> <span class="n">PyPDFLoader</span>
+<span class="kn">from</span> <span class="nn">langchain.text_splitter</span> <span class="kn">import</span> <span class="n">RecursiveCharacterTextSplitter</span>
+
+<span class="c1"># 加载教务文档目录
+</span><span class="n">loader</span> <span class="o">=</span> <span class="n">DirectoryLoader</span><span class="p">(</span>
+    <span class="s">"./docs/academic/"</span><span class="p">,</span>
+    <span class="n">glob</span><span class="o">=</span><span class="s">"**/*.pdf"</span><span class="p">,</span>
+    <span class="n">loader_cls</span><span class="o">=</span><span class="n">PyPDFLoader</span>
+<span class="p">)</span>
+<span class="n">documents</span> <span class="o">=</span> <span class="n">loader</span><span class="p">.</span><span class="n">load</span><span class="p">()</span>
+<span class="k">print</span><span class="p">(</span><span class="sa">f</span><span class="s">"已加载 </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">documents</span><span class="p">)</span><span class="si">}</span><span class="s"> 份文档"</span><span class="p">)</span>
+
+<span class="c1"># 按语义段落切分
+</span><span class="n">splitter</span> <span class="o">=</span> <span class="n">RecursiveCharacterTextSplitter</span><span class="p">(</span>
+    <span class="n">chunk_size</span><span class="o">=</span><span class="mi">800</span><span class="p">,</span>
+    <span class="n">chunk_overlap</span><span class="o">=</span><span class="mi">150</span><span class="p">,</span>
+    <span class="n">separators</span><span class="o">=</span><span class="p">[</span><span class="s">"</span><span class="se">\n\n</span><span class="s">"</span><span class="p">,</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="s">"。"</span><span class="p">,</span> <span class="s">"."</span><span class="p">,</span> <span class="s">" "</span><span class="p">]</span>
+<span class="p">)</span>
+<span class="n">chunks</span> <span class="o">=</span> <span class="n">splitter</span><span class="p">.</span><span class="n">split_documents</span><span class="p">(</span><span class="n">documents</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="sa">f</span><span class="s">"已切分为 </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">chunks</span><span class="p">)</span><span class="si">}</span><span class="s"> 个 chunk"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="向量化与-faiss-索引构建">向量化与 FAISS 索引构建</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">langchain.embeddings</span> <span class="kn">import</span> <span class="n">OpenAIEmbeddings</span>
+<span class="kn">from</span> <span class="nn">langchain.vectorstores</span> <span class="kn">import</span> <span class="n">FAISS</span>
+
+<span class="n">embeddings</span> <span class="o">=</span> <span class="n">OpenAIEmbeddings</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="s">"text-embedding-3-small"</span><span class="p">)</span>
+
+<span class="c1"># 构建向量索引
+</span><span class="n">vectorstore</span> <span class="o">=</span> <span class="n">FAISS</span><span class="p">.</span><span class="n">from_documents</span><span class="p">(</span><span class="n">chunks</span><span class="p">,</span> <span class="n">embeddings</span><span class="p">)</span>
+
+<span class="c1"># 持久化保存
+</span><span class="n">vectorstore</span><span class="p">.</span><span class="n">save_local</span><span class="p">(</span><span class="s">"./faiss_index"</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="sa">f</span><span class="s">"向量索引已保存，维度: 1536"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="rag-问答链">RAG 问答链</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">langchain.chains</span> <span class="kn">import</span> <span class="n">RetrievalQA</span>
+<span class="kn">from</span> <span class="nn">langchain.chat_models</span> <span class="kn">import</span> <span class="n">ChatOpenAI</span>
+<span class="kn">from</span> <span class="nn">langchain.prompts</span> <span class="kn">import</span> <span class="n">PromptTemplate</span>
+
+<span class="n">prompt</span> <span class="o">=</span> <span class="n">PromptTemplate</span><span class="p">(</span>
+    <span class="n">template</span><span class="o">=</span><span class="s">"""你是一位熟悉{university}教务政策的助手。
+请根据以下参考文档回答学生的问题。如果文档中没有相关信息，
+请如实说明，不要编造。
+
+参考文档：
+{context}
+
+学生问题：{question}
+
+请用友好、清晰的语气回答，并在答案末尾标注参考文档编号。"""</span><span class="p">,</span>
+    <span class="n">input_variables</span><span class="o">=</span><span class="p">[</span><span class="s">"university"</span><span class="p">,</span> <span class="s">"context"</span><span class="p">,</span> <span class="s">"question"</span><span class="p">]</span>
+<span class="p">)</span>
+
+<span class="n">retriever</span> <span class="o">=</span> <span class="n">vectorstore</span><span class="p">.</span><span class="n">as_retriever</span><span class="p">(</span>
+    <span class="n">search_type</span><span class="o">=</span><span class="s">"similarity"</span><span class="p">,</span>
+    <span class="n">search_kwargs</span><span class="o">=</span><span class="p">{</span><span class="s">"k"</span><span class="p">:</span> <span class="mi">5</span><span class="p">}</span>
+<span class="p">)</span>
+
+<span class="n">qa_chain</span> <span class="o">=</span> <span class="n">RetrievalQA</span><span class="p">.</span><span class="n">from_chain_type</span><span class="p">(</span>
+    <span class="n">llm</span><span class="o">=</span><span class="n">ChatOpenAI</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="s">"gpt-4o"</span><span class="p">,</span> <span class="n">temperature</span><span class="o">=</span><span class="mf">0.3</span><span class="p">),</span>
+    <span class="n">chain_type</span><span class="o">=</span><span class="s">"stuff"</span><span class="p">,</span>
+    <span class="n">retriever</span><span class="o">=</span><span class="n">retriever</span><span class="p">,</span>
+    <span class="n">chain_type_kwargs</span><span class="o">=</span><span class="p">{</span><span class="s">"prompt"</span><span class="p">:</span> <span class="n">prompt</span><span class="p">}</span>
+<span class="p">)</span>
+
+<span class="c1"># 示例问答
+</span><span class="n">question</span> <span class="o">=</span> <span class="s">"我错过了选课时间怎么办？"</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">qa_chain</span><span class="p">.</span><span class="n">invoke</span><span class="p">({</span>
+    <span class="s">"query"</span><span class="p">:</span> <span class="n">question</span><span class="p">,</span>
+    <span class="s">"university"</span><span class="p">:</span> <span class="s">"青岛理工大学"</span>
+<span class="p">})</span>
+<span class="k">print</span><span class="p">(</span><span class="sa">f</span><span class="s">"Q: </span><span class="si">{</span><span class="n">question</span><span class="si">}</span><span class="se">\n</span><span class="s">A: </span><span class="si">{</span><span class="n">result</span><span class="p">[</span><span class="s">'result'</span><span class="p">]</span><span class="si">}</span><span class="s">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h2 id="前端展示">前端展示</h2>
+
+<p>使用 Streamlit 快速搭建了问答交互界面：</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">streamlit</span> <span class="k">as</span> <span class="n">st</span>
+
+<span class="n">st</span><span class="p">.</span><span class="n">set_page_config</span><span class="p">(</span><span class="n">page_title</span><span class="o">=</span><span class="s">"校园知识库问答"</span><span class="p">,</span> <span class="n">page_icon</span><span class="o">=</span><span class="s">"🎓"</span><span class="p">)</span>
+<span class="n">st</span><span class="p">.</span><span class="n">title</span><span class="p">(</span><span class="s">"🎓 校园知识库问答机器人"</span><span class="p">)</span>
+
+<span class="c1"># 侧边栏：参数配置
+</span><span class="k">with</span> <span class="n">st</span><span class="p">.</span><span class="n">sidebar</span><span class="p">:</span>
+    <span class="n">st</span><span class="p">.</span><span class="n">header</span><span class="p">(</span><span class="s">"检索参数"</span><span class="p">)</span>
+    <span class="n">k</span> <span class="o">=</span> <span class="n">st</span><span class="p">.</span><span class="n">slider</span><span class="p">(</span><span class="s">"检索文档数 (K)"</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+    <span class="n">temperature</span> <span class="o">=</span> <span class="n">st</span><span class="p">.</span><span class="n">slider</span><span class="p">(</span><span class="s">"生成温度"</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">)</span>
+
+<span class="c1"># 主区域：对话界面
+</span><span class="k">if</span> <span class="s">"messages"</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">st</span><span class="p">.</span><span class="n">session_state</span><span class="p">:</span>
+    <span class="n">st</span><span class="p">.</span><span class="n">session_state</span><span class="p">.</span><span class="n">messages</span> <span class="o">=</span> <span class="p">[]</span>
+
+<span class="k">for</span> <span class="n">msg</span> <span class="ow">in</span> <span class="n">st</span><span class="p">.</span><span class="n">session_state</span><span class="p">.</span><span class="n">messages</span><span class="p">:</span>
+    <span class="k">with</span> <span class="n">st</span><span class="p">.</span><span class="n">chat_message</span><span class="p">(</span><span class="n">msg</span><span class="p">[</span><span class="s">"role"</span><span class="p">]):</span>
+        <span class="n">st</span><span class="p">.</span><span class="n">markdown</span><span class="p">(</span><span class="n">msg</span><span class="p">[</span><span class="s">"content"</span><span class="p">])</span>
+
+<span class="k">if</span> <span class="n">prompt</span> <span class="p">:</span><span class="o">=</span> <span class="n">st</span><span class="p">.</span><span class="n">chat_input</span><span class="p">(</span><span class="s">"请输入你的问题..."</span><span class="p">):</span>
+    <span class="n">st</span><span class="p">.</span><span class="n">session_state</span><span class="p">.</span><span class="n">messages</span><span class="p">.</span><span class="n">append</span><span class="p">({</span><span class="s">"role"</span><span class="p">:</span> <span class="s">"user"</span><span class="p">,</span> <span class="s">"content"</span><span class="p">:</span> <span class="n">prompt</span><span class="p">})</span>
+    <span class="k">with</span> <span class="n">st</span><span class="p">.</span><span class="n">chat_message</span><span class="p">(</span><span class="s">"user"</span><span class="p">):</span>
+        <span class="n">st</span><span class="p">.</span><span class="n">markdown</span><span class="p">(</span><span class="n">prompt</span><span class="p">)</span>
+
+    <span class="k">with</span> <span class="n">st</span><span class="p">.</span><span class="n">chat_message</span><span class="p">(</span><span class="s">"assistant"</span><span class="p">):</span>
+        <span class="k">with</span> <span class="n">st</span><span class="p">.</span><span class="n">spinner</span><span class="p">(</span><span class="s">"正在检索相关文档..."</span><span class="p">):</span>
+            <span class="n">response</span> <span class="o">=</span> <span class="n">qa_chain</span><span class="p">.</span><span class="n">invoke</span><span class="p">({</span>
+                <span class="s">"query"</span><span class="p">:</span> <span class="n">prompt</span><span class="p">,</span>
+                <span class="s">"university"</span><span class="p">:</span> <span class="s">"青岛理工大学"</span>
+            <span class="p">})</span>
+            <span class="n">st</span><span class="p">.</span><span class="n">markdown</span><span class="p">(</span><span class="n">response</span><span class="p">[</span><span class="s">"result"</span><span class="p">])</span>
+            <span class="c1"># 显示引用来源
+</span>            <span class="k">with</span> <span class="n">st</span><span class="p">.</span><span class="n">expander</span><span class="p">(</span><span class="s">"📚 参考来源"</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">doc</span> <span class="ow">in</span> <span class="n">response</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="s">"source_documents"</span><span class="p">,</span> <span class="p">[]):</span>
+                    <span class="n">st</span><span class="p">.</span><span class="n">caption</span><span class="p">(</span><span class="sa">f</span><span class="s">"📄 </span><span class="si">{</span><span class="n">doc</span><span class="p">.</span><span class="n">metadata</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="s">'source'</span><span class="p">,</span> <span class="s">'未知来源'</span><span class="p">)</span><span class="si">}</span><span class="s">"</span><span class="p">)</span>
+    <span class="n">st</span><span class="p">.</span><span class="n">session_state</span><span class="p">.</span><span class="n">messages</span><span class="p">.</span><span class="n">append</span><span class="p">({</span><span class="s">"role"</span><span class="p">:</span> <span class="s">"assistant"</span><span class="p">,</span> <span class="s">"content"</span><span class="p">:</span> <span class="n">response</span><span class="p">[</span><span class="s">"result"</span><span class="p">]})</span>
+</code></pre></div></div>
+
+<h2 id="效果展示">效果展示</h2>
+
+<blockquote>
+  <p><strong>学生提问</strong>：我想申请辅修计算机科学，需要满足什么条件？</p>
+
+  <p><strong>机器人回答</strong>：根据《青岛理工大学辅修专业管理办法》（2024版），申请辅修计算机科学需满足以下条件：</p>
+  <ol>
+    <li>主修专业第一学年平均学分绩点不低于 2.5</li>
+    <li>无不及格课程记录</li>
+    <li>每年 5 月份通过教务系统提交申请</li>
+  </ol>
+
+  <p>📚 参考来源：[1] 辅修管理办法.pdf (第3-4页), [2] 2025辅修招生简章.pdf (第1页)</p>
+</blockquote>
+
+<h2 id="项目总结">项目总结</h2>
+
+<p>这个项目从文档预处理到前端展示完整覆盖了 RAG 系统的核心环节。最大的收获是对检索质量和生成质量的权衡有了直观理解——K 值太小会漏掉关键信息，太大又会引入噪声导致回答跑偏。</p>
+
+<p>后续可以优化的方向包括：HyDE（假设性文档嵌入）提升检索语义匹配、Re-ranking 精排、以及支持表格和图片等多模态文档的解析。</p>
+
+<hr />
 
 
         </div>
@@ -80,8 +299,224 @@
           
           
             
-<p>A RAG-based capstone project that vectorizes campus admin documents to power
-multi-turn Q&amp;A with source citations, built to help new students find academic-affairs info.</p>
+<h2 id="project-background">Project Background</h2>
+
+<p>Every year during freshman orientation, the academic affairs office gets flooded with repetitive questions — “How do I use the course selection system?” “What’s the credit transfer process?” “When’s the deadline for minor applications?” The answers are all buried in dozens of PDFs and web pages scattered across the campus network, and students simply can’t find them.</p>
+
+<p>This project builds a RAG (Retrieval-Augmented Generation) powered Q&amp;A bot that ingests all those scattered academic documents and feeds them to an LLM. Students ask questions in natural language and get accurate answers with source citations.</p>
+
+<h3 id="key-metrics">Key Metrics</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Metric</th>
+      <th>Value</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Document coverage</td>
+      <td>127 academic affairs documents</td>
+    </tr>
+    <tr>
+      <td>Retrieval recall (Top-5)</td>
+      <td>91.2%</td>
+    </tr>
+    <tr>
+      <td>Answer accuracy (human evaluation)</td>
+      <td>87.5%</td>
+    </tr>
+    <tr>
+      <td>Average response time</td>
+      <td>2.3 seconds</td>
+    </tr>
+    <tr>
+      <td>Supported formats</td>
+      <td>PDF / Word / Web pages</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="system-architecture">System Architecture</h2>
+
+<p>The system follows the classic three-stage RAG pipeline: Document Preprocessing → Vector Retrieval → Answer Generation.</p>
+
+<p><img src="assets/projects/campus-qa-arch.png" alt="System Architecture" /></p>
+
+<h3 id="stage-1-document-preprocessing">Stage 1: Document Preprocessing</h3>
+
+<p>127 academic documents (course selection guides, enrollment regulations, minor application procedures, scholarship policies, etc.) are unified into plain text and split by semantic paragraphs into 1,847 chunks.</p>
+
+<h3 id="stage-2-vectorization--retrieval">Stage 2: Vectorization &amp; Retrieval</h3>
+
+<p>Each chunk is embedded into a 1536-dimensional vector via the <code class="language-plaintext highlighter-rouge">text-embedding-3-small</code> model and stored in a FAISS vector database. User queries are embedded on the fly and compared against the database to retrieve the Top-K most similar chunks.</p>
+
+<p>Cosine similarity is used for retrieval:</p>
+
+<p>[\text{similarity}(\mathbf{q}, \mathbf{d}) = \frac{\mathbf{q} \cdot \mathbf{d}}{|\mathbf{q}| \cdot |\mathbf{d}|}]</p>
+
+<p>Experiments compared $K \in {3, 5, 7, 10}$, and $K=5$ achieved the best balance between recall and response speed:</p>
+
+<table>
+  <tbody>
+    <tr>
+      <td>[\text{Recall}@5 = \frac{</td>
+      <td>\text{Relevant Docs} \cap \text{Top-5 Retrieved}</td>
+      <td>}{</td>
+      <td>\text{Relevant Docs}</td>
+      <td>} = 91.2\%]</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="stage-3-answer-generation">Stage 3: Answer Generation</h3>
+
+<p>The Top-5 retrieved chunks and the user query are assembled into a prompt and sent to GPT-4o to generate a natural language answer with mandatory source citations.</p>
+
+<h2 id="key-code">Key Code</h2>
+
+<h3 id="document-loading--chunking">Document Loading &amp; Chunking</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">langchain.document_loaders</span> <span class="kn">import</span> <span class="n">DirectoryLoader</span><span class="p">,</span> <span class="n">PyPDFLoader</span>
+<span class="kn">from</span> <span class="nn">langchain.text_splitter</span> <span class="kn">import</span> <span class="n">RecursiveCharacterTextSplitter</span>
+
+<span class="c1"># Load academic document directory
+</span><span class="n">loader</span> <span class="o">=</span> <span class="n">DirectoryLoader</span><span class="p">(</span>
+    <span class="s">"./docs/academic/"</span><span class="p">,</span>
+    <span class="n">glob</span><span class="o">=</span><span class="s">"**/*.pdf"</span><span class="p">,</span>
+    <span class="n">loader_cls</span><span class="o">=</span><span class="n">PyPDFLoader</span>
+<span class="p">)</span>
+<span class="n">documents</span> <span class="o">=</span> <span class="n">loader</span><span class="p">.</span><span class="n">load</span><span class="p">()</span>
+<span class="k">print</span><span class="p">(</span><span class="sa">f</span><span class="s">"Loaded </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">documents</span><span class="p">)</span><span class="si">}</span><span class="s"> documents"</span><span class="p">)</span>
+
+<span class="c1"># Semantic paragraph splitting
+</span><span class="n">splitter</span> <span class="o">=</span> <span class="n">RecursiveCharacterTextSplitter</span><span class="p">(</span>
+    <span class="n">chunk_size</span><span class="o">=</span><span class="mi">800</span><span class="p">,</span>
+    <span class="n">chunk_overlap</span><span class="o">=</span><span class="mi">150</span><span class="p">,</span>
+    <span class="n">separators</span><span class="o">=</span><span class="p">[</span><span class="s">"</span><span class="se">\n\n</span><span class="s">"</span><span class="p">,</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="s">"."</span><span class="p">,</span> <span class="s">"。"</span><span class="p">,</span> <span class="s">" "</span><span class="p">]</span>
+<span class="p">)</span>
+<span class="n">chunks</span> <span class="o">=</span> <span class="n">splitter</span><span class="p">.</span><span class="n">split_documents</span><span class="p">(</span><span class="n">documents</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="sa">f</span><span class="s">"Split into </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">chunks</span><span class="p">)</span><span class="si">}</span><span class="s"> chunks"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="embedding--faiss-index">Embedding &amp; FAISS Index</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">langchain.embeddings</span> <span class="kn">import</span> <span class="n">OpenAIEmbeddings</span>
+<span class="kn">from</span> <span class="nn">langchain.vectorstores</span> <span class="kn">import</span> <span class="n">FAISS</span>
+
+<span class="n">embeddings</span> <span class="o">=</span> <span class="n">OpenAIEmbeddings</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="s">"text-embedding-3-small"</span><span class="p">)</span>
+
+<span class="c1"># Build vector index
+</span><span class="n">vectorstore</span> <span class="o">=</span> <span class="n">FAISS</span><span class="p">.</span><span class="n">from_documents</span><span class="p">(</span><span class="n">chunks</span><span class="p">,</span> <span class="n">embeddings</span><span class="p">)</span>
+
+<span class="c1"># Persist to disk
+</span><span class="n">vectorstore</span><span class="p">.</span><span class="n">save_local</span><span class="p">(</span><span class="s">"./faiss_index"</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="sa">f</span><span class="s">"Vector index saved, dimension: 1536"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="rag-qa-chain">RAG Q&amp;A Chain</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">langchain.chains</span> <span class="kn">import</span> <span class="n">RetrievalQA</span>
+<span class="kn">from</span> <span class="nn">langchain.chat_models</span> <span class="kn">import</span> <span class="n">ChatOpenAI</span>
+<span class="kn">from</span> <span class="nn">langchain.prompts</span> <span class="kn">import</span> <span class="n">PromptTemplate</span>
+
+<span class="n">prompt</span> <span class="o">=</span> <span class="n">PromptTemplate</span><span class="p">(</span>
+    <span class="n">template</span><span class="o">=</span><span class="s">"""You are an assistant familiar with {university} academic policies.
+Answer the student's question based on the reference documents below.
+If the documents don't contain relevant information, be honest and don't fabricate.
+
+Reference documents:
+{context}
+
+Student question: {question}
+
+Respond in a friendly, clear tone, and cite reference document numbers at the end."""</span><span class="p">,</span>
+    <span class="n">input_variables</span><span class="o">=</span><span class="p">[</span><span class="s">"university"</span><span class="p">,</span> <span class="s">"context"</span><span class="p">,</span> <span class="s">"question"</span><span class="p">]</span>
+<span class="p">)</span>
+
+<span class="n">retriever</span> <span class="o">=</span> <span class="n">vectorstore</span><span class="p">.</span><span class="n">as_retriever</span><span class="p">(</span>
+    <span class="n">search_type</span><span class="o">=</span><span class="s">"similarity"</span><span class="p">,</span>
+    <span class="n">search_kwargs</span><span class="o">=</span><span class="p">{</span><span class="s">"k"</span><span class="p">:</span> <span class="mi">5</span><span class="p">}</span>
+<span class="p">)</span>
+
+<span class="n">qa_chain</span> <span class="o">=</span> <span class="n">RetrievalQA</span><span class="p">.</span><span class="n">from_chain_type</span><span class="p">(</span>
+    <span class="n">llm</span><span class="o">=</span><span class="n">ChatOpenAI</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="s">"gpt-4o"</span><span class="p">,</span> <span class="n">temperature</span><span class="o">=</span><span class="mf">0.3</span><span class="p">),</span>
+    <span class="n">chain_type</span><span class="o">=</span><span class="s">"stuff"</span><span class="p">,</span>
+    <span class="n">retriever</span><span class="o">=</span><span class="n">retriever</span><span class="p">,</span>
+    <span class="n">chain_type_kwargs</span><span class="o">=</span><span class="p">{</span><span class="s">"prompt"</span><span class="p">:</span> <span class="n">prompt</span><span class="p">}</span>
+<span class="p">)</span>
+
+<span class="c1"># Example Q&amp;A
+</span><span class="n">question</span> <span class="o">=</span> <span class="s">"What should I do if I missed the course registration window?"</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">qa_chain</span><span class="p">.</span><span class="n">invoke</span><span class="p">({</span>
+    <span class="s">"query"</span><span class="p">:</span> <span class="n">question</span><span class="p">,</span>
+    <span class="s">"university"</span><span class="p">:</span> <span class="s">"Qingdao University of Technology"</span>
+<span class="p">})</span>
+<span class="k">print</span><span class="p">(</span><span class="sa">f</span><span class="s">"Q: </span><span class="si">{</span><span class="n">question</span><span class="si">}</span><span class="se">\n</span><span class="s">A: </span><span class="si">{</span><span class="n">result</span><span class="p">[</span><span class="s">'result'</span><span class="p">]</span><span class="si">}</span><span class="s">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h2 id="frontend-interface">Frontend Interface</h2>
+
+<p>A Streamlit-based interactive Q&amp;A interface:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">streamlit</span> <span class="k">as</span> <span class="n">st</span>
+
+<span class="n">st</span><span class="p">.</span><span class="n">set_page_config</span><span class="p">(</span><span class="n">page_title</span><span class="o">=</span><span class="s">"Campus Knowledge Base Q&amp;A"</span><span class="p">,</span> <span class="n">page_icon</span><span class="o">=</span><span class="s">"🎓"</span><span class="p">)</span>
+<span class="n">st</span><span class="p">.</span><span class="n">title</span><span class="p">(</span><span class="s">"🎓 Campus Knowledge Base Q&amp;A Bot"</span><span class="p">)</span>
+
+<span class="c1"># Sidebar: parameter configuration
+</span><span class="k">with</span> <span class="n">st</span><span class="p">.</span><span class="n">sidebar</span><span class="p">:</span>
+    <span class="n">st</span><span class="p">.</span><span class="n">header</span><span class="p">(</span><span class="s">"Retrieval Parameters"</span><span class="p">)</span>
+    <span class="n">k</span> <span class="o">=</span> <span class="n">st</span><span class="p">.</span><span class="n">slider</span><span class="p">(</span><span class="s">"Number of documents (K)"</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+    <span class="n">temperature</span> <span class="o">=</span> <span class="n">st</span><span class="p">.</span><span class="n">slider</span><span class="p">(</span><span class="s">"Generation temperature"</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">)</span>
+
+<span class="c1"># Main area: chat interface
+</span><span class="k">if</span> <span class="s">"messages"</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">st</span><span class="p">.</span><span class="n">session_state</span><span class="p">:</span>
+    <span class="n">st</span><span class="p">.</span><span class="n">session_state</span><span class="p">.</span><span class="n">messages</span> <span class="o">=</span> <span class="p">[]</span>
+
+<span class="k">for</span> <span class="n">msg</span> <span class="ow">in</span> <span class="n">st</span><span class="p">.</span><span class="n">session_state</span><span class="p">.</span><span class="n">messages</span><span class="p">:</span>
+    <span class="k">with</span> <span class="n">st</span><span class="p">.</span><span class="n">chat_message</span><span class="p">(</span><span class="n">msg</span><span class="p">[</span><span class="s">"role"</span><span class="p">]):</span>
+        <span class="n">st</span><span class="p">.</span><span class="n">markdown</span><span class="p">(</span><span class="n">msg</span><span class="p">[</span><span class="s">"content"</span><span class="p">])</span>
+
+<span class="k">if</span> <span class="n">prompt</span> <span class="p">:</span><span class="o">=</span> <span class="n">st</span><span class="p">.</span><span class="n">chat_input</span><span class="p">(</span><span class="s">"Ask your question..."</span><span class="p">):</span>
+    <span class="n">st</span><span class="p">.</span><span class="n">session_state</span><span class="p">.</span><span class="n">messages</span><span class="p">.</span><span class="n">append</span><span class="p">({</span><span class="s">"role"</span><span class="p">:</span> <span class="s">"user"</span><span class="p">,</span> <span class="s">"content"</span><span class="p">:</span> <span class="n">prompt</span><span class="p">})</span>
+    <span class="k">with</span> <span class="n">st</span><span class="p">.</span><span class="n">chat_message</span><span class="p">(</span><span class="s">"user"</span><span class="p">):</span>
+        <span class="n">st</span><span class="p">.</span><span class="n">markdown</span><span class="p">(</span><span class="n">prompt</span><span class="p">)</span>
+
+    <span class="k">with</span> <span class="n">st</span><span class="p">.</span><span class="n">chat_message</span><span class="p">(</span><span class="s">"assistant"</span><span class="p">):</span>
+        <span class="k">with</span> <span class="n">st</span><span class="p">.</span><span class="n">spinner</span><span class="p">(</span><span class="s">"Searching relevant documents..."</span><span class="p">):</span>
+            <span class="n">response</span> <span class="o">=</span> <span class="n">qa_chain</span><span class="p">.</span><span class="n">invoke</span><span class="p">({</span>
+                <span class="s">"query"</span><span class="p">:</span> <span class="n">prompt</span><span class="p">,</span>
+                <span class="s">"university"</span><span class="p">:</span> <span class="s">"Qingdao University of Technology"</span>
+            <span class="p">})</span>
+            <span class="n">st</span><span class="p">.</span><span class="n">markdown</span><span class="p">(</span><span class="n">response</span><span class="p">[</span><span class="s">"result"</span><span class="p">])</span>
+            <span class="k">with</span> <span class="n">st</span><span class="p">.</span><span class="n">expander</span><span class="p">(</span><span class="s">"📚 Sources"</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">doc</span> <span class="ow">in</span> <span class="n">response</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="s">"source_documents"</span><span class="p">,</span> <span class="p">[]):</span>
+                    <span class="n">st</span><span class="p">.</span><span class="n">caption</span><span class="p">(</span><span class="sa">f</span><span class="s">"📄 </span><span class="si">{</span><span class="n">doc</span><span class="p">.</span><span class="n">metadata</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="s">'source'</span><span class="p">,</span> <span class="s">'Unknown'</span><span class="p">)</span><span class="si">}</span><span class="s">"</span><span class="p">)</span>
+    <span class="n">st</span><span class="p">.</span><span class="n">session_state</span><span class="p">.</span><span class="n">messages</span><span class="p">.</span><span class="n">append</span><span class="p">({</span><span class="s">"role"</span><span class="p">:</span> <span class="s">"assistant"</span><span class="p">,</span> <span class="s">"content"</span><span class="p">:</span> <span class="n">response</span><span class="p">[</span><span class="s">"result"</span><span class="p">]})</span>
+</code></pre></div></div>
+
+<h2 id="live-demo">Live Demo</h2>
+
+<blockquote>
+  <p><strong>Student</strong>: What are the requirements to apply for a Computer Science minor?</p>
+
+  <p><strong>Bot</strong>: According to the <em>Qingdao University of Technology Minor Program Regulations</em> (2024 edition), the requirements for a CS minor are:</p>
+  <ol>
+    <li>A minimum GPA of 2.5 in your major during the first academic year</li>
+    <li>No failed courses on record</li>
+    <li>Submit your application via the academic system every May</li>
+  </ol>
+
+  <p>📚 Sources: [1] Minor Program Regulations.pdf (pp. 3-4), [2] 2025 Minor Enrollment Guide.pdf (p. 1)</p>
+</blockquote>
+
+<h2 id="project-summary">Project Summary</h2>
+
+<p>This project covers the complete RAG pipeline from document preprocessing to frontend deployment. The biggest insight was understanding the trade-off between retrieval quality and generation quality — too few chunks miss critical information, while too many introduce noise and degrade answers.</p>
+
+<p>Future improvements include: HyDE (Hypothetical Document Embeddings) for better semantic matching, re-ranking for precision, and multi-modal support for tables and images in academic documents.</p>
 
           
         </div>

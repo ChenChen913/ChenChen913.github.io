@@ -145,17 +145,18 @@
          ------------------------------------------------------------ */
       navLinks.forEach(function (link) {
         link.addEventListener("click", function (e) {
+          var href = this.getAttribute("href");
+          // 只拦截 hash 锚点链接（如 #projects），放行普通页面跳转（如 /index.html）
+          if (!href || href.charAt(0) !== "#") return;
           e.preventDefault();
-          var id = this.getAttribute("href").replace("#", "");
+          var id = href.replace("#", "");
           var target = document.getElementById(id);
           if (!target) return;
           var top = target.getBoundingClientRect().top + window.scrollY - NAV_OFFSET;
           window.scrollTo({ top: top, behavior: "smooth" });
-          // 同步更新 URL hash，但不触发浏览器锚点滚动
           if (history.pushState) {
             history.pushState(null, null, "#" + id);
           }
-          // 立即更新高亮
           setActive(id);
         });
       });

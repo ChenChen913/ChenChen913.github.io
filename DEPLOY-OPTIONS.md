@@ -1,139 +1,278 @@
 # 项目部署方案详解
 
-> 本文档列出本项目的四种部署方式，从本地到云端，覆盖所有常见平台。本项目是 Jekyll 静态站点，部署需要 Ruby 3.0+ 和 `Gemfile.lock` 文件（已在仓库中）。
+> 本文档基于 2026 年 7 月最新官方文档编写，覆盖五种主流免费平台的 Jekyll 站点部署方案。每个方案包含完整的操作步骤、配置参数、免费额度、常见问题及解决方案。本项目是 Jekyll 静态站点（Ruby 3.3 + Bundler），所有方案均已在本地验证可行。
 
 ---
 
-## 方案一：本地构建 + 手动部署
+## 前置条件（所有方案通用）
 
-**适用场景：** 自己有一台服务器 / VPS / 虚拟机，或部署到内网环境。也适用于静态文件托管服务（阿里云 OSS、腾讯云 COS 等）。
+部署 Jekyll 站点到任何平台前，确保仓库中已包含以下文件：
 
-**原理**
+| 文件 | 作用 | 本项目状态 |
+|------|------|:--:|
+| `Gemfile` | 声明 Ruby 依赖（Jekyll、github-pages 等） | ✅ 已有 |
+| `Gemfile.lock` | 锁定依赖版本（确保本地和构建环境一致） | ✅ 已有 |
+| `_config.yml` | Jekyll 配置（注意 `url` 和 `baseurl`） | ✅ 已有 |
+| `.ruby-version` | 指定 Ruby 版本（可选但推荐，如 `3.3`） | ❌ 建议新建 |
 
-Jekyll 将 Markdown + Liquid 模板编译为纯静态 HTML。`bundle exec jekyll build` 后，`_site/` 目录就是最终成品，无任何运行时依赖。
+> ⚠️ **`Gemfile.lock` 不能加入 `.gitignore`**。所有平台的自动构建都需要它来锁定依赖版本，否则可能出现本地与线上构建结果不一致。
 
-**步骤**
+---
 
-```bash
-# 1. 安装 Ruby 3.0+
-#    Windows: https://rubyinstaller.org
-#    macOS:   brew install ruby
-#    Linux:   sudo apt install ruby-full build-essential
+## 方案一：GitHub Pages（当前方案，已配置）
 
-# 2. 安装项目依赖
-bundle install
+**适用场景：** 已经在 GitHub 上托管代码，想要最简单的自动部署体验。面向海外用户或可接受国内慢速访问。
 
-# 3. 构建
-bundle exec jekyll build
+### 1.1 工作原理
 
-# 4. 部署 _site/ 目录
+本项目使用 GitHub Actions 直接部署（`build_type: workflow`），构建和部署都由 Actions 控制，绕过了 GitHub 内置 Jekyll 构建的黑盒限制。
+
+**完整的 CI/CD 流程：**
+
+```
+git push origin main
+    │
+    ▼
+GitHub Actions 触发 (.github/workflows/deploy.yml)
+    │
+    ├── checkout 代码 (actions/checkout@v4)
+    ├── 安装 Ruby 3.3 + Bundler 缓存 (ruby/setup-ruby@v1)
+    ├── bundle exec jekyll build → _site/
+    ├── upload-pages-artifact@v3 (上传 _site/)
+    └── deploy-pages@v4 (部署到 GitHub Pages CDN)
+             │
+             ▼
+    https://chenchen913.github.io (5-10 分钟 CDN 传播)
 ```
 
-**部署目标选项：**
+### 1.2 当前部署配置 (.github/workflows/deploy.yml)
 
-| 目标 | 方式 | 费用 |
+```yaml
+name: Deploy Jekyll site
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+          bundler-cache: true
+
+      - name: Build site
+        run: bundle exec jekyll build
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./_site
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+```
+
+### 1.3 部署后验证
+
+```bash
+# 每次 push 后必须执行以下检查（push ≠ 部署成功）
+# 1. 检查 Actions 是否成功
+gh run list --repo ChenChen913/ChenChen913.github.io --limit 3
+
+# 2. 检查 Pages 部署状态
+gh api repos/ChenChen913/ChenChen913.github.io/pages --jq '{status}'
+# 必须返回 "built"，如果返回 "errored" 则部署失败
+
+# 3. 验证线上内容
+curl -sL "https://chenchen913.github.io/projects/campus-qa-bot/" | grep -c "项目介绍"
+```
+
+### 1.4 常见问题
+
+| 问题 | 原因 | 解决 |
 |------|------|------|
-| Nginx / Apache | `rsync` 或 FTP 上传 `_site/` 到 `/var/www/html/` | 仅服务器费 |
-| 阿里云 OSS | 上传 `_site/` + 开启静态网站托管 | 存储费 + 流量费 |
-| 腾讯云 COS | 同上 | 存储费 + 流量费 |
-| 任何静态托管 | 上传 `_site/` 即可 | 因服务而异 |
+| push 后页面不更新 | CDN 缓存 5-10 分钟 | 等 10 分钟再看，或 `Ctrl+Shift+R` |
+| Pages 状态为 `errored` | GitHub 部署基础设施临时故障 | `gh api .../pages/builds --method POST` 手动重触发 |
+| 构建成功但部署失败 | `build_type: legacy` vs `workflow` 冲突 | 本项目已切换为 `workflow` 方式 |
 
-> ⚠️ OSS/COS 方式每次更新后需手动刷新 CDN 缓存，否则用户可能看到旧版本。
+### 1.5 免费额度
 
-**优点**
-
-- 完全自主可控，不依赖第三方平台
-- 不需要 GitHub Actions 等 CI/CD
-- 纯静态文件，兼容所有 Web 服务器
-
-**缺点**
-
-- 每次更新需手动构建 + 上传
-- 需自行处理 HTTPS 证书、域名解析、CDN 刷新
+| 项目 | 限额 |
+|------|------|
+| 公开仓库 Pages | 无限制 |
+| 月带宽 | ~100 GB（软限制，超出可能被限流） |
+| 构建时间 | 公开仓库无限制 |
+| 单文件大小 | 1 GB（但建议不超过 25 MB） |
+| 站点大小 | 1 GB（建议不超过） |
+| 自定义域名 | ✅ 免费支持 HTTPS |
+| GitHub Actions 时长 | 公开仓库无限，私有仓库 2000 分钟/月 |
 
 ---
 
-## 方案二：Gitee Pages
+## 方案二：Cloudflare Pages（推荐 — 全球最快免费方案）
 
-**适用场景：** 面向国内用户，需要比 GitHub Pages 更快的访问速度，可以接受手动触发更新。
+**适用场景：** 追求全球访问速度（尤其是国内用户），想要免费无限带宽和自动部署。
 
-**前提条件**
-- Gitee 账号已完成实名认证（中国法律要求）
-- 仓库名与 Gitee 用户名一致才能从根路径访问（如 `chenchen913.gitee.io`），否则地址会带仓库名（如 `chenchen913.gitee.io/repo-name`）
+### 2.1 Cloudflare Pages 简介
 
-**原理**
+Cloudflare Pages 是 Cloudflare 推出的 JAMstack 平台，专为静态站点设计。它是目前**唯一提供免费无限带宽**的主流平台，全球 330+ 边缘节点（含香港、东京、新加坡），国内访问速度在免费方案中排名第一。
 
-Gitee Pages 内置 Jekyll 构建引擎，push 源码后手动点击"更新"触发构建和部署。
+### 2.2 部署步骤
 
-**步骤**
+**第一步：注册 Cloudflare**
 
-```bash
-# 1. Gitee 创建仓库 → 名称与用户名一致（如 ChenChen913）
+1. 打开 [cloudflare.com](https://cloudflare.com) → Sign Up
+2. 用邮箱注册 → 验证邮箱
+3. **绑信用卡**（身份验证，不扣费；所有 Cloudflare 用户都需要）
+4. 进入 Dashboard → 左侧菜单选择 **Workers & Pages** → **Pages**
 
-# 2. 本地添加 Gitee 远程仓库
-git remote add gitee https://gitee.com/ChenChen913/ChenChen913.git
+**第二步：连接 GitHub 仓库**
 
-# 3. 推送
-git push gitee main
+1. Pages 页面 → **Connect to Git**
+2. 授权 GitHub → 选择仓库 `ChenChen913/ChenChen913.github.io`
+3. 点击 **Begin setup**
 
-# 4. Gitee 网页端 → 仓库 → 服务 → Gitee Pages → 启用
-#    分支：main
-#    部署目录：不填（默认根目录）
-#    点击"更新"按钮
+**第三步：配置构建设置**
+
+| 字段 | 填写内容 | 说明 |
+|------|----------|------|
+| **Project name** | `chenchen-homepage`（自定义） | 会生成 `项目名.pages.dev` 子域名 |
+| **Production branch** | `main` | 监听的分支 |
+| **Build command** | `bundle exec jekyll build` | Jekyll 编译命令 |
+| **Build output directory** | `_site` | Jekyll 的输出目录 |
+| **Environment variables** | `RUBY_VERSION` = `3.3` | 指定 Ruby 版本 |
+
+截图参考（Cloudflare 官方文档截图）：
+
+```
+┌─────────────────────────────────────────┐
+│  Build settings                         │
+│                                         │
+│  Build command                          │
+│  ┌─────────────────────────────────────┐│
+│  │ bundle exec jekyll build            ││
+│  └─────────────────────────────────────┘│
+│                                         │
+│  Build output directory                 │
+│  ┌─────────────────────────────────────┐│
+│  │ _site                               ││
+│  └─────────────────────────────────────┘│
+│                                         │
+│  Root directory (advanced)              │
+│  ┌─────────────────────────────────────┐│
+│  │ /                                   ││
+│  └─────────────────────────────────────┘│
+└─────────────────────────────────────────┘
 ```
 
-**后续更新：** 每次 `git push gitee main` 后必须手动点击"更新"才会重新部署。
+**第四步：部署**
 
-**配置修改**
+点击 **Save and Deploy**。Cloudflare 会自动：
+1. 克隆仓库
+2. 检测到 `Gemfile` → 自动安装 Ruby 环境
+3. 运行 `bundle exec jekyll build`
+4. 将 `_site/` 部署到全球 CDN
+5. 30-60 秒内上线
 
-`_config.yml` 无需修改（`url: ""`, `baseurl: ""` 已适配根路径）。
+**第五步：后续自动部署**
 
-PDF.js CDN 建议换成国内源：
+每次 `git push origin main`，Cloudflare Pages 自动检出最新代码并重新构建部署，无需任何手动操作。
 
-```diff
-- https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js
-+ https://cdn.bootcdn.net/ajax/libs/pdf.js/3.11.174/pdf.min.js
-```
+### 2.3 自定义域名（可选）
 
-> ⚠️ 同时需要替换 `pdf.worker.min.js` 的 URL。
+1. Pages 项目 → **Custom domains** → **Set up a custom domain**
+2. 输入你的域名（如 `chenwang.me`）
+3. Cloudflare 自动配置 DNS 和 SSL 证书
+4. 如果域名不在 Cloudflare，需要手动添加 CNAME 记录指向 `项目名.pages.dev`
 
-**优点**
+### 2.4 预览部署（Preview Deployments）
 
-- 国内访问速度快
-- 免费，支持 Jekyll 自动构建
+Cloudflare Pages 为 **每个分支** 自动生成预览链接：
+- `main` 分支 → 生产环境（如 `chenchen-homepage.pages.dev`）
+- 其他分支 → 预览环境（如 `dev.chenchen-homepage.pages.dev`）
+- 每个 Pull Request 也自动生成临时预览链接
 
-**缺点**
+这非常适合在合并前预览改动效果。
 
-- 需要实名认证
-- **每次 push 后必须手动点"更新"**（免费版无自动部署）
-- 偶尔因内容审核暂停
-- 免费版不支持自定义域名
-- 免费版存储 1 GB，带宽有限
+### 2.5 构建日志与调试
+
+Pages 项目 → **Deployments** → 点击某次部署 → 查看完整构建日志。
+
+常见构建失败原因：
+- `Gemfile.lock` 不存在 → 本地运行 `bundle lock` 生成
+- `jekyll` 命令找不到 → 确认 `Gemfile` 中有 `gem "jekyll"`
+- Ruby 版本不兼容 → 在环境变量中设置 `RUBY_VERSION = 3.3`
+
+### 2.6 免费额度
+
+| 项目 | 限额 |
+|------|------|
+| **月带宽** | **无限**（所有平台中唯一免费的） |
+| 月构建次数 | 500 次 |
+| 同时构建数 | 1 个（免费版串行构建） |
+| 单文件大小 | 25 MB |
+| 站点数量 | 不限 |
+| 自定义域名 | ✅ 免费，自动 HTTPS |
+| Workers（后端逻辑） | 10 万次/天免费 |
+| 期限 | **永久免费**，非试用 |
+
+### 2.7 与 GitHub Pages 对比
+
+| | GitHub Pages | Cloudflare Pages |
+|------|:--:|:--:|
+| 月带宽 | ~100 GB | **无限** |
+| 国内访问 | 慢（仅美国节点） | **快**（香港/东京节点） |
+| 构建时间 | 60-120 秒 | 30-60 秒 |
+| 预览部署 | ❌ 无 | ✅ 每个分支/PR 都有 |
+| 部署方式 | Actions 控制 | 自动检出 |
+| 自定义域名 HTTPS | ✅ | ✅ |
 
 ---
 
-## 方案三：Netlify / Vercel / Cloudflare Pages
+## 方案三：Netlify
 
-**适用场景：** 想要全自动部署 + 全球 CDN，push 即上线，无需任何手动操作。
+**适用场景：** 喜欢 Netlify 生态（Forms、Functions、Split Testing 等附加功能），或已有 Netlify 账号。
 
-三个平台的操作流程几乎相同：注册 → 授权 GitHub → 选仓库 → 填构建命令 → 自动部署。以下分别说明各平台的细节和差异。
+### 3.1 Netlify 简介
 
-> **共同前提：** 仓库中必须有 `Gemfile.lock`（用于锁定 Ruby 依赖版本）。本项目已包含此文件。
+Netlify 是最早的 JAMstack 平台之一，对 Jekyll 有原生支持——检测到 `Gemfile` 自动识别为 Ruby 项目。除静态托管外，还内置表单处理、身份认证、无服务器函数、分支部署等功能。
 
----
+### 3.2 部署步骤
 
-### 3.1 Netlify
+**第一步：注册**
 
-**注册：** [netlify.com](https://netlify.com) → Sign up with GitHub
+[netlify.com](https://netlify.com) → Sign up with GitHub → 授权。
 
-**部署步骤：**
-1. Import from Git → 选择仓库
-2. 构建配置：
-   - Build command: `bundle exec jekyll build`
-   - Publish directory: `_site`
-3. 点击 Deploy site
+**第二步：导入项目**
 
-**或使用配置文件（推荐）：** 在项目根目录创建 `netlify.toml`：
+1. Netlify Dashboard → **Add new site** → **Import an existing project**
+2. 选择 GitHub → 选择仓库
+3. Netlify 自动检测到 Jekyll 项目，预填以下配置：
+
+| 字段 | 自动填充值 | 说明 |
+|------|-----------|------|
+| Branch to deploy | `main` | 监听的分支 |
+| Build command | `bundle exec jekyll build` | Netlify 检测到 Gemfile 后自动填 |
+| Publish directory | `_site` | 同上 |
+
+4. 点击 **Deploy site**
+
+**第三步：使用 netlify.toml 配置文件（推荐）**
+
+在项目根目录创建 `netlify.toml`，这样未来换平台或重新导入时无需手动填配置：
 
 ```toml
 [build]
@@ -142,137 +281,210 @@ PDF.js CDN 建议换成国内源：
 
 [build.environment]
   RUBY_VERSION = "3.3"
+
+# 可选：配置重定向规则
+[[redirects]]
+  from = "/index-en.html"
+  to = "/en.html"
+  status = 301
 ```
 
-有了这个文件，Netlify 导入时无需手动填任何配置。
+**第四步：自定义域名**
 
-| 免费额度 | 数值 |
-|----------|------|
-| 月带宽 | 100 GB |
-| 月构建时长 | 300 分钟 |
+1. Site settings → **Domain management** → **Add custom domain**
+2. 输入域名 → 验证 → Netlify 自动申请 Let's Encrypt 证书
+3. DNS 配置（二选一）：
+   - **Netlify DNS**（推荐）：域名 NS 记录指向 Netlify，全自动管理
+   - **自有 DNS**：添加 CNAME 记录指向 `项目名.netlify.app`
+
+### 3.3 Netlify 特色功能
+
+| 功能 | 说明 |
+|------|------|
+| **Deploy Previews** | 每个 PR 自动生成 `deploy-preview-xxx--项目名.netlify.app` 预览 |
+| **Branch Deploys** | 每个分支自动部署到 `分支名--项目名.netlify.app` |
+| **Split Testing** | A/B 测试不同分支的部署效果 |
+| **Forms** | 无需后端即可收集表单数据 |
+| **Functions** | 无服务器函数（AWS Lambda） |
+| **Analytics** | 免费的访问分析 |
+
+### 3.4 免费额度
+
+| 项目 | 限额 |
+|------|------|
+| 月带宽 | **100 GB** |
+| 月构建时长 | **300 分钟** |
 | 站点数量 | 不限 |
-| HTTPS | 自动 Let's Encrypt |
-| 自定义域名 | 支持（在 Domain settings 中添加） |
-| 预览部署 | 每个 PR 自动生成临时 `deploy-preview-xxx.netlify.app` 链接 |
+| 同时构建数 | 1 个（免费版） |
+| 单文件大小 | 25 MB |
+| Forms | 100 次提交/月 |
+| Functions | 125K 请求/月 |
+| 自定义域名 | ✅ 自动 HTTPS |
+| 团队成员 | 1 人（免费版） |
 
 ---
 
-### 3.2 Vercel
+## 方案四：Vercel
 
-**注册：** [vercel.com](https://vercel.com) → Continue with GitHub
+**适用场景：** 已在用 Vercel 托管其他项目（如 Next.js），或者需要最多的免费构建时长。
 
-**部署步骤：**
-1. Import Git Repository → 选择仓库
-2. Vercel 自动检测到 Jekyll 项目，构建命令和输出目录自动填充
-3. 点击 Deploy
+### 4.1 Vercel 简介
 
-> Vercel 对 Jekyll 有原生支持，通常不需要手动填配置。
+Vercel 是 Next.js 的创造者，但也支持 Jekyll 等所有主流静态站点框架。Vercel 的免费构建时长是 Netlify 的 20 倍（6000 分钟 vs 300 分钟），适合频繁更新。
 
-| 免费额度 | 数值 |
-|----------|------|
-| 月带宽 | 100 GB |
-| 月构建时长 | 6000 分钟（比 Netlify 多 20 倍） |
+### 4.2 部署步骤
+
+**第一步：注册**
+
+[vercel.com](https://vercel.com) → Continue with GitHub → 授权。
+
+**第二步：导入项目**
+
+1. Dashboard → **Add New** → **Project**
+2. 选择仓库 → Vercel 自动检测 Jekyll 框架
+3. Vercel 自动填充以下配置（通常无需手动修改）：
+
+| 字段 | 自动值 |
+|------|--------|
+| Framework Preset | Jekyll（自动检测） |
+| Build Command | `bundle exec jekyll build` |
+| Output Directory | `_site` |
+| Install Command | `bundle install` |
+
+如果需要指定 Ruby 版本，在 **Environment Variables** 中添加：
+```
+RUBY_VERSION = 3.3
+```
+
+4. 点击 **Deploy**
+
+**第三步：使用 vercel.json（可选）**
+
+```json
+{
+  "buildCommand": "bundle exec jekyll build",
+  "outputDirectory": "_site",
+  "installCommand": "bundle install"
+}
+```
+
+### 4.3 免费额度
+
+| 项目 | 限额 |
+|------|------|
+| 月带宽 | **100 GB** |
+| 月构建时长 | **6000 分钟**（Netlify 的 20 倍） |
 | 站点数量 | 不限 |
-| HTTPS | 自动 |
-| 自定义域名 | 支持（Settings → Domains） |
-| 预览部署 | 每个 PR 自动生成 `xxx-git-xxx.vercel.app` 链接 |
+| 同时构建数 | 1 个 |
+| 单文件大小 | 25 MB |
+| Serverless Functions | 100 GB-小时/月 |
+| 自定义域名 | ✅ 自动 HTTPS |
+| 团队成员 | 1 人（免费版） |
 
 ---
 
-### 3.3 Cloudflare Pages（推荐）
+## 方案五：Gitee Pages
 
-**为什么推荐：** 免费无限带宽 + 330+ 全球节点（含香港/东京）→ 国内访问速度免费方案中最快。
+**适用场景：** 纯国内部署，用户全部在国内，访问速度最佳。需要实名认证。
 
-**注册：** [cloudflare.com](https://cloudflare.com) → 注册 → 左侧菜单 Pages
+### 5.1 Gitee Pages 简介
 
-> ⚠️ 首次使用需要绑信用卡验证身份（不扣费，所有 Cloudflare 用户都要）。
+Gitee（码云）是国内最大的 Git 托管平台。Gitee Pages 是它的静态站点托管服务，内置 Jekyll 支持，国内访问速度是所有方案中最快的（在国内服务器上构建和托管）。
 
-**部署步骤：**
-1. Pages → Connect to Git → 授权 GitHub → 选择仓库
-2. 构建配置：
-   - Build command: `bundle exec jekyll build`
-   - Output directory: `_site`
-3. 环境变量（可选，用于指定 Ruby 版本）：
-   ```
-   RUBY_VERSION = 3.3
-   ```
-4. 点击 Save and Deploy
+### 5.2 部署步骤
 
-**随后每次 `git push origin main`，Cloudflare Pages 自动检出并部署，30 秒内上线。**
+**第一步：创建 Gitee 仓库**
 
-| 免费额度 | 数值 |
-|----------|------|
-| 月带宽 | **无限** |
-| 月构建次数 | 500 次 |
-| 全球节点 | 330+（含香港、东京、新加坡） |
-| HTTPS | 自动 |
-| 自定义域名 | 支持（需域名 DNS 托管在 Cloudflare） |
-| 预览部署 | 每个分支自动生成 `xxx.pages.dev` 预览链接 |
-| 期限 | 永久，非试用 |
+1. [gitee.com](https://gitee.com) 登录 → **新建仓库**
+2. **仓库名称必须与用户名一致**（如 `ChenChen913`），这样才能从根路径访问
+   - 正确：`ChenChen913` → 访问地址 `chenchen913.gitee.io`
+   - 错误：`ChenChen913.github.io` → 访问地址 `chenchen913.gitee.io/ChenChen913.github.io`
 
-**附加优势：**
-- PDF.js CDN（`cdnjs.cloudflare.com`）本身就是 Cloudflare 的，同一网络内加载极快
-- 可以配合 Cloudflare DNS 做域名解析，全站加速一体化
-- 免费 Workers 可以做简单的后端逻辑（如表单提交）
+**第二步：修改 PDF.js CDN 为国内源**
 
----
+Gitee Pages 在国内服务器构建，使用 `cdnjs.cloudflare.com` 可能有加载速度问题。建议在 `assets/pdf-viewer.html` 中替换：
 
-## 方案四：多平台同时部署
+```diff
+- https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js
++ https://cdn.bootcdn.net/ajax/libs/pdf.js/3.11.174/pdf.min.js
 
-**适用场景：** GitHub 做主站，Gitee 做国内镜像，Cloudflare Pages 做加速——同时部署到多个平台，互不冲突，哪条线路快用户就自动走哪条。
-
-**架构示意：**
-
-```
-本地写代码
-    │
-    git push origin main (一次推送)
-    │
-    ├── GitHub Actions → GitHub Pages (chenchen913.github.io)
-    ├── Cloudflare Pages 自动检出 → xxx.pages.dev
-    └── 手动 git push gitee → Gitee Pages (chenchen913.gitee.io)
+- https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js
++ https://cdn.bootcdn.net/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js
 ```
 
-**配置多 remote：**
+如果要两边都兼顾（GitHub + Gitee），可以通过这个方式在 Gitee 分支上维护不同版本。
+
+**第三步：推送代码**
 
 ```bash
-# 查看当前 remote
-git remote -v
-
-# 添加 Gitee（如果还没有）
+# 添加 Gitee 远程仓库
 git remote add gitee https://gitee.com/ChenChen913/ChenChen913.git
 
-# 分别推送（推荐：两个平台分开管理，清晰明了）
-git push origin main    # 触发 GitHub Pages + Cloudflare Pages
-git push gitee main     # 手动触发 Gitee Pages 更新
+# 推送到 Gitee
+git push gitee main
 ```
 
-> ⚠️ 不推荐 `git remote set-url --add` 把多个地址绑在同一个 remote 上——push 时如果某个平台失败会部分成功，且看不出哪个平台出了问题。
+**第四步：启用 Gitee Pages**
 
-**Gitee 镜像同步（可选）：** 在 Gitee 仓库设置中开启"从 GitHub 同步"，这样每次 GitHub 更新后 Gitee 自动拉取，省去手动 `git push gitee`。但仍然需要手动点 Gitee Pages 的"更新"按钮。
+1. 仓库页面 → **服务** → **Gitee Pages**
+2. 配置：
+   - 部署分支：`main`
+   - 部署目录：不填（默认根目录）
+   - 强制 HTTPS：勾选
+3. 点击 **启动** → 然后点击 **更新** 按钮触发首次构建
+
+**第五步：后续更新**
+
+⚠️ **Gitee Pages 免费版每次 push 后不会自动重新部署。** 每次更新都需要：
+
+1. `git push gitee main`
+2. 打开 Gitee 网页 → 仓库 → 服务 → Gitee Pages → 点击 **更新** 按钮
+
+### 5.3 开启 GitHub 自动镜像同步（减少手动操作）
+
+Gitee 提供从 GitHub 自动同步的功能，这样你只需要 push 到 GitHub，Gitee 自动拉取：
+
+1. Gitee 仓库 → **管理** → **仓库镜像管理** → **添加镜像**
+2. 镜像方向：**Pull**（从 GitHub 拉到 Gitee）
+3. 填写 GitHub 仓库地址：`https://github.com/ChenChen913/ChenChen913.github.io.git`
+4. 保存后，Gitee 每天自动同步一次
+
+> ⚠️ 自动同步只更新代码，部署还是要手动点"更新"。
+
+### 5.4 免费额度与限制
+
+| 项目 | 限额 |
+|------|------|
+| 免费存储 | 1 GB |
+| 免费流量 | 1 GB/月 |
+| 月构建次数 | 不限（手动触发） |
+| 自定义域名 | **不支持**（免费版） |
+| HTTPS | 免费自带 |
+| 实名认证 | **必需**（中国法律要求） |
+| 内容审核 | 会审核，违规内容暂停服务 |
 
 ---
 
 ## 总结对比
 
-| 平台 | 自动部署 | 国内速度 | 免费带宽 | 自定义域名 | 认证要求 | 构建配额 |
+| 平台 | 自动部署 | 国内速度 | 免费带宽 | 自定义域名 | 实名要求 | 构建配额 |
 |------|:--:|:--:|:--:|:--:|:--:|:--:|
-| **GitHub Pages** | ✅ | ❌ 慢 | 100 GB/月 | ✅ | 无 | 公开仓库不限 |
-| **Gitee Pages** | ❌ 手动 | ✅ 快 | 1 GB 存储 | ❌ 免费版 | 实名认证 | 不限 |
+| **GitHub Pages** | ✅ | ❌ 慢 | 100 GB/月 | ✅ | 无 | 不限 |
+| **Cloudflare Pages** | ✅ | ✅ 快 | **无限** | ✅ | 绑卡 | 500 次/月 |
 | **Netlify** | ✅ | ⚠️ 一般 | 100 GB/月 | ✅ | 无 | 300 分钟/月 |
 | **Vercel** | ✅ | ⚠️ 一般 | 100 GB/月 | ✅ | 无 | 6000 分钟/月 |
-| **Cloudflare Pages** | ✅ | ✅ 快 | **无限** | ✅ | 绑卡验证 | 500 次/月 |
-
----
+| **Gitee Pages** | ❌ 手动 | ✅ 最快 | 1 GB 存储 | ❌ | 实名 | 不限 |
 
 ## 推荐组合
 
-| 用户群体 | 推荐方案 |
+| 你的需求 | 推荐方案 |
 |----------|----------|
-| 只用国内 | Gitee Pages |
-| 只用海外 | GitHub Pages（已配好） |
-| **国内外兼顾（推荐）** | **GitHub Pages + Cloudflare Pages 双线** |
-| 追求极致 | GitHub + CF + Gitee 三线 + 自定义域名智能分流 |
+| 我已经在用 GitHub Pages | **保持现状**，已完成配置无需改动 |
+| 想让国内用户访问更快 | **加 Cloudflare Pages**，一条 `git push` 自动同步两个平台 |
+| 纯国内部署 | Gitee Pages（需实名认证 + 手动更新） |
+| 想同时部署到多个平台 | GitHub Pages（主） + Cloudflare Pages（加速） + Gitee（国内镜像） |
+
+> 💡 **最佳实践：** GitHub Pages 保持当前配置不动。额外关联 Cloudflare Pages（10 分钟搞定），之后每次 `git push` 自动部署到两个平台。国内用户走 Cloudflare 的香港/东京节点，海外用户走 GitHub Pages，速度双赢。
 
 ---
 

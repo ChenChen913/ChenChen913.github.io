@@ -89,19 +89,15 @@ demo: "#"
 
 检索相似度采用余弦相似度：
 
-<div markdown="0">
-$$
+<script type="math/tex; mode=display">
 \text{similarity}(\mathbf{q}, \mathbf{d}) = \frac{\mathbf{q} \cdot \mathbf{d}}{\|\mathbf{q}\| \cdot \|\mathbf{d}\|}
-$$
-</div>
+</script>
 
 对于 Top-K 的选取，实验对比了 $K \in \{3, 5, 7, 10\}$ 的效果，最终 $K=5$ 在召回率和响应速度之间达到最佳平衡：
 
-<div markdown="0">
-$$
+<script type="math/tex; mode=display">
 \text{Recall}@5 = \frac{|\text{相关文档} \cap \text{Top-5 检索结果}|}{|\text{相关文档}|} = 91.2\%
-$$
-</div>
+</script>
 
 ### 阶段三：答案生成
 
@@ -327,19 +323,15 @@ Each chunk is embedded into a 1536-dimensional vector via the `text-embedding-3-
 
 Cosine similarity is used for retrieval:
 
-<div markdown="0">
-$$
+<script type="math/tex; mode=display">
 \text{similarity}(\mathbf{q}, \mathbf{d}) = \frac{\mathbf{q} \cdot \mathbf{d}}{\|\mathbf{q}\| \cdot \|\mathbf{d}\|}
-$$
-</div>
+</script>
 
 Experiments compared $K \in \{3, 5, 7, 10\}$, and $K=5$ achieved the best balance between recall and response speed:
 
-<div markdown="0">
-$$
+<script type="math/tex; mode=display">
 \text{Recall}@5 = \frac{|\text{Relevant Docs} \cap \text{Top-5 Retrieved}|}{|\text{Relevant Docs}|} = 91.2\%
-$$
-</div>
+</script>
 
 ### Stage 3: Answer Generation
 

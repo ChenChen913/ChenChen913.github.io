@@ -1,11 +1,5 @@
 # Jekyll 站点配置
 
-title: 王晨 · 个人主页
-description: 王晨的个人主页
-
-url: ""
-baseurl: ""
-
 collections:
   publications:
     output: true
@@ -28,9 +22,6 @@ exclude:
   - backups/
   - index_empty.html
   - portfolio-single-file.html
-  - Gemfile
-  - Gemfile.lock
   - vendor/
-  - .nojekyll
 
 markdown: kramdown

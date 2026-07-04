@@ -40,7 +40,7 @@
 <!-- Rouge 语法高亮样式 -->
 <style>
   /* 代码块容器 */
-  .highlight pre {
+  pre.highlight {
     background: #f6f8fa;
     border: 1px solid #d0d7de;
     border-radius: 6px;
@@ -65,7 +65,7 @@
   .highlight .nb { color: #005cc5; }                      /* builtin */
 
   /* 深色模式下适配 */
-  html[data-theme="dark"] .highlight pre {
+  html[data-theme="dark"] pre.highlight {
     background: #161b22;
     border-color: #30363d;
   }
@@ -95,7 +95,7 @@
     }
   };
 </script>
-<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js" async></script>
 </head>
 <body>
 

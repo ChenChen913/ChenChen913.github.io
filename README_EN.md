@@ -37,7 +37,7 @@ A personal homepage built with Jekyll, deployed on GitHub Pages.
 └── .github/workflows/   # GitHub Actions deployment config
 ```
 
-> `DEPLOY.md`, `TROUBLESHOOTING.md`, `AUDIT-REPORT.md` and other internal docs are
+> `DEPLOY.md`, `TROUBLESHOOTING.md`, `INDEPENDENT-AUDIT.md` and other internal docs are
 > listed in `exclude` in `_config.yml` and never published. `backups/` holds local
 > snapshots and is git-ignored.
 

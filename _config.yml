@@ -46,7 +46,6 @@ exclude:
   - vendor/
   - DEPLOY.md
   - TROUBLESHOOTING.md
-  - AUDIT-REPORT.md
   - INDEPENDENT-AUDIT.md
   - DEPLOY-OPTIONS.md
   - RUBY-JEKYLL.md

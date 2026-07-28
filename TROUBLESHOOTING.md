@@ -613,6 +613,8 @@ exclude:
 
 推送后验证（按第九章清单）：Actions `success` → Pages 状态 `built` → 三个关键页面 curl 均返回 200。
 
+> **当前状态（2026-07-28 注）**：上方代码块为当时的修复记录。`AUDIT-REPORT.md` 与 `INDEPENDENT-AUDIT.md` 后已先后删除（内容逐代融入 `COMPREHENSIVE-REVIEW.md`），`exclude` 列表已同步替换为 `COMPREHENSIVE-REVIEW.md`，当前有效清单以 `_config.yml` 为准。
+
 ### 教训
 
 1. **修复一类问题时要泛化，不要只修当前报错的那一个文件。** 第三章只 exclude 了 DEPLOY.md，本质规则（"含 Liquid 语法示例的文档必须 exclude"）写进了教训却没落地为机制，导致同坑二进。

@@ -37,7 +37,7 @@
 └── .github/workflows/   # GitHub Actions 自动部署配置
 ```
 
-> `DEPLOY.md`、`TROUBLESHOOTING.md`、`INDEPENDENT-AUDIT.md` 等为内部文档，已在
+> `DEPLOY.md`、`TROUBLESHOOTING.md`、`COMPREHENSIVE-REVIEW.md` 等为内部文档，已在
 > `_config.yml` 的 `exclude` 中排除，不会发布到线上。`backups/` 为本地历史
 > 快照，已加入 `.gitignore` 不入库。
 

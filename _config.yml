@@ -46,7 +46,7 @@ exclude:
   - vendor/
   - DEPLOY.md
   - TROUBLESHOOTING.md
-  - INDEPENDENT-AUDIT.md
+  - COMPREHENSIVE-REVIEW.md
   - DEPLOY-OPTIONS.md
   - RUBY-JEKYLL.md
   - update-date.py

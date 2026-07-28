@@ -11,9 +11,16 @@
 | 文件 | 作用 | 本项目状态 |
 |------|------|:--:|
 | `Gemfile` | 声明 Ruby 依赖（Jekyll、github-pages 等） | ✅ 已有 |
-| `Gemfile.lock` | 锁定依赖版本（确保本地和构建环境一致） | ✅ 已有 |
+| `Gemfile.lock` | 锁定依赖版本（确保本地和构建环境一致） | ❌ 需生成（见下方命令） |
 | `_config.yml` | Jekyll 配置（注意 `url` 和 `baseurl`） | ✅ 已有 |
 | `.ruby-version` | 指定 Ruby 版本（如 `3.3`），Netlify 和 Cloudflare 均支持 | ❌ 建议新建 |
+
+> ⚠️ **生成 `Gemfile.lock`**：本仓库尚未提交 `Gemfile.lock`。在本地安装 Ruby 与 Bundler 后，于项目根目录执行：
+> ```bash
+> bundle install
+> bundle lock --add-platform x86_64-linux
+> ```
+> 然后将生成的 `Gemfile.lock` 一并提交入库。
 
 > ⚠️ **`Gemfile.lock` 不能加入 `.gitignore`**。所有平台的自动构建都需要它来锁定依赖版本。
 

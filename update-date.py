@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """更新 personal.yml 中的页面最后更新日期为当前北京时间"""
+import os
 import re
 from datetime import datetime, timezone, timedelta
 
@@ -13,7 +14,8 @@ en_months = ['January','February','March','April','May','June',
              'July','August','September','October','November','December']
 en_date = f"{en_months[now.month-1]} {now.day}, {now.year}"
 
-path = r"C:\Users\11853\Desktop\个人主页2\_data\personal.yml"
+# 基于本脚本所在目录定位，保证在任意机器/系统上都能运行
+path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "_data", "personal.yml")
 with open(path, encoding='utf-8') as f:
     content = f.read()
 

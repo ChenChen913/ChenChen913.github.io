@@ -72,15 +72,11 @@
 │   ├── experience.yml         # 工作经历
 │   └── skills.yml             # 技能
 ├── _publications/             # 论文 Markdown
-│   ├── rag-thesis.md
-│   └── lightweight-text-classification.md
+│   └── rgv-dynamic-scheduling.md
 ├── _projects/                 # 项目 Markdown
-│   ├── campus-qa-bot.md
-│   ├── tool-calling-assistant.md
-│   ├── resume-keyword-matcher.md
-│   └── waste-classification.md
+│   └── campus-qa-bot.md
 ├── index.html                 # 中文主页（Jekyll frontmatter）
-├── index-en.html              # 英文主页（Jekyll frontmatter）
+├── en.html                    # 英文主页（Jekyll frontmatter）
 ├── index_empty.html           # "主页暂时关闭"提示页
 ├── style.css                  # 全局样式（不动）
 ├── script.js                  # 全局脚本（不动）
@@ -153,9 +149,9 @@ _projects/campus-qa-bot.md
   → 网址 /projects/campus-qa-bot/?lang=zh
   → 网址 /projects/campus-qa-bot/?lang=en
 
-_publications/rag-thesis.md
-  → 网址 /publications/rag-thesis/?lang=zh
-  → 网址 /publications/rag-thesis/?lang=en
+_publications/rgv-dynamic-scheduling.md
+  → 网址 /publications/rgv-dynamic-scheduling/?lang=zh
+  → 网址 /publications/rgv-dynamic-scheduling/?lang=en
 ```
 
 **转换流程：**
@@ -215,8 +211,8 @@ Markdown 文件                         Jekyll 构建
 无论修改了什么（数据文件、Markdown、样式），推送步骤都一样：
 
 ```bash
-# 第一步：进入项目文件夹
-cd /c/Users/11853/Desktop/个人主页2
+# 第一步：进入项目文件夹（改成你自己的项目路径）
+cd path/to/个人主页2
 
 # 第二步：把所有改动加入暂存区
 git add .
@@ -315,7 +311,7 @@ git push -u origin main
 1. push 完成后等 **1-2 分钟**
 2. 浏览器打开 `https://你的用户名.github.io`
 3. 看到中文主页 → 成功！
-4. 英文版：`https://你的用户名.github.io/index-en.html`
+4. 英文版：`https://你的用户名.github.io/en.html`
 
 如果显示 404：再等 2 分钟。如果还不行：仓库 Settings → Pages，确认 Branch 选 `main`，目录选 `/ (root)`，点 Save。
 
@@ -456,7 +452,7 @@ git push
 
 ```bash
 mkdir -p backups/$(date +%Y-%m-%d)-stable
-cp -r _layouts _data _config.yml index.html index-en.html style.css script.js backups/$(date +%Y-%m-%d)-stable/
+cp -r _layouts _data _config.yml index.html en.html style.css script.js backups/$(date +%Y-%m-%d)-stable/
 ```
 
 ---

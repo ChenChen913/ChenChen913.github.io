@@ -12,8 +12,7 @@ en:
   desc: RAG-based capstone project powering multi-turn Q&A with campus document vectorization.
   tech: [Python, LangChain, FAISS, Streamlit]
 
-github: "#"
-demo: "#"
+github: "https://github.com/ChenChen913/ChenChen913.github.io"
 
 ---
 

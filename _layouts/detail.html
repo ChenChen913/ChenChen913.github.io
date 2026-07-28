@@ -1,6 +1,8 @@
 {% assign meta_zh = page.zh %}
 {% assign meta_en = page.en %}
 {% assign p = site.data.personal.zh %}
+{% assign has_math = false %}{% if content contains 'math/tex' or content contains '$$' %}{% assign has_math = true %}{% endif %}
+{% assign has_code = false %}{% if content contains '<pre' or content contains '```' %}{% assign has_code = true %}{% endif %}
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -46,11 +48,14 @@
 
 <link rel="stylesheet" href="{{ '/style.css' | relative_url }}">
 
-<!-- KaTeX: 数学公式 -->
-<link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/KaTeX/0.16.9/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+{% if has_math %}
+<!-- KaTeX: 数学公式（仅在正文含公式时加载） -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+{% endif %}
 
-<!-- highlight.js: 代码高亮 -->
-<link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/highlight.js/11.9.0/styles/github.min.css" integrity="sha384-eFTL69TLRZTkNfYZOLM+G04821K1qZao/4QLJbet1pP4tcF+fdXq/9CdqAbWRl/L" crossorigin="anonymous" id="hljs-light">
+{% if has_code %}
+<!-- highlight.js: 代码高亮（仅在正文含代码块时加载） -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css" integrity="sha384-eFTL69TLRZTkNfYZOLM+G04821K1qZao/4QLJbet1pP4tcF+fdXq/9CdqAbWRl/L" crossorigin="anonymous" id="hljs-light">
 <style id="hljs-dark" disabled>
   .hljs { color: #e1e4e8; background: #161b22; }
   .hljs-keyword, .hljs-selector-tag, .hljs-literal, .hljs-section, .hljs-link { color: #ff7b72; }
@@ -60,6 +65,7 @@
   .hljs-function .hljs-title, .hljs-attr, .hljs-params { color: #d2a8ff; }
   .hljs-class .hljs-title { color: #ffa657; }
 </style>
+{% endif %}
 
 <!-- 代码块容器样式 -->
 <style>
@@ -134,8 +140,9 @@
 
   <script src="{{ '/script.js' | relative_url }}"></script>
 
+  {% if has_code %}
   <!-- highlight.js: 代码高亮 -->
-  <script src="https://cdn.bootcdn.net/ajax/libs/highlight.js/11.9.0/highlight.min.js" integrity="sha384-F/bZzf7p3Joyp5psL90p/p89AZJsndkSoGwRpXcZhleCWhd8SnRuoYo4d0yirjJp" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" integrity="sha384-F/bZzf7p3Joyp5psL90p/p89AZJsndkSoGwRpXcZhleCWhd8SnRuoYo4d0yirjJp" crossorigin="anonymous"></script>
   <script>hljs.highlightAll();</script>
 
   <!-- 深色模式同步高亮主题 -->
@@ -152,9 +159,11 @@
     new MutationObserver(sync).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
   })();
   </script>
+  {% endif %}
 
+  {% if has_math %}
   <!-- KaTeX: 数学公式渲染 -->
-  <script src="https://cdn.bootcdn.net/ajax/libs/KaTeX/0.16.9/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous"></script>
   <script>
   (function() {
     // 仅渲染当前可见语言区域的公式，避免浪费性能
@@ -179,6 +188,7 @@
     });
   })();
   </script>
+  {% endif %}
 
 </body>
 </html>

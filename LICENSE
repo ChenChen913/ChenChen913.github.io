@@ -1,0 +1,41 @@
+MIT License
+
+Copyright (c) 2026 ChenChen913 (王晨)
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+---
+
+附加说明（Additional Notice）:
+
+上述 MIT 许可证仅适用于本仓库中的代码（HTML / CSS / JavaScript / Liquid
+模板 / Python 脚本 / 配置文件）。
+
+以下内容不适用 MIT 许可证，保留所有权利（All Rights Reserved），未经
+所有者书面许可不得复制、修改或再分发：
+
+- 个人信息与文字内容（_data/ 下的简历数据、_projects/ 与 _publications/
+  下的正文内容）
+- 图片（assets/avatar.jpg 等）
+- PDF 文档（assets/projects/、assets/publications/ 下的报告与论文）
+
+The MIT License above applies only to the source code in this repository.
+Personal information, written content, images, and PDF documents are
+All Rights Reserved and may not be copied, modified, or redistributed
+without written permission from the owner.

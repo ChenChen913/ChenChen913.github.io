@@ -495,21 +495,21 @@ AUDIT-REPORT 给出 4.0/5.0 综合分。结合本独立审查的发现，重新�
 | F-P1-10 | 删除遗留文件 `放头像说明.txt` | 双方一致 | ✅ 已删除（文件自身注明头像就位后可删） |
 | F-P1-11 | `Gemfile` 未指定 `github-pages` 版本号 | 本独立审查 | ✅ 已锁定 `"~> 232"` |
 
-### 🟡 P2 — 中优先级（融合后共 11 项）
+### 🟡 P2 — 中优先级（融合后共 11 项） ✅ 已处理（2026-07-28）
 
-| # | 问题 | 来源 |
-|---|------|------|
-| F-P2-1 | 统一 CDN 源（pdf.js 与 KaTeX 当前不一致） | 本独立审查 |
-| F-P2-2 | `pdf-viewer.html` 工具栏国际化 | 本独立审查 |
-| F-P2-3 | `detail.html` 无条件加载 KaTeX + highlight.js | 本独立审查 |
-| F-P2-4 | `backups/` 加入 `.gitignore` 或迁移为 Git tag | 双方一致 |
-| F-P2-5 | `TROUBLESHOOTING.md` 第四节加注释说明当前为 en.html | AUDIT-REPORT |
-| F-P2-6 | `footer_updated` 日期 24 天未更新 | AUDIT-REPORT |
-| F-P2-7 | 添加 `.editorconfig` + 基础 lint 配置 | 本独立审查 |
-| F-P2-8 | 添加 `LICENSE` 文件 | 本独立审查 |
-| F-P2-9 | `README.md` 扩充内容 | 本独立审查 |
-| F-P2-10 | 邮箱明文暴露，可加 JS 混淆 | 本独立审查 |
-| F-P2-11 | 拆分 `_projects/*.md` 的中英混合写法 | AUDIT-REPORT |
+| # | 问题 | 来源 | 状态 |
+|---|------|------|------|
+| F-P2-1 | 统一 CDN 源（pdf.js 与 KaTeX 当前不一致） | 本独立审查 | ✅ 已全部统一到 cdnjs.cloudflare.com（bootcdn 2024 年有供应链事件；文件 hash 与原源一致，SRI 值不变） |
+| F-P2-2 | `pdf-viewer.html` 工具栏国际化 | 本独立审查 | ✅ 已加 I18N 对象（zh/en），语言从 `?lang=` 参数或 referrer 自动检测，全屏链接透传 lang |
+| F-P2-3 | `detail.html` 无条件加载 KaTeX + highlight.js | 本独立审查 | ✅ 已改为 Liquid `contains` 判断（has_math/has_code）按需加载 |
+| F-P2-4 | `backups/` 加入 `.gitignore` 或迁移为 Git tag | 双方一致 | ✅ 已 `git rm -r --cached` 移出跟踪 + 加入 `.gitignore`（历史版本仍在 Git 提交记录中） |
+| F-P2-5 | `TROUBLESHOOTING.md` 第四节加注释说明当前为 en.html | AUDIT-REPORT | ✅ 已加“当前状态（2026-07-28 注）”说明 |
+| F-P2-6 | `footer_updated` 日期 24 天未更新 | AUDIT-REPORT | ✅ 已运行 `update-date.py` 更新为 2026-07-28 |
+| F-P2-7 | 添加 `.editorconfig` + 基础 lint 配置 | 本独立审查 | ✅ 已加 `.editorconfig`；lint 不引入本地工具链（静态小站收益低，CI 构建失败即是把关） |
+| F-P2-8 | 添加 `LICENSE` 文件 | 本独立审查 | ✅ 已加：代码 MIT + 个人内容/图片/PDF 保留所有权利 |
+| F-P2-9 | `README.md` 扩充内容 | 本独立审查 | ✅ 已扩充：目录结构、本地预览、修改流程、许可证说明 |
+| F-P2-10 | 邮箱明文暴露，可加 JS 混淆 | 本独立审查 | ✅ 已改为 data-u/data-d + JS 运行时拼接，JSON-LD 中 email 字段已移除 |
+| F-P2-11 | 拆分 `_projects/*.md` 的中英混合写法 | AUDIT-REPORT | ⏸️ 保留现状 — 评估后认为 `<!-- English -->` 分隔机制简单可靠（单文件双语同步维护成本更低），拆分为两套 collection 会增加重复和漏改风险 |
 
 ### 🟢 P3 — 锦上添花（融合后共 8 项）
 

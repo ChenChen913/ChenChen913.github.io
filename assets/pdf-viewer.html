@@ -102,7 +102,7 @@
   <div id="progress-bar"><div id="progress-fill"></div></div>
 </div>
 <div id="error">
-  <span>PDF 加载失败。<br><a href="#" id="error-link">点击此处直接打开</a></span>
+  <span id="error-text">PDF 加载失败。<br><a href="#" id="error-link">点击此处直接打开</a></span>
 </div>
 <div id="pages"></div>
 
@@ -110,16 +110,44 @@
 pdfjsLib.GlobalWorkerOptions.workerSrc =
   'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
+// 国际化：语言来自自身 ?lang= 参数，或嵌入本页的详情页 URL（referrer）
+var I18N = {
+  zh: { title: 'PDF 查看器', zoomin: '放大', zoomout: '缩小', download: '📥 下载', fullscreen: '⛶ 全屏',
+        loading: '正在加载 PDF…', nofile: '未指定 PDF 文件', pageloading: '加载中…',
+        error: 'PDF 加载失败。', errorlink: '点击此处直接打开', htmllang: 'zh-CN' },
+  en: { title: 'PDF Viewer', zoomin: 'Zoom in', zoomout: 'Zoom out', download: '📥 Download', fullscreen: '⛶ Fullscreen',
+        loading: 'Loading PDF…', nofile: 'No PDF file specified', pageloading: 'Loading…',
+        error: 'Failed to load PDF.', errorlink: 'Click here to open it directly', htmllang: 'en' }
+};
+var lang = 'zh';
+try {
+  var ml = location.search.match(/[?&]lang=(zh|en)/) || (document.referrer || '').match(/[?&]lang=(zh|en)/);
+  if (ml) lang = ml[1];
+} catch (e) {}
+var T = I18N[lang];
+document.documentElement.setAttribute('lang', T.htmllang);
+document.title = T.title;
+document.getElementById('btn-zoomin').title = T.zoomin;
+document.getElementById('btn-zoomout').title = T.zoomout;
+document.getElementById('btn-download').textContent = T.download;
+document.getElementById('btn-fullscreen').textContent = T.fullscreen;
+document.getElementById('loading-text').textContent = T.loading;
+document.getElementById('error-text').innerHTML = '';
+document.getElementById('error-text').appendChild(document.createTextNode(T.error));
+document.getElementById('error-text').appendChild(document.createElement('br'));
+var _el = document.createElement('a'); _el.href = '#'; _el.id = 'error-link'; _el.textContent = T.errorlink;
+document.getElementById('error-text').appendChild(_el);
+
 var params = new URLSearchParams(location.search);
 var pdfUrl = params.get('file');
 if (!pdfUrl) {
-  document.getElementById('loading-text').textContent = '未指定 PDF 文件';
+  document.getElementById('loading-text').textContent = T.nofile;
   document.getElementById('progress-bar').style.display = 'none';
 } else {
   // 下载链接指向原始 PDF
   document.getElementById('btn-download').href = pdfUrl;
-  // 全屏按钮打开当前查看器页面（而非原始 PDF），避免手机端触发下载弹窗
-  document.getElementById('btn-fullscreen').href = location.href;
+  // 全屏按钮打开当前查看器页面（而非原始 PDF），带上语言参数，避免手机端触发下载弹窗
+  document.getElementById('btn-fullscreen').href = location.href + (location.search.indexOf('lang=') > -1 ? '' : '&lang=' + lang);
   document.getElementById('error-link').href = pdfUrl;
   init(pdfUrl);
 }
@@ -141,7 +169,7 @@ function init(url) {
     if (evt.total > 0) {
       var pct = Math.round(evt.loaded / evt.total * 100);
       fill.style.width = pct + '%';
-      text.textContent = '正在加载 PDF… ' + pct + '%';
+      text.textContent = T.loading + ' ' + pct + '%';
     }
   };
 
@@ -172,7 +200,8 @@ function renderPage(num) {
   document.getElementById('btn-prev').disabled = num <= 1;
   document.getElementById('btn-next').disabled = num >= totalPages;
   document.getElementById('pages').innerHTML =
-    '<div style="text-align:center;padding:40px;color:#aaa;">加载中…</div>';
+    '<div style="text-align:center;padding:40px;color:#aaa;"></div>';
+  document.getElementById('pages').firstChild.textContent = T.pageloading;
 
   pdfDoc.getPage(num).then(function(page) {
     var viewport = page.getViewport({ scale: scale });

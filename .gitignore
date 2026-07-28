@@ -5,3 +5,6 @@ _site/
 vendor/
 .DS_Store
 Thumbs.db
+
+# 本地历史快照，不入库（历史版本已在 Git 提交记录中）
+backups/

@@ -16,6 +16,26 @@
 <meta property="og:title" content="{{ p.name }} · {% if l == 'zh' %}个人主页{% else %}Personal Homepage{% endif %}">
 <meta property="og:type" content="website">
 <meta property="og:description" content="{% if l == 'zh' %}{{ p.name }}的个人主页{% else %}{{ p.name }}'s personal homepage{% endif %}">
+<meta property="og:url" content="{{ page.url | absolute_url }}">
+<meta property="og:image" content="{{ '/assets/avatar.jpg' | absolute_url }}">
+<link rel="canonical" href="{{ page.url | absolute_url }}">
+<link rel="icon" type="image/png" href="assets/favicon.png">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<meta name="theme-color" content="#F4F5F7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#14161A" media="(prefers-color-scheme: dark)">
+
+<!-- 结构化数据：个人名片 -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Person",
+  "name": "{{ p.name }}",
+  "url": "{{ site.url }}/",
+  "image": "{{ '/assets/avatar.jpg' | absolute_url }}",
+  "email": "mailto:{{ s.email }}",
+  "sameAs": ["{{ s.github }}", "{{ s.gitee }}", "{{ s.x }}"]
+}
+</script>
 
 <!-- 防止深浅色主题闪烁 -->
 <script>

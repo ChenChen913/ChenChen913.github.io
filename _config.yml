@@ -2,8 +2,12 @@
 
 title: 王晨 · 个人主页
 description: 王晨的个人主页
-url: ""
+url: "https://chenchen913.github.io"
 baseurl: ""
+
+# 插件（github-pages gem 内置白名单）
+plugins:
+  - jekyll-sitemap
 
 # 集合
 collections:

@@ -6,9 +6,26 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- 语言修正尽早执行：根据 ?lang= 参数在解析正文前修正 <html lang>，避免屏幕阅读器以错误语言朗读 -->
+<script>
+  (function () {
+    var m = location.search.match(/[?&]lang=(zh|en)/);
+    if (m) {
+      document.documentElement.classList.add('lang-' + m[1]);
+      document.documentElement.setAttribute('lang', m[1] === 'en' ? 'en' : 'zh-CN');
+    }
+  })();
+</script>
+
 <title>{{ meta_zh.title }} — {{ p.name }}</title>
 <meta property="og:title" content="{{ meta_zh.title }}">
 <meta property="og:type" content="article">
+<link rel="canonical" href="{{ page.url | absolute_url }}">
+<link rel="icon" type="image/png" href="{{ '/assets/favicon.png' | relative_url }}">
+<link rel="apple-touch-icon" href="{{ '/assets/apple-touch-icon.png' | relative_url }}">
+<meta name="theme-color" content="#F4F5F7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#14161A" media="(prefers-color-scheme: dark)">
 
 <!-- 防止深浅色主题闪烁 -->
 <script>
@@ -23,28 +40,19 @@
   })();
 </script>
 
-<!-- 语言过滤：根据 ?lang=zh 或 ?lang=en 只显示对应语言 -->
+<!-- 语言过滤：根据 ?lang=zh 或 ?lang=en 只显示对应语言（lang 属性已在 head 最早处修正） -->
 <style>
   .lang-zh .detail-en, .lang-zh .detail-divider { display: none; }
   .lang-en .detail-zh, .lang-en .detail-divider { display: none; }
 </style>
-<script>
-  (function () {
-    var m = location.search.match(/[?&]lang=(zh|en)/);
-    if (m) {
-      document.documentElement.classList.add('lang-' + m[1]);
-      document.documentElement.setAttribute('lang', m[1] === 'en' ? 'en' : 'zh-CN');
-    }
-  })();
-</script>
 
 <link rel="stylesheet" href="{{ '/style.css' | relative_url }}">
 
 <!-- KaTeX: 数学公式 -->
-<link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/KaTeX/0.16.9/katex.min.css">
+<link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/KaTeX/0.16.9/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
 
 <!-- highlight.js: 代码高亮 -->
-<link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/highlight.js/11.9.0/styles/github.min.css" id="hljs-light">
+<link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/highlight.js/11.9.0/styles/github.min.css" integrity="sha384-eFTL69TLRZTkNfYZOLM+G04821K1qZao/4QLJbet1pP4tcF+fdXq/9CdqAbWRl/L" crossorigin="anonymous" id="hljs-light">
 <style id="hljs-dark" disabled>
   .hljs { color: #e1e4e8; background: #161b22; }
   .hljs-keyword, .hljs-selector-tag, .hljs-literal, .hljs-section, .hljs-link { color: #ff7b72; }
@@ -129,7 +137,7 @@
   <script src="{{ '/script.js' | relative_url }}"></script>
 
   <!-- highlight.js: 代码高亮 -->
-  <script src="https://cdn.bootcdn.net/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script src="https://cdn.bootcdn.net/ajax/libs/highlight.js/11.9.0/highlight.min.js" integrity="sha384-F/bZzf7p3Joyp5psL90p/p89AZJsndkSoGwRpXcZhleCWhd8SnRuoYo4d0yirjJp" crossorigin="anonymous"></script>
   <script>hljs.highlightAll();</script>
 
   <!-- 深色模式同步高亮主题 -->
@@ -148,7 +156,7 @@
   </script>
 
   <!-- KaTeX: 数学公式渲染 -->
-  <script src="https://cdn.bootcdn.net/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+  <script src="https://cdn.bootcdn.net/ajax/libs/KaTeX/0.16.9/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous"></script>
   <script>
   (function() {
     // 仅渲染当前可见语言区域的公式，避免浪费性能

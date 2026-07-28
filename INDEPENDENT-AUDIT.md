@@ -479,21 +479,21 @@ AUDIT-REPORT 给出 4.0/5.0 综合分。结合本独立审查的发现，重新�
 | F-P0-6 | **"某科技公司"公司名缺乏可信度** | AUDIT-REPORT | _data/experience.yml | ✅ 已处理（所有者确认为可随时修改的占位文字，暂按原样保留） |
 | F-P0-7 | **`_projects/campus-qa-bot.md` 的 `github`/`demo` 字段为 `"#"` 占位** | AUDIT-REPORT | _projects/campus-qa-bot.md | ✅ 已修复（`github` 填入真实仓库地址，无演示的 `demo` 字段已移除） |
 
-### 🟠 P1 — 高优先级（融合后共 11 项）
+### 🟠 P1 — 高优先级（融合后共 11 项）✅ 已处理（2026-07-28）
 
-| # | 问题 | 来源 |
-|---|------|------|
-| F-P1-1 | 头像 avatar.jpg 649KB + 分辨率 2149×2528，应压缩到 50KB / 400×500 | 双方一致 |
-| F-P1-2 | 缺少 `.ruby-version` 文件 | 本独立审查 |
-| F-P1-3 | `_layouts/detail.html` 硬编码 `<html lang="zh-CN">` | 本独立审查 |
-| F-P1-4 | SEO 空白：缺 sitemap.xml、robots.txt、canonical、JSON-LD、og:image、theme-color、favicon | 双方一致 |
-| F-P1-5 | `_config.yml` 的 `url` 字段为空 | AUDIT-REPORT |
-| F-P1-6 | CDN 资源缺少 SRI hash | 本独立审查 |
-| F-P1-7 | `_data/experience.yml` 与 `_data/social.yml` 的 TODO 注释残留 | 本独立审查 |
-| F-P1-8 | 内容时间线矛盾（2020 毕业 → 5 年空档 → 2025 实习 → 2025-2026 "毕业设计"） | 本独立审查 |
-| F-P1-9 | 缺少"关于我"段落，tagline 与内容定位不匹配 | AUDIT-REPORT |
-| F-P1-10 | 删除遗留文件 `放头像说明.txt` | 双方一致 |
-| F-P1-11 | `Gemfile` 未指定 `github-pages` 版本号 | 本独立审查 |
+| # | 问题 | 来源 | 状态 |
+|---|------|------|------|
+| F-P1-1 | 头像 avatar.jpg 649KB + 分辨率 2149×2528，应压缩到 50KB / 400×500 | 双方一致 | ✅ 已压缩为 400×471 / 17KB，并生成 favicon.png + apple-touch-icon.png |
+| F-P1-2 | 缺少 `.ruby-version` 文件 | 本独立审查 | ✅ 已新建（内容 3.3，与 workflow 一致） |
+| F-P1-3 | `_layouts/detail.html` 硬编码 `<html lang="zh-CN">` | 本独立审查 | ✅ 语言修正脚本已前置到 head 最早位置（charset 之后立即执行） |
+| F-P1-4 | SEO 空白：缺 sitemap.xml、robots.txt、canonical、JSON-LD、og:image、theme-color、favicon | 双方一致 | ✅ 全部补齐：jekyll-sitemap 插件 + robots.txt + canonical/og:url/og:image/JSON-LD/theme-color/favicon |
+| F-P1-5 | `_config.yml` 的 `url` 字段为空 | AUDIT-REPORT | ✅ 已填入 https://chenchen913.github.io |
+| F-P1-6 | CDN 资源缺少 SRI hash | 本独立审查 | ✅ 5 个 CDN 资源已加 integrity + crossorigin（worker 由 pdf.js 内部加载，浏览器不支持 SRI，已注释说明） |
+| F-P1-7 | `_data/experience.yml` 与 `_data/social.yml` 的 TODO 注释残留 | 本独立审查 | ✅ 已删除两处 TODO 注释 |
+| F-P1-8 | 内容时间线矛盾（2020 毕业 → 5 年空档 → 2025 实习 → 2025-2026 "毕业设计"） | 本独立审查 | ⏸️ 暂缓 — 按用户决定，内容文字不纠结真实性，随时可改 |
+| F-P1-9 | 缺少"关于我"段落，tagline 与内容定位不匹配 | AUDIT-REPORT | ⏸️ 暂缓 — 内容类修改，同上 |
+| F-P1-10 | 删除遗留文件 `放头像说明.txt` | 双方一致 | ✅ 已删除（文件自身注明头像就位后可删） |
+| F-P1-11 | `Gemfile` 未指定 `github-pages` 版本号 | 本独立审查 | ✅ 已锁定 `"~> 232"` |
 
 ### 🟡 P2 — 中优先级（融合后共 11 项）
 

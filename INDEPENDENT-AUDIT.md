@@ -486,7 +486,7 @@ AUDIT-REPORT 给出 4.0/5.0 综合分。结合本独立审查的发现，重新�
 | F-P1-1 | 头像 avatar.jpg 649KB + 分辨率 2149×2528，应压缩到 50KB / 400×500 | 双方一致 | ✅ 已压缩为 400×471 / 17KB |
 | F-P1-2 | 缺少 `.ruby-version` 文件 | 本独立审查 | ✅ 已新建（内容 3.3，与 workflow 一致） |
 | F-P1-3 | `_layouts/detail.html` 硬编码 `<html lang="zh-CN">` | 本独立审查 | ✅ 语言修正脚本已前置到 head 最早位置（charset 之后立即执行） |
-| F-P1-4 | SEO 空白：缺 sitemap.xml、robots.txt、canonical、JSON-LD、og:image、theme-color、favicon | 双方一致 | ✅ 已补：jekyll-sitemap 插件 + robots.txt + canonical/og:url/og:image/JSON-LD/theme-color；favicon 曾添加，后按所有者要求移除（不希望浏览器标签显示头像） |
+| F-P1-4 | SEO 空白：缺 sitemap.xml、robots.txt、canonical、JSON-LD、og:image、theme-color、favicon | 双方一致 | ✅ 已补：jekyll-sitemap 插件 + robots.txt + canonical/og:url/og:image/JSON-LD/theme-color；favicon 曾添加，后按所有者要求移除（不希望浏览器标签显示头像；2026-07-28 复核发现两个图标文件未删干净，已彻底删除） |
 | F-P1-5 | `_config.yml` 的 `url` 字段为空 | AUDIT-REPORT | ✅ 已填入 https://chenchen913.github.io |
 | F-P1-6 | CDN 资源缺少 SRI hash | 本独立审查 | ✅ 5 个 CDN 资源已加 integrity + crossorigin（worker 由 pdf.js 内部加载，浏览器不支持 SRI，已注释说明） |
 | F-P1-7 | `_data/experience.yml` 与 `_data/social.yml` 的 TODO 注释残留 | 本独立审查 | ✅ 已删除两处 TODO 注释 |

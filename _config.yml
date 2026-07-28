@@ -51,6 +51,9 @@ exclude:
   - DEPLOY-OPTIONS.md
   - RUBY-JEKYLL.md
   - update-date.py
+  - README.md
+  - README_EN.md
+  - LICENSE
 
 # 保留
 keep_files:

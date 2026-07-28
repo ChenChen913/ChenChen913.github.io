@@ -19,6 +19,10 @@
 <meta property="og:url" content="{{ page.url | absolute_url }}">
 <meta property="og:image" content="{{ '/assets/avatar.jpg' | absolute_url }}">
 <link rel="canonical" href="{{ page.url | absolute_url }}">
+<!-- 双语版本互指，帮助搜索引擎识别语言对应关系（本布局仅用于 index.html / en.html） -->
+<link rel="alternate" hreflang="zh-CN" href="{{ '/index.html' | absolute_url }}">
+<link rel="alternate" hreflang="en" href="{{ '/en.html' | absolute_url }}">
+<link rel="alternate" hreflang="x-default" href="{{ '/index.html' | absolute_url }}">
 <meta name="theme-color" content="#F4F5F7" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#14161A" media="(prefers-color-scheme: dark)">
 
@@ -34,12 +38,12 @@
 }
 </script>
 
-<!-- 防止深浅色主题闪烁 -->
+<!-- 防止深浅色主题闪烁；无手动选择记录时跟随系统偏好（与上方 theme-color meta 行为一致） -->
 <script>
   (function () {
     try {
       var saved = localStorage.getItem("theme");
-      var theme = saved || "light";
+      var theme = saved || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
       document.documentElement.setAttribute("data-theme", theme);
     } catch (e) {
       document.documentElement.setAttribute("data-theme", "light");

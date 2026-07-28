@@ -4,6 +4,13 @@ on:
   push:
     branches: [main]
 
+# 同一时刻只允许一个 Pages 部署，防止旧构建后完成反而覆盖新构建的竞态。
+# cancel-in-progress 设为 false（GitHub Pages 官方模板配置）：
+# 不取消进行中的生产部署，让其跑完，新触发的部署排队等待。
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest

@@ -1,6 +1,7 @@
 {% assign meta_zh = page.zh %}
 {% assign meta_en = page.en %}
 {% assign p = site.data.personal.zh %}
+{% assign p_en = site.data.personal.en %}
 {% assign has_math = false %}{% if content contains 'math/tex' or content contains '$$' %}{% assign has_math = true %}{% endif %}
 {% assign has_code = false %}{% if content contains '<pre' or content contains '```' %}{% assign has_code = true %}{% endif %}
 <!DOCTYPE html>
@@ -22,17 +23,26 @@
 
 <title>{{ meta_zh.title }} — {{ p.name }}</title>
 <meta property="og:title" content="{{ meta_zh.title }}">
+<!-- ?lang=en 时同步替换浏览器标签标题与分享卡片标题（语言 class 已在上方脚本中设置） -->
+<script>
+  (function () {
+    if (!document.documentElement.classList.contains('lang-en')) return;
+    document.title = {{ meta_en.title | jsonify }} + " — " + {{ p_en.name | jsonify }};
+    var og = document.querySelector('meta[property="og:title"]');
+    if (og) og.setAttribute('content', {{ meta_en.title | jsonify }});
+  })();
+</script>
 <meta property="og:type" content="article">
 <link rel="canonical" href="{{ page.url | absolute_url }}">
 <meta name="theme-color" content="#F4F5F7" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#14161A" media="(prefers-color-scheme: dark)">
 
-<!-- 防止深浅色主题闪烁 -->
+<!-- 防止深浅色主题闪烁；无手动选择记录时跟随系统偏好（与上方 theme-color meta 行为一致） -->
 <script>
   (function () {
     try {
       var saved = localStorage.getItem("theme");
-      var theme = saved || "light";
+      var theme = saved || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
       document.documentElement.setAttribute("data-theme", theme);
     } catch (e) {
       document.documentElement.setAttribute("data-theme", "light");

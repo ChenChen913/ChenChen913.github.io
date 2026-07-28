@@ -23,10 +23,12 @@
         }
       }
 
-      applyTheme(storage.get("theme") || "light");
+      // 无手动选择记录时跟随系统偏好（与 head 防闪烁脚本保持一致）
+      applyTheme(storage.get("theme") || (mql.matches ? "dark" : "light"));
 
-      mql.addEventListener("change", function () {
-        // 不再自动跟随系统主题变化，保持用户看到的或手动选择的主题
+      mql.addEventListener("change", function (e) {
+        // 仅在用户未手动选择过主题时跟随系统变化；手动选择后以 localStorage 为准
+        if (!storage.get("theme")) applyTheme(e.matches ? "dark" : "light");
       });
 
       var themeToggle = document.getElementById("theme-toggle");
@@ -321,16 +323,21 @@
       updateBackToTop();    // 初始计算
 
       /* ------------------------------------------------------------
-         语言切换前保存滚动比例，用于目标页恢复精确位置
+         语言切换前保存滚动比例，用于目标页恢复精确位置。
+         仅在点击语言切换按钮时保存——若对所有页面跳转（beforeunload）
+         都保存，从详情页返回主页时会用详情页的滚动比例污染主页位置。
          ------------------------------------------------------------ */
-      window.addEventListener("beforeunload", function () {
-        try {
-          var dh = _cachedDocHeight || getDocHeight();
-          if (dh > 0) {
-            var ratio = (window.scrollY || window.pageYOffset) / dh;
-            sessionStorage.setItem("_scrollRatio", String(ratio));
-          }
-        } catch (e) {}
-      });
+      var langToggleBtn = document.querySelector(".lang-btn");
+      if (langToggleBtn) {
+        langToggleBtn.addEventListener("click", function () {
+          try {
+            var dh = _cachedDocHeight || getDocHeight();
+            if (dh > 0) {
+              var ratio = (window.scrollY || window.pageYOffset) / dh;
+              sessionStorage.setItem("_scrollRatio", String(ratio));
+            }
+          } catch (e) {}
+        });
+      }
 
     })();

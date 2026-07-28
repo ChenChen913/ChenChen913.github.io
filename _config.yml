@@ -42,6 +42,11 @@ exclude:
   - vendor/
   - DEPLOY.md
   - TROUBLESHOOTING.md
+  - AUDIT-REPORT.md
+  - INDEPENDENT-AUDIT.md
+  - DEPLOY-OPTIONS.md
+  - RUBY-JEKYLL.md
+  - update-date.py
 
 # 保留
 keep_files:

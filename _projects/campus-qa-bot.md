@@ -1,6 +1,4 @@
 ---
-
-
 zh:
   title: 校园知识库问答机器人（毕业设计）
   meta: 独立开发 · 2025.09 — 2026.03
@@ -11,8 +9,6 @@ en:
   meta: Solo Developer · Sep 2025 — Mar 2026
   desc: RAG-based capstone project powering multi-turn Q&A with campus document vectorization.
   tech: [Python, LangChain, FAISS, Streamlit]
-
-github: "https://github.com/ChenChen913/ChenChen913.github.io"
 
 ---
 

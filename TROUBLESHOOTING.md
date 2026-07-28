@@ -566,4 +566,58 @@ git push origin main
 
 ---
 
-> 最后更新：2026-07-04（新增第十五～十七章：审查修复、spy 抑制、日期自动化）
+## 十八、新增审计报告后构建失败：第三章同类问题复发
+
+### 问题现象
+
+2026-07-28 推送包含审计报告的提交后，GitHub Pages 显示部署失败。`gh run list` 显示连续两次构建 `failure`：
+
+- 第一次失败：提交"添加项目综合审核报告"（新增 `AUDIT-REPORT.md`）
+- 第二次失败：提交"修复 P0 级别审计问题"（新增 `INDEPENDENT-AUDIT.md`）
+
+### 排查过程
+
+```bash
+gh run list --limit 5          # 发现失败始于上一次推送，而非最新改动
+gh run view <run-id> --log-failed   # 直接定位到报错行
+```
+
+日志中错误信息非常明确：
+
+```
+Liquid Exception: Liquid syntax error (line 538): 'if' tag was never closed in AUDIT-REPORT.md
+```
+
+关键排查细节：**先看失败是从哪次提交开始的**。本次失败的首次出现早于最新修改，说明根因不在最新改动里，避免了在错误方向上浪费时间。
+
+### 根因
+
+`AUDIT-REPORT.md` 第 65 行引用了模板代码片段 `{% if has_pubs %}` 作为文档内容。该文件未加入 `_config.yml` 的 `exclude`，Jekyll 扫描根目录所有 `.md` 时把它当成真正的 Liquid 模板解析，发现 `if` 标签未闭合直接报错。
+
+**这是第三章（DEPLOY.md 被误解析）的同类问题复发。** 复发原因：当时只把"当时已存在的"问题文件加进了 exclude，没有建立"新增内部文档必须同步进 exclude"的机制。后续新增审计报告时，无人（包括 AI）想起这条规则。
+
+### 解决方案
+
+在 `_config.yml` 的 `exclude` 中一次性补齐所有内部文档与工具脚本（而不是只修本次报错的那一个）：
+
+```yaml
+exclude:
+  - AUDIT-REPORT.md        # 本次故障根源（含 {% if %} 示例）
+  - INDEPENDENT-AUDIT.md   # 同类隐患
+  - DEPLOY-OPTIONS.md      # 含 ${{ ... }} workflow 示例，同类隐患
+  - RUBY-JEKYLL.md         # 内部文档，预防性排除
+  - update-date.py         # 工具脚本，不应发布到站点
+```
+
+推送后验证（按第九章清单）：Actions `success` → Pages 状态 `built` → 三个关键页面 curl 均返回 200。
+
+### 教训
+
+1. **修复一类问题时要泛化，不要只修当前报错的那一个文件。** 第三章只 exclude 了 DEPLOY.md，本质规则（"含 Liquid 语法示例的文档必须 exclude"）写进了教训却没落地为机制，导致同坑二进。
+2. **新增任何根目录 Markdown/脚本文件时，先问一句：它该不该发布到网站？** 不该就立即加 exclude，不要等构建报错。
+3. **排查构建失败先看失败首次出现的提交**（`gh run list`），能快速判断根因是否在最新改动中。
+4. `gh run view <run-id> --log-failed` 是定位 Jekyll 构建错误最快的方式，错误信息精确到文件和行号。
+
+---
+
+> 最后更新：2026-07-28（新增第十八章：审计报告导致构建失败——第三章同类问题复发）

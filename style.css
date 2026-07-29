@@ -518,3 +518,24 @@
       grid-template-columns: 1fr;
     }
   }
+
+  /* ============================================================
+     skip-link: 键盘用户跳过导航直达正文（a11y）
+     ============================================================ */
+  .skip-link {
+    position: absolute;
+    top: -100px;
+    left: 0;
+    background: var(--accent);
+    color: #fff;
+    padding: 8px 16px;
+    z-index: 1000;
+    border-radius: 0 0 6px 0;
+    text-decoration: none;
+    font-size: 14px;
+    transition: top 0.15s ease;
+  }
+  .skip-link:focus {
+    top: 0;
+    text-decoration: none;
+  }

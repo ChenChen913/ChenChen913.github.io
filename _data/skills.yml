@@ -7,7 +7,7 @@ zh:
     items: [HTML / CSS, React, FastAPI]
   - category: 工具与协作
     items: [Git, Docker, Linux, Claude Code, Codex, Openclaw, Hermes, Trae]
-  
+
 en:
   - category: Languages
     items: [C, C++, Java, Python]
@@ -17,4 +17,3 @@ en:
     items: [HTML / CSS, React Basics, FastAPI]
   - category: Tools & Collaboration
     items: [Git, Docker, Linux, Claude Code, Codex, Openclaw, Hermes, Trae]
-  

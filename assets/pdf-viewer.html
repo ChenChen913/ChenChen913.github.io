@@ -152,7 +152,7 @@ if (!pdfUrl) {
   init(pdfUrl);
 }
 
-var pdfDoc = null, pageNum = 1, totalPages = 0, scale = 1.2;
+var pdfDoc = null, pageNum = 1, totalPages = 0, scale = 1.2, currentRenderTask = null;
 
 function init(url) {
   var fill = document.getElementById('progress-fill');
@@ -196,6 +196,9 @@ function autoScale() {
 
 function renderPage(num) {
   if (!pdfDoc) return;
+  // 取消上一次未完成的渲染任务，避免快速翻页时旧任务继续向已脱离 DOM 的 canvas 绘制
+  if (currentRenderTask) { try { currentRenderTask.cancel(); } catch (e) {} currentRenderTask = null; }
+  pageNum = num;  // 立即更新，防止快速连续翻页时重复渲染同一页
   document.getElementById('page-num').textContent = num + ' / ' + totalPages;
   document.getElementById('btn-prev').disabled = num <= 1;
   document.getElementById('btn-next').disabled = num >= totalPages;
@@ -204,6 +207,8 @@ function renderPage(num) {
   document.getElementById('pages').firstChild.textContent = T.pageloading;
 
   pdfDoc.getPage(num).then(function(page) {
+    // getPage 期间若又触发了新的 renderPage（pageNum 已变），跳过本次渲染
+    if (pageNum !== num) return;
     var viewport = page.getViewport({ scale: scale });
     var canvas = document.createElement('canvas');
     canvas.width = viewport.width;
@@ -211,8 +216,13 @@ function renderPage(num) {
     var ctx = canvas.getContext('2d');
     document.getElementById('pages').innerHTML = '';
     document.getElementById('pages').appendChild(canvas);
-    page.render({ canvasContext: ctx, viewport: viewport });
-    pageNum = num;
+    currentRenderTask = page.render({ canvasContext: ctx, viewport: viewport });
+    currentRenderTask.promise.then(function() {
+      currentRenderTask = null;
+    }).catch(function(err) {
+      // 渲染被取消（快速翻页）时 promise 会 reject，忽略即可
+      currentRenderTask = null;
+    });
   });
 }
 

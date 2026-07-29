@@ -76,9 +76,11 @@
   })();
 </script>
 
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="{{ '/style.css' | relative_url }}">
 </head>
 <body>
+
+  <a href="#main-content" class="skip-link">{% if l == 'zh' %}跳到主内容{% else %}Skip to main content{% endif %}</a>
 
   <div class="top-ribbon-wrap"><div class="top-ribbon" aria-hidden="true"></div></div>
 
@@ -115,7 +117,7 @@
     </div>
   </div>
 
-  <main class="container">
+  <main class="container" id="main-content">
 
     <!-- Header / 个人信息 -->
     <header class="profile" id="about">
@@ -126,7 +128,7 @@
             <p class="tagline">{{ p.tagline }}</p>
           </div>
           <div class="avatar">
-            <img src="assets/avatar.jpg" alt="{{ p.name }}" onerror="this.style.display='none';">
+            <img src="{{ '/assets/avatar.jpg' | relative_url }}" alt="{{ p.name }}" onerror="this.style.display='none';">
             <div class="avatar-fallback" id="avatar-fallback" aria-hidden="true"></div>
           </div>
         </div>
@@ -288,6 +290,6 @@
     <span>{{ p.footer_updated }}</span>
   </footer>
 
-  <script src="script.js"></script>
+  <script src="{{ '/script.js' | relative_url }}"></script>
 </body>
 </html>

@@ -34,11 +34,12 @@ jobs:
 
       # 链接/产物校验：检查内部死链与图片 alt 缺失等，防止内容性回归。
       # 设为非阻断（continue-on-error）：校验失败只告警不卡部署，便于逐步治理历史问题。
+      # 注：html-proofer 5.x 移除了 --assume-extension（jekyll 目录型 permalink 默认即按 index.html 解析）。
       - name: Check internal links (non-blocking)
         continue-on-error: true
         run: |
           gem install html-proofer --no-document
-          htmlproofer ./_site --disable-external --allow-missing-href --no-enforce-https --assume-extension
+          htmlproofer ./_site --disable-external --allow-missing-href --no-enforce-https
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

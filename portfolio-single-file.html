@@ -1,25 +1,29 @@
 <!DOCTYPE html>
 <!--
   ============================================================
-  个人主页 —— 王晨的作品集 · 单文件版本
+  个人主页 —— 王晨 · 单文件备案页（受维护，请勿删除）
 
-  此文件为完全独立的 HTML 文件，内嵌所有 CSS 和 JS，
-  双击即可在浏览器中打开，无需其他文件。
+  用途：GitHub Pages 不可用时的应急离线查看版本。
+  特点：完全独立，内嵌全部 CSS/JS/头像，双击即可打开。
+  范围：仅复刻主页内容（不包含项目/论文详情页，按设计省略）。
 
-  用途：主站（Jekyll 版）不可用时的应急离线查看版本。
-  注意：此为历史快照，内容可能滞后于主版本（index.html + _data/*.yml），
-        以主版本为准；如需最新内容请手动同步。
-  此文件已在 _config.yml 中被 exclude，不参与 Jekyll 构建，不影响线上站点。
+  同步：本文件为手工维护，内容需与以下文件保持一致：
+    _data/personal.yml / education.yml / experience.yml / skills.yml / social.yml
+    _projects/campus-qa-bot.md / _publications/rgv-dynamic-scheduling.md
+  每次更新主页内容后，请同步修改本文件（含页脚日期），
+  否则离线版本会与线上不一致。修改邮箱时同步 social.yml 与本文件字符码数组。
+
+  本文件已在 _config.yml 中被 exclude，不参与 Jekyll 构建，不影响线上站点。
   ============================================================
 -->
-<html lang="zh-CN">
+<html lang="zh-CN" class="lang-zh">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>王晨 · 个人主页</title>
 <meta name="description" content="王晨的个人主页 —— 青岛理工大学信息与计算科学专业毕业生">
 
-<!-- 防止深浅色主题闪烁 -->
+<!-- 防止深浅色主题闪烁；无手动选择记录时跟随系统偏好 -->
 <script>
   (function () {
     try {
@@ -34,7 +38,7 @@
 
 <style>
   /* ============================================================
-     CSS 变量:冷色调浅灰白(浅色)与冷灰(深色)
+     CSS 变量：冷色调浅灰白（浅色）与冷灰（深色），与 style.css 保持一致
      ============================================================ */
   :root,
   html[data-theme="light"] {
@@ -95,9 +99,10 @@
 
   section[id], header[id] { scroll-margin-top: 80px; }
 
-  /* ============================================================
-     顶部装饰渐变条 —— 宽度与正文对齐,不再撑满整屏
-     ============================================================ */
+  /* 双语切换：html.lang-en 时隐藏中文块，反之隐藏英文块 */
+  html.lang-zh .en { display: none; }
+  html.lang-en .zh { display: none; }
+
   .top-ribbon-wrap { padding: 0 24px; }
   .top-ribbon {
     height: 4px;
@@ -108,13 +113,24 @@
     border-radius: 0 0 3px 3px;
   }
 
-  /* ============================================================
-     吸顶导航
-     ============================================================ */
+  .fallback-banner {
+    max-width: 760px;
+    margin: 14px auto 0;
+    padding: 8px 16px;
+    font-size: 12px;
+    color: var(--ink-secondary);
+    background: var(--accent-soft);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    text-align: center;
+  }
+
+  /* 吸顶导航 */
   .nav-wrap {
     position: sticky;
     top: 0;
     z-index: 50;
+    background: var(--bg-elevated);
     background: color-mix(in srgb, var(--bg-elevated) 94%, transparent);
     border-bottom: 1px solid var(--border);
     backdrop-filter: saturate(120%);
@@ -131,14 +147,10 @@
     gap: 10px;
   }
 
-  /* nav-links-wrap:渐隐提示层(.nav-fade)的定位参照,自己会随可用空间伸缩收窄 */
   .nav-links-wrap { position: relative; min-width: 0; flex: 1; }
-
   .nav-links { display: flex; gap: 2px; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; scroll-behavior: smooth; }
   .nav-links::-webkit-scrollbar { display: none; }
 
-  /* 左右渐隐提示:默认透明,JS 检测到该方向还有没显示完的链接时才淡入,
-     用来提示"这里还能横向滑动看更多",不用额外做汉堡菜单 */
   .nav-fade {
     position: absolute;
     top: 0;
@@ -166,7 +178,6 @@
 
   .nav-controls { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
 
-  /* 语言切换按钮:显示"将要切换到的语言" */
   .lang-btn {
     background: transparent;
     border: 1px solid var(--border);
@@ -182,7 +193,6 @@
   }
   .lang-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); text-decoration: none; }
 
-  /* 深浅色切换按钮:纯图标,圆形 */
   .theme-btn {
     background: transparent;
     border: 1px solid var(--border);
@@ -199,9 +209,7 @@
   .theme-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
   .theme-btn svg { width: 15px; height: 15px; }
 
-  /* ============================================================
-     Header / 个人信息区
-     ============================================================ */
+  /* Header / 个人信息区 */
   header.profile { position: relative; padding: 56px 0 34px; overflow: hidden; }
 
   header.profile::before {
@@ -217,18 +225,9 @@
   }
 
   .profile-inner { position: relative; }
-
-  .profile-header-row {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 22px;
-    margin-bottom: 1em;
-  }
-
+  .profile-header-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 22px; margin-bottom: 1em; }
   .profile-text { flex: 1; min-width: 0; }
 
-  /* 头像:长方形(圆角矩形),更像证件照比例 */
   .avatar {
     position: relative;
     width: 112px;
@@ -240,14 +239,7 @@
     box-shadow: var(--shadow);
     background: var(--accent-soft);
   }
-  .avatar img {
-    position: relative;
-    z-index: 1;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-  }
+  .avatar img { position: relative; z-index: 1; width: 100%; height: 100%; object-fit: cover; display: block; }
   .avatar-fallback {
     position: absolute;
     inset: 0;
@@ -263,9 +255,7 @@
   .name { font-size: 2.3rem; font-weight: 700; letter-spacing: 0.03em; margin-bottom: 0.3em; }
   .tagline { font-size: 1rem; color: var(--ink-secondary); }
 
-  /* ============================================================
-     通用板块 & 卡片
-     ============================================================ */
+  /* 通用板块 & 卡片 */
   .section { padding: 40px 0; border-top: 1px solid var(--border); }
   .section:first-of-type { border-top: none; }
 
@@ -300,7 +290,6 @@
   .card:hover { border-color: var(--border-strong); transform: translateY(-2px); box-shadow: var(--shadow-hover); }
   .card + .card { margin-top: 14px; }
 
-  /* 两种标签胶囊:强调色(能力/类别标签)与中性色(事实性标签) */
   .tag {
     display: inline-flex;
     align-items: center;
@@ -320,17 +309,8 @@
   }
   .tag-row { display: flex; flex-wrap: wrap; gap: 8px; }
 
-  /* ============================================================
-     教育背景
-     ============================================================ */
-  .edu-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    flex-wrap: wrap;
-    gap: 0.4em;
-    margin-bottom: 0.2em;
-  }
+  /* 教育背景 */
+  .edu-header { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 0.4em; margin-bottom: 0.2em; }
   .edu-school { font-family: Georgia, "Songti SC", serif; font-size: 1.12rem; font-weight: 700; }
   .edu-meta { font-size: 0.82rem; color: var(--ink-tertiary); }
   .edu-detail { font-size: 0.9rem; color: var(--ink-secondary); margin-bottom: 1em; }
@@ -345,39 +325,20 @@
   }
   .dash-list li::before { content: "–"; position: absolute; left: 0; color: var(--ink-tertiary); }
 
-  .sub-label {
-    font-size: 0.8rem;
-    color: var(--ink-tertiary);
-    margin-bottom: 0.6em;
-    font-weight: 600;
-    letter-spacing: 0.03em;
-  }
+  .sub-label { font-size: 0.8rem; color: var(--ink-tertiary); margin-bottom: 0.6em; font-weight: 600; letter-spacing: 0.03em; }
 
-  /* ============================================================
-     工作经历
-     ============================================================ */
-  .work-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    flex-wrap: wrap;
-    gap: 0.4em;
-    margin-bottom: 0.9em;
-  }
+  /* 工作经历 */
+  .work-header { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 0.4em; margin-bottom: 0.9em; }
   .work-role { font-size: 1.02rem; font-weight: 700; margin-bottom: 0.15em; }
   .work-company { font-size: 0.88rem; color: var(--ink-secondary); }
   .work-meta { font-size: 0.8rem; color: var(--ink-tertiary); white-space: nowrap; }
 
-  /* ============================================================
-     技能
-     ============================================================ */
+  /* 技能 */
   .skill-category { margin-bottom: 1.1em; }
   .skill-category:last-child { margin-bottom: 0; }
   .skill-category-label { display: block; font-size: 0.88rem; font-weight: 700; margin-bottom: 0.55em; }
 
-  /* ============================================================
-     项目经历(带右下角虚化序号)
-     ============================================================ */
+  /* 项目经历 */
   .project-entry { position: relative; overflow: hidden; }
   .project-index {
     position: absolute;
@@ -395,41 +356,21 @@
   .project-title { font-size: 1.02rem; font-weight: 700; margin-bottom: 0.2em; position: relative; padding-right: 76px; }
   .project-meta { font-size: 0.8rem; color: var(--ink-tertiary); margin-bottom: 0.7em; position: relative; }
   .project-desc { font-size: 0.9rem; color: var(--ink-secondary); margin-bottom: 0.9em; position: relative; max-width: 46ch; }
-  .project-tech-label { font-size: 0.78rem; color: var(--ink-tertiary); margin-bottom: 0.5em; position: relative; }
-  .project-links { font-size: 0.85rem; position: relative; }
-  .project-links a { margin-right: 1.3em; }
 
-  /* ============================================================
-     论文发表(卡片 + 类型徽章)
-     ============================================================ */
+  /* 论文发表 */
   .pub-type { margin-bottom: 0.8em; }
-  .pub-title {
-    font-family: Georgia, "Songti SC", serif;
-    font-weight: 700;
-    font-size: 1rem;
-    margin-bottom: 0.35em;
-    line-height: 1.5;
-  }
+  .pub-title { font-family: Georgia, "Songti SC", serif; font-weight: 700; font-size: 1rem; margin-bottom: 0.35em; line-height: 1.5; }
   .pub-meta { font-size: 0.8rem; color: var(--ink-tertiary); margin-bottom: 0.7em; }
   .pub-desc { font-size: 0.88rem; color: var(--ink-secondary); }
 
-  /* ============================================================
-     联系方式
-     ============================================================ */
-  .contact-row {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 10px 20px;
-    margin-top: 0.6em;
-  }
+  /* 联系方式 */
+  .contact-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px 20px; margin-top: 0.6em; }
   .contact-item { display: inline-flex; align-items: center; gap: 8px; font-size: 0.875rem; color: var(--ink-secondary); }
   .contact-item a { color: var(--ink-secondary); }
   .contact-item a:hover { color: var(--accent); }
   .contact-item svg { width: 16px; height: 16px; flex-shrink: 0; color: var(--ink-tertiary); }
 
-  /* ============================================================
-     页脚
-     ============================================================ */
+  /* 页脚 */
   footer.site-footer {
     border-top: 1px solid var(--border);
     padding: 28px 0 clamp(200px, 25vh, 300px);
@@ -441,13 +382,10 @@
     gap: 0.5em;
   }
 
-  /* ============================================================
-     返回顶部按钮 + 阅读进度圆环
-     ============================================================ */
+  /* 返回顶部按钮 */
   .back-to-top {
     position: fixed;
-    /* 桌面端：紧贴主题内容(.container)右侧，12px 间距 */
-    left: calc(50% + 392px);  /* 760/2 + 12px gap */
+    left: calc(50% + 392px);
     right: auto;
     bottom: 30px;
     z-index: 40;
@@ -469,53 +407,18 @@
     -webkit-tap-highlight-color: transparent;
     outline: none;
   }
-  .back-to-top.visible {
-    opacity: 1;
-    transform: translateY(0);
-    pointer-events: auto;
-  }
-  .back-to-top:hover {
-    box-shadow: var(--shadow-hover);
-    transform: translateY(-2px);
-  }
-  .back-to-top:active {
-    transform: scale(0.94);
-  }
-  .back-to-top svg {
-    width: 48px;
-    height: 48px;
-    display: block;
-  }
+  .back-to-top.visible { opacity: 1; transform: translateY(0); pointer-events: auto; }
+  .back-to-top:hover { box-shadow: var(--shadow-hover); transform: translateY(-2px); }
+  .back-to-top:active { transform: scale(0.94); }
+  .back-to-top svg { width: 48px; height: 48px; display: block; }
+  .back-to-top__track { stroke: var(--border-strong); }
+  .back-to-top__progress { stroke: var(--accent); transition: stroke-dashoffset 0.15s linear; }
+  .back-to-top__arrow { stroke: var(--accent); }
 
-  /* 轨道圆环（背景） */
-  .back-to-top__track {
-    stroke: var(--border-strong);
-  }
-
-  /* 进度圆环 */
-  .back-to-top__progress {
-    stroke: var(--accent);
-    transition: stroke-dashoffset 0.15s linear;
-  }
-
-  /* 向上箭头 */
-  .back-to-top__arrow {
-    stroke: var(--accent);
-  }
-
-  /* ============================================================
-     响应式
-     ============================================================ */
-  /* 平板端 */
+  /* 响应式 */
   @media (max-width: 1024px) and (min-width: 641px) {
-    .back-to-top {
-      left: auto;
-      right: 24px;
-      bottom: 24px;
-    }
-    .contact-row {
-      grid-template-columns: repeat(2, 1fr);
-    }
+    .back-to-top { left: auto; right: 24px; bottom: 24px; }
+    .contact-row { grid-template-columns: repeat(2, 1fr); }
   }
 
   @media (max-width: 640px) {
@@ -523,65 +426,47 @@
     .top-ribbon-wrap { padding: 0 18px; }
     .name { font-size: 1.85rem; }
     header.profile { padding: 40px 0 24px; }
-
-    /* 导航链接与按钮的触控热区在手机端适当放大,更符合触屏最小可点击尺寸建议 */
     .nav-links a { font-size: 12px; padding: 9px 9px; }
     .theme-btn { width: 34px; height: 34px; }
     .lang-btn { padding: 8px 13px; }
-
     .avatar { width: 82px; height: 106px; }
     .avatar-fallback { font-size: 1.7rem; }
     .profile-header-row { gap: 14px; }
     .section-title { font-size: 1.35rem; }
     .project-index { font-size: 52px; right: 16px; top: 12px; }
     .project-title { padding-right: 54px; }
-
-    /* 底部版权信息 + 更新时间：窄屏下两行文字并排容易挤在一起、
-       space-between 会让它们别扭地贴在左边，改成居中竖排更舒服 */
     footer.site-footer { flex-direction: column; align-items: center; text-align: center; gap: 6px; }
-
-    /* 返回顶部按钮 — 手机端适配，考虑 iPhone Safe Area */
-    .back-to-top {
-      left: auto;
-      right: 16px;
-      bottom: max(20px, calc(20px + env(safe-area-inset-bottom)));
-    }
-
-    /* 联系方式 — 手机端单列 */
-    .contact-row {
-      grid-template-columns: 1fr;
-    }
+    .back-to-top { left: auto; right: 16px; bottom: max(20px, calc(20px + env(safe-area-inset-bottom))); }
+    .contact-row { grid-template-columns: 1fr; }
   }
-
 </style>
 </head>
 <body>
 
-
   <div class="top-ribbon-wrap"><div class="top-ribbon" aria-hidden="true"></div></div>
+  <div class="fallback-banner">
+    <span class="zh">离线备案页 · 内容同步于 2026 年 07 月 31 日 · 完整版请访问 chenchen913.github.io</span>
+    <span class="en">Offline fallback page · Synced Jul 31, 2026 · Full version: chenchen913.github.io</span>
+  </div>
 
-  <!-- ============================================================
-       吸顶导航
-       ============================================================ -->
+  <!-- 吸顶导航 -->
   <div class="nav-wrap">
     <div class="nav-inner">
       <div class="nav-links-wrap">
         <nav class="nav-links" id="nav-links" aria-label="页面导航">
-          <a href="#about" class="active">关于</a>
-          <a href="#education">教育背景</a>
-          <a href="#experience">工作经历</a>
-          <a href="#skills">技能</a>
-          <a href="#projects">项目经历</a>
-          <a href="#publications">论文发表</a>
-          <a href="#contact">联系方式</a>
+          <a href="#about" class="zh active">关于</a><a href="#about" class="en active">About</a>
+          <a href="#education" class="zh">教育背景</a><a href="#education" class="en">Education</a>
+          <a href="#experience" class="zh">工作经历</a><a href="#experience" class="en">Experience</a>
+          <a href="#skills" class="zh">技能</a><a href="#skills" class="en">Skills</a>
+          <a href="#projects" class="zh">项目经历</a><a href="#projects" class="en">Projects</a>
+          <a href="#publications" class="zh">论文发表</a><a href="#publications" class="en">Publications</a>
+          <a href="#contact" class="zh">联系方式</a><a href="#contact" class="en">Contact</a>
         </nav>
         <div class="nav-fade nav-fade-left" aria-hidden="true"></div>
         <div class="nav-fade nav-fade-right" aria-hidden="true"></div>
       </div>
-
       <div class="nav-controls">
-        <!-- 单文件版本，无语言切换 -->
-        <!-- 深浅色按钮 -->
+        <button id="lang-toggle" class="lang-btn" type="button" aria-label="切换到英文版">EN</button>
         <button id="theme-toggle" class="theme-btn" type="button" aria-label="切换深浅色模式">
           <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4.3"/><path d="M12 2.5v3M12 18.5v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2.5 12h3M18.5 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg>
           <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" style="display:none;"><path d="M20 14.2A8.2 8.2 0 1 1 9.8 4a6.6 6.6 0 0 0 10.2 10.2z"/></svg>
@@ -590,232 +475,166 @@
     </div>
   </div>
 
-  <main class="container">
+  <main class="container" id="main-content">
 
-    <!-- ============================================================
-         Header / 个人信息
-         ============================================================ -->
+    <!-- Header / 个人信息 -->
     <header class="profile" id="about">
       <div class="profile-inner">
         <div class="profile-header-row">
           <div class="profile-text">
-            <h1 class="name font-serif">王晨</h1>
-            <!-- TODO(重要)：请改为真实的身份定位 -->
-            <p class="tagline">计算机科学与技术 · 2026 届本科毕业生 · AI 应用开发方向</p>
+            <h1 class="name font-serif zh">王晨</h1>
+            <h1 class="name font-serif en">Chen Wang</h1>
+            <p class="tagline zh">信息与计算科学 · 2020 届本科毕业生 · AI 应用开发方向</p>
+            <p class="tagline en">Information and Computing Science · Class of 2020 · AI Application Development</p>
           </div>
-
           <div class="avatar">
-            <!-- TODO: 把照片放到 assets/avatar.jpg -->
-            <img src="assets/avatar.jpg" alt="王晨" onerror="this.style.display='none';">
-            <div class="avatar-fallback" id="avatar-fallback" aria-hidden="true"></div>
+            <img id="avatar-img" src="data:image/jpeg;base64,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" alt="王晨 / Chen Wang">
+            <div class="avatar-fallback" id="avatar-fallback" aria-hidden="true">王</div>
           </div>
         </div>
       </div>
     </header>
 
-    <!-- ============================================================
-         教育背景
-         ============================================================ -->
+    <!-- 教育背景 -->
     <section class="section" id="education">
-      <h2 class="section-title">教育背景</h2>
-
+      <h2 class="section-title zh">教育背景</h2>
+      <h2 class="section-title en">Education</h2>
       <div class="card">
         <div class="edu-header">
-          <span class="edu-school">青岛理工大学</span>
+          <span class="edu-school zh">青岛理工大学</span>
+          <span class="edu-school en">Qingdao University of Technology</span>
           <span class="edu-meta">2016.09 — 2020.06</span>
         </div>
-        <p class="edu-detail">理学院 · 信息与计算科学专业 · 本科</p>
-
+        <p class="edu-detail zh">理学院 · 信息与计算科学专业 · 本科</p>
+        <p class="edu-detail en">School of Science · B.Sc. in Information and Computing Science</p>
         <ul class="dash-list">
-          <li>专业成绩排名前 15%，连续两年获得校级奖学金</li>
-          <li>"互联网 +"创新创业大赛校赛二等奖</li>
-          <li>GPA 3.6 / 4.0</li>
+          <li class="zh">专业成绩排名前 10%，通过英语六级（CET-6）</li>
+          <li class="zh">2017 年 10 月 青岛理工大学校长奖学金</li>
+          <li class="zh">2018 年 5 月 美国大学生数学建模比赛 H 奖</li>
+          <li class="zh">2018 年 5 月 第九届蓝桥杯全国软件和信息技术专业人才大赛省三等奖</li>
+          <li class="zh">2018 年 10 月 高教社杯全国大学生数学建模竞赛省二等奖</li>
+          <li class="zh">2018 年 10 月 青岛理工大学优秀学生奖学金</li>
+          <li class="en">Top 10% of the cohort; CET-6 certified</li>
+          <li class="en">Oct 2017 — President's Scholarship</li>
+          <li class="en">May 2018 — Honorable Mention, MCM/ICM</li>
+          <li class="en">May 2018 — 3rd Prize (Provincial), 9th Lanqiao Cup</li>
+          <li class="en">Oct 2018 — 2nd Prize (Provincial), CUMCM</li>
+          <li class="en">Oct 2018 — Outstanding Student Scholarship</li>
         </ul>
-
-        <p class="sub-label">核心主修课程</p>
+        <p class="sub-label zh">核心主修课程</p>
+        <p class="sub-label en">Core Coursework</p>
         <div class="tag-row">
-          <span class="tag">数据结构与算法</span>
-          <span class="tag">机器学习</span>
-          <span class="tag">深度学习</span>
-          <span class="tag">自然语言处理</span>
-          <span class="tag">数据库系统</span>
-          <span class="tag">计算机网络</span>
+          <span class="tag">数学分析上（99 分）</span><span class="tag">大学物理上（90 分）</span>
+          <span class="tag">Java 高级程序设计（97 分）</span><span class="tag">计算机网络（91 分）</span>
+          <span class="tag">数据结构（95 分）</span><span class="tag">C++ 程序设计（96 分）</span>
+          <span class="tag">Web 程序设计（94 分）</span><span class="tag">离散数学（91 分）</span>
+        </div>
+        <div class="tag-row">
+          <span class="tag">Mathematical Analysis I (99/100)</span><span class="tag">University Physics I (90/100)</span>
+          <span class="tag">Java Programming (97/100)</span><span class="tag">Computer Networks (91/100)</span>
+          <span class="tag">Data Structures (95/100)</span><span class="tag">C++ Programming (96/100)</span>
+          <span class="tag">Web Programming (94/100)</span><span class="tag">Discrete Mathematics (91/100)</span>
         </div>
       </div>
     </section>
 
-    <!-- ============================================================
-         工作经历
-         ============================================================ -->
+    <!-- 工作经历 -->
     <section class="section" id="experience">
-      <h2 class="section-title">工作经历</h2>
-
+      <h2 class="section-title zh">工作经历</h2>
+      <h2 class="section-title en">Experience</h2>
       <div class="card">
         <div class="work-header">
           <div>
-            <div class="work-role">AI 应用开发实习生</div>
-            <div class="work-company">某科技公司 · 智能化产品组</div>
+            <div class="work-role zh">AI 应用开发实习生</div>
+            <div class="work-role en">AI Application Development Intern</div>
+            <div class="work-company zh">某科技公司 · 智能化产品组</div>
+            <div class="work-company en">A Tech Company · Intelligent Products Team</div>
           </div>
           <div class="work-meta">2025.06 — 2025.09</div>
         </div>
         <ul class="dash-list">
-          <li>独立负责一个内部 AI 工具模块的设计与实现，用于自动生成团队周报草稿</li>
-          <li>参与团队的 Prompt 调优与效果评估，配合工程师排查线上问题</li>
-          <li>协助整理内部技术文档，帮助新同事更快上手现有工具链</li>
+          <li class="zh">独立负责一个内部 AI 工具模块的设计与实现，用于自动生成团队周报草稿</li>
+          <li class="zh">参与团队的 Prompt 调优与效果评估，配合工程师排查线上问题</li>
+          <li class="zh">协助整理内部技术文档，帮助新同事更快上手现有工具链</li>
+          <li class="en">Independently designed and built an internal AI tool module for auto-drafting weekly team reports</li>
+          <li class="en">Contributed to prompt tuning and evaluation, and helped engineers debug production issues</li>
+          <li class="en">Helped organize internal technical docs to speed up onboarding for new teammates</li>
         </ul>
       </div>
     </section>
 
-    <!-- ============================================================
-         技能
-         ============================================================ -->
+    <!-- 技能 -->
     <section class="section" id="skills">
-      <h2 class="section-title">技能</h2>
-
+      <h2 class="section-title zh">技能</h2>
+      <h2 class="section-title en">Skills</h2>
       <div class="card">
         <div class="skill-category">
-          <span class="skill-category-label">编程语言</span>
-          <div class="tag-row">
-            <span class="tag tag-accent">Python</span><span class="tag tag-accent">JavaScript</span><span class="tag tag-accent">SQL</span>
-          </div>
+          <span class="skill-category-label zh">编程语言</span>
+          <span class="skill-category-label en">Languages</span>
+          <div class="tag-row"><span class="tag tag-accent">C</span><span class="tag tag-accent">C++</span><span class="tag tag-accent">Java</span><span class="tag tag-accent">Python</span></div>
         </div>
-
         <div class="skill-category">
-          <span class="skill-category-label">AI / 机器学习</span>
-          <div class="tag-row">
-            <span class="tag tag-accent">PyTorch</span><span class="tag tag-accent">Prompt Engineering</span><span class="tag tag-accent">RAG 检索增强</span><span class="tag tag-accent">LangChain</span>
-          </div>
+          <span class="skill-category-label zh">AI / 机器学习</span>
+          <span class="skill-category-label en">AI / Machine Learning</span>
+          <div class="tag-row"><span class="tag tag-accent">Prompt Engineering</span><span class="tag tag-accent">RAG</span><span class="tag tag-accent">LangChain</span></div>
         </div>
-
         <div class="skill-category">
-          <span class="skill-category-label">Web 开发基础</span>
-          <div class="tag-row">
-            <span class="tag tag-accent">HTML / CSS</span><span class="tag tag-accent">React 基础</span><span class="tag tag-accent">FastAPI</span>
-          </div>
+          <span class="skill-category-label zh">Web 开发基础</span>
+          <span class="skill-category-label en">Web Fundamentals</span>
+          <div class="tag-row"><span class="tag tag-accent">HTML / CSS</span><span class="tag tag-accent">React</span><span class="tag tag-accent">FastAPI</span></div>
         </div>
-
         <div class="skill-category">
-          <span class="skill-category-label">工具与协作</span>
-          <div class="tag-row">
-            <span class="tag tag-accent">Git</span><span class="tag tag-accent">Docker 基础</span><span class="tag tag-accent">Linux 基础</span>
-          </div>
+          <span class="skill-category-label zh">工具与协作</span>
+          <span class="skill-category-label en">Tools &amp; Collaboration</span>
+          <div class="tag-row"><span class="tag tag-accent">Git</span><span class="tag tag-accent">Docker</span><span class="tag tag-accent">Linux</span><span class="tag tag-accent">Claude Code</span><span class="tag tag-accent">Codex</span><span class="tag tag-accent">Openclaw</span><span class="tag tag-accent">Hermes</span><span class="tag tag-accent">Trae</span></div>
         </div>
       </div>
     </section>
 
-    <!-- ============================================================
-         项目经历
-         ============================================================ -->
+    <!-- 项目经历 -->
     <section class="section" id="projects">
-      <h2 class="section-title">项目经历</h2>
-
+      <h2 class="section-title zh">项目经历</h2>
+      <h2 class="section-title en">Projects</h2>
       <article class="card project-entry">
         <span class="project-index" aria-hidden="true">01</span>
-        <div class="project-title">校园知识库问答机器人（毕业设计）</div>
-        <div class="project-meta">独立开发 · 2025.09 — 2026.03</div>
-        <p class="project-desc">
-          基于 RAG 架构做的毕业设计项目，把校园教务文档向量化存储，
-          支持多轮问答与来源引用，用来解决新生找不到教务信息的问题。
-        </p>
+        <div class="project-title zh">校园知识库问答机器人（毕业设计）</div>
+        <div class="project-title en">Campus Knowledge-Base Q&amp;A Bot (Capstone Project)</div>
+        <div class="project-meta zh">独立开发 · 2019.09 — 2020.05</div>
+        <div class="project-meta en">Solo Developer · Sep 2019 — May 2020</div>
+        <p class="project-desc zh">基于 RAG 架构的毕业设计，向量化教务文档支持多轮问答。</p>
+        <p class="project-desc en">RAG-based capstone project powering multi-turn Q&amp;A with campus document vectorization.</p>
         <div class="tag-row" style="margin-bottom:0.9em;">
           <span class="tag">Python</span><span class="tag">LangChain</span><span class="tag">FAISS</span><span class="tag">Streamlit</span>
         </div>
-        <div class="project-links">
-          <a href="#">GitHub 仓库</a>
-          <a href="#">在线演示</a>
-        </div>
-      </article>
-
-      <article class="card project-entry">
-        <span class="project-index" aria-hidden="true">02</span>
-        <div class="project-title">AI 工具调用小助手（实习产出）</div>
-        <div class="project-meta">实习生 · 2025.06 — 2025.09</div>
-        <p class="project-desc">
-          实习期间参与开发的内部小工具，支持自定义工具注册和链式调用，
-          用来自动生成团队周报草稿，减少了同事们手动整理的时间。
-        </p>
-        <div class="tag-row" style="margin-bottom:0.9em;">
-          <span class="tag">Python</span><span class="tag">FastAPI</span><span class="tag">OpenAI API</span>
-        </div>
-        <div class="project-links">
-          <a href="#">GitHub 仓库</a>
-        </div>
-      </article>
-
-      <article class="card project-entry">
-        <span class="project-index" aria-hidden="true">03</span>
-        <div class="project-title">简历关键词匹配小工具（个人项目）</div>
-        <div class="project-meta">个人练手 · 2025.04</div>
-        <p class="project-desc">
-          周末自己练手写的小工具，输入简历和岗位描述，
-          能给出关键词匹配度打分，顺便练习了一下轻量模型的部署。
-        </p>
-        <div class="tag-row" style="margin-bottom:0.9em;">
-          <span class="tag">Python</span><span class="tag">scikit-learn</span><span class="tag">Streamlit</span>
-        </div>
-        <div class="project-links">
-          <a href="#">GitHub 仓库</a>
-          <a href="#">在线演示</a>
-        </div>
-      </article>
-
-      <article class="card project-entry">
-        <span class="project-index" aria-hidden="true">04</span>
-        <div class="project-title">垃圾分类图像识别（课程作业）</div>
-        <div class="project-meta">课程项目 · 2024.11</div>
-        <p class="project-desc">
-          深度学习课程的期末作业，用卷积神经网络做垃圾分类识别，
-          在验证集上跑到了 91% 的准确率。
-        </p>
-        <div class="tag-row" style="margin-bottom:0.9em;">
-          <span class="tag">PyTorch</span><span class="tag">ResNet18</span>
-        </div>
-        <div class="project-links">
-          <a href="#">GitHub 仓库</a>
-        </div>
       </article>
     </section>
 
-    <!-- ============================================================
-         论文发表
-         ============================================================ -->
+    <!-- 论文发表 -->
     <section class="section" id="publications">
-      <h2 class="section-title">论文发表</h2>
-
+      <h2 class="section-title zh">论文发表</h2>
+      <h2 class="section-title en">Publications</h2>
       <div class="card">
-        <span class="tag tag-accent pub-type">毕业论文</span>
-        <div class="pub-title">基于检索增强生成的校园知识库问答系统设计与实现</div>
-        <div class="pub-meta">本科毕业论文 · 指导教师：李教授 · 2026.06</div>
-        <p class="pub-desc">
-          围绕毕业设计项目展开，系统性梳理了 RAG 架构在校园场景下的工程实践，
-          并对检索准确率与回答质量做了对比评估。
-        </p>
-      </div>
-
-      <div class="card">
-        <span class="tag tag-accent pub-type">科研报告</span>
-        <div class="pub-title">面向轻量化部署的文本分类模型对比研究</div>
-        <div class="pub-meta">校级本科生科研创新项目结题报告 · 第二作者 · 2025.05</div>
-        <p class="pub-desc">
-          参与导师的科研项目，对比了几种轻量文本分类模型在边缘设备上的
-          推理效率与准确率权衡。
-        </p>
+        <span class="tag tag-accent pub-type zh">期刊论文</span>
+        <span class="tag tag-accent pub-type en">Journal Paper</span>
+        <div class="pub-title zh">智能 RGV 的动态调度策略研究</div>
+        <div class="pub-title en">Research on Dynamic Scheduling Strategy for Intelligent RGV</div>
+        <div class="pub-meta zh">第二作者 · 《新型工业化》 · 2019 年第 1 期</div>
+        <div class="pub-meta en">Co-author · Journal of New Industrialization · Vol. 2019, No. 1</div>
+        <p class="pub-desc zh">针对智能加工系统中 RGV 的动态调度问题，用模拟退火算法求初始最短路径并构建实时动态模型。</p>
+        <p class="pub-desc en">Dynamic scheduling strategy for intelligent RGV using simulated annealing for initial path optimization and real-time modeling.</p>
       </div>
     </section>
 
-    <!-- ============================================================
-         联系方式
-         ============================================================ -->
+    <!-- 联系方式 -->
     <section class="section" id="contact">
-      <h2 class="section-title">联系方式</h2>
-      <p class="edu-detail">
-        如果你看到了合适的机会，或者只是想聊聊 AI 应用方向的东西，都欢迎联系我。
-      </p>
+      <h2 class="section-title zh">联系方式</h2>
+      <h2 class="section-title en">Contact</h2>
+      <p class="edu-detail zh">如果你看到了合适的机会，或者只是想聊聊 AI 应用方向的东西，都欢迎联系我。</p>
+      <p class="edu-detail en">If you've got a role that might be a fit, or just want to talk about AI applications, I'd love to hear from you.</p>
       <div class="contact-row">
-        <!-- TODO: 换成真实联系方式 -->
         <span class="contact-item">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>
-          <a href="mailto:wcn913@gmail.com">wcn913@gmail.com</a>
+          <a href="#" id="email-link" rel="nofollow"><noscript>wcn913 [at] gmail.com</noscript></a>
         </span>
         <span class="contact-item">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6 0 0 0-1.3-3.2 4.2 4.2 0 0 0-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3 0 0 0-6.2 0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2 0 0 0-.1 3.2A4.6 4.6 0 0 0 4 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"/></svg>
@@ -831,7 +650,8 @@
         </span>
         <span class="contact-item">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10v4a1 1 0 0 0 1 1h2l5 4V5L6 9H4a1 1 0 0 0-1 1z"/><path d="M14.5 8.2c1.3 1 1.3 6.6 0 7.6"/><path d="M18 6c2.6 2 2.6 10 0 12"/></svg>
-          <span>微信公众号：MaoMaoTech</span>
+          <span class="zh">微信公众号：MaoMaoTech</span>
+          <span class="en">WeChat Official Account: MaoMaoTech</span>
         </span>
       </div>
     </section>
@@ -839,30 +659,28 @@
   </main>
 
   <footer class="site-footer container">
-    <span>&copy; 2026 王晨，保留所有权利</span>
-    <span>页面最后更新：2026 年 07 月 01 日</span>
+    <span class="zh">© 2026 王晨，保留所有权利</span>
+    <span class="en">© 2026 Chen Wang. All rights reserved.</span>
+    <span class="zh">页面最后更新：2026 年 07 月 31 日</span>
+    <span class="en">Last updated: July 31, 2026</span>
   </footer>
 
+  <button class="back-to-top" id="back-to-top" type="button" aria-label="返回顶部">
+    <svg viewBox="0 0 48 48">
+      <circle class="back-to-top__track" cx="24" cy="24" r="22" fill="none" stroke-width="2"/>
+      <circle class="back-to-top__progress" id="btt-progress" cx="24" cy="24" r="22" fill="none" stroke-width="2" stroke-linecap="round" stroke-dasharray="138.23" stroke-dashoffset="138.23" transform="rotate(-90 24 24)"/>
+      <path class="back-to-top__arrow" d="M24 32V16M18 22l6-6 6 6" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </button>
 
-
-
-<script>
+  <script>
     (function () {
       "use strict";
-
-      var storage = {
-        get: function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
-        set: function (k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
-      };
-
       var htmlEl = document.documentElement;
+      var CIRCUMFERENCE = 138.23;
 
-      /* ------------------------------------------------------------
-         深浅色主题
-         ------------------------------------------------------------ */
+      /* 主题切换 */
       var mql = window.matchMedia("(prefers-color-scheme: dark)");
-      function systemTheme() { return mql.matches ? "dark" : "light"; }
-
       function applyTheme(theme) {
         htmlEl.setAttribute("data-theme", theme);
         var sun = document.querySelector(".icon-sun");
@@ -872,267 +690,159 @@
           moon.style.display = theme === "dark" ? "block" : "none";
         }
       }
-
-      applyTheme(storage.get("theme") || systemTheme());
-
-      mql.addEventListener("change", function () {
-        if (!storage.get("theme")) applyTheme(systemTheme());
+      applyTheme((function () {
+        try { return localStorage.getItem("theme") || (mql.matches ? "dark" : "light"); } catch (e) { return "light"; }
+      })());
+      mql.addEventListener("change", function (e) {
+        try { if (!localStorage.getItem("theme")) applyTheme(e.matches ? "dark" : "light"); } catch (err) {}
       });
-
       var themeToggle = document.getElementById("theme-toggle");
       if (themeToggle) {
         themeToggle.addEventListener("click", function () {
           var next = htmlEl.getAttribute("data-theme") === "dark" ? "light" : "dark";
-          storage.set("theme", next);
+          try { localStorage.setItem("theme", next); } catch (e) {}
           applyTheme(next);
         });
       }
 
-      /* ------------------------------------------------------------
-         头像占位字母：从 h1.name 取第一个字（中文页取"王"，英文页取"C"）
-         ------------------------------------------------------------ */
-      function updateAvatarFallback() {
-        var el = document.getElementById("avatar-fallback");
-        if (!el) return;
-        var nameEl = document.querySelector("h1.name");
-        var fullName = nameEl ? nameEl.textContent.trim() : "";
-        el.textContent = fullName.charAt(0) || "";
+      /* 语言切换（不刷新页面） */
+      function setLang(lang) {
+        htmlEl.classList.remove("lang-zh", "lang-en");
+        htmlEl.classList.add("lang-" + lang);
+        htmlEl.setAttribute("lang", lang === "en" ? "en" : "zh-CN");
+        var btn = document.getElementById("lang-toggle");
+        if (btn) {
+          btn.textContent = lang === "zh" ? "EN" : "中文";
+          btn.setAttribute("aria-label", lang === "zh" ? "切换到英文版" : "Switch to Chinese");
+        }
+        document.title = lang === "zh" ? "王晨 · 个人主页" : "Chen Wang · Personal Homepage";
+        try { localStorage.setItem("fallback-lang", lang); } catch (e) {}
       }
-      updateAvatarFallback();
+      var initLang = "zh";
+      try {
+        var storedLang = localStorage.getItem("fallback-lang");
+        if (storedLang === "en" || storedLang === "zh") initLang = storedLang;
+        else if ((navigator.language || "zh").indexOf("en") > -1) initLang = "en";
+      } catch (e) {}
+      setLang(initLang);
+      var langToggle = document.getElementById("lang-toggle");
+      if (langToggle) {
+        langToggle.addEventListener("click", function () {
+          setLang(htmlEl.classList.contains("lang-zh") ? "en" : "zh");
+        });
+      }
 
-      /* ------------------------------------------------------------
-         滚动高亮当前板块
-         修复方案：
-         1. 对比每个 section 的 offsetTop 来确定当前板块；
-         2. 当用户滚动到页面最底部时，强制激活最后一个 section（联系方式）；
-         3. 增加底部留白确保最后一个 section 能进入触发区域。
-         ------------------------------------------------------------ */
+      /* 头像加载失败时显示占位字母 */
+      var avatarImg = document.getElementById("avatar-img");
+      if (avatarImg) {
+        avatarImg.addEventListener("error", function () { this.style.display = "none"; });
+      }
+
+      /* 邮箱由字符码数组 JS 拼接，仅防简单抓取 */
+      var emailLink = document.getElementById("email-link");
+      if (emailLink) {
+        var codes = [119, 99, 110, 57, 49, 51, 64, 103, 109, 97, 105, 108, 46, 99, 111, 109];
+        var addr = codes.map(function (c) { return String.fromCharCode(c); }).join("");
+        emailLink.href = "mailto:" + addr;
+        emailLink.textContent = addr;
+      }
+
+      /* 滚动高亮当前板块 */
       var sections = Array.prototype.slice.call(document.querySelectorAll("section[id], header[id]"));
       var navLinks = Array.prototype.slice.call(document.querySelectorAll(".nav-links a"));
       var navLinksEl = document.getElementById("nav-links");
       var navLinksWrap = navLinksEl ? navLinksEl.parentElement : null;
-      var NAV_OFFSET = 80; // 略大于吸顶导航高度 + scroll-margin-top
-
-      var lastActiveId = null;
-
-      function getDocHeight() {
-        return Math.max(
-          document.body.scrollHeight, document.documentElement.scrollHeight,
-          document.body.offsetHeight, document.documentElement.offsetHeight,
-          document.body.clientHeight, document.documentElement.clientHeight
-        );
-      }
-
-      function scrollActiveLinkIntoView(link) {
-        if (!navLinksEl || !link) return;
-        var linkLeft = link.offsetLeft;
-        var linkRight = linkLeft + link.offsetWidth;
-        var viewLeft = navLinksEl.scrollLeft;
-        var viewRight = viewLeft + navLinksEl.clientWidth;
-        if (linkLeft < viewLeft || linkRight > viewRight) {
-          var target = linkLeft - (navLinksEl.clientWidth - link.offsetWidth) / 2;
-          navLinksEl.scrollTo({ left: Math.max(0, target), behavior: "smooth" });
-        }
-      }
-
-      function setActive(id) {
-        var activeLink = null;
-        navLinks.forEach(function (a) {
-          var isActive = a.getAttribute("href") === "#" + id;
-          a.classList.toggle("active", isActive);
-          if (isActive) activeLink = a;
-        });
-        if (id !== lastActiveId) {
-          lastActiveId = id;
-          scrollActiveLinkIntoView(activeLink);
-          // 更新语言切换链接的 hash（单文件版无此元素，自动跳过）
-          var langBtn = document.querySelector(".lang-btn");
-          if (langBtn) {
-            var baseHref = langBtn.getAttribute("href").split("#")[0];
-            langBtn.setAttribute("href", baseHref + "#" + id);
-          }
-        }
-      }
-
+      var NAV_OFFSET = 80;
       var ticking = false;
+
       function computeActiveSection() {
         var scrollY = window.scrollY || window.pageYOffset;
         var pos = scrollY + NAV_OFFSET;
         var currentId = sections.length ? sections[0].id : null;
-
-        // 常规判断：找到最后一个 offsetTop <= pos 的 section
         for (var i = 0; i < sections.length; i++) {
           if (sections[i].offsetTop <= pos) currentId = sections[i].id;
         }
-
-        // 关键修复：如果页面已经滚动到底部，强制激活最后一个 section
-        // 使用缓存高度避免每帧强制 layout；回退到 getDocHeight() 兜底
-        var docHeight = _cachedDocHeight || getDocHeight();
-        var atBottom = scrollY + window.innerHeight >= docHeight - 5;
-        if (atBottom && sections.length > 0) {
+        var docHeight = Math.max(
+          document.body.scrollHeight, document.documentElement.scrollHeight,
+          document.body.offsetHeight, document.documentElement.offsetHeight
+        );
+        if (scrollY + window.innerHeight >= docHeight - 5 && sections.length) {
           currentId = sections[sections.length - 1].id;
         }
-
-        if (currentId) setActive(currentId);
+        navLinks.forEach(function (a) {
+          a.classList.toggle("active", a.getAttribute("href") === "#" + currentId);
+        });
         ticking = false;
       }
+      window.addEventListener("scroll", function () {
+        if (!ticking) { window.requestAnimationFrame(computeActiveSection); ticking = true; }
+      }, { passive: true });
+      window.addEventListener("resize", function () {
+        if (!ticking) { window.requestAnimationFrame(computeActiveSection); ticking = true; }
+      });
+      computeActiveSection();
 
-      function onScroll() {
-        if (!ticking) {
-          window.requestAnimationFrame(computeActiveSection);
-          ticking = true;
-        }
-      }
+      /* 导航点击：平滑滚动 + 更新 URL hash */
+      var motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+      navLinks.forEach(function (link) {
+        link.addEventListener("click", function (e) {
+          var href = this.getAttribute("href");
+          if (!href || href.charAt(0) !== "#") return;
+          e.preventDefault();
+          var target = document.getElementById(href.slice(1));
+          if (!target) return;
+          var top = target.getBoundingClientRect().top + window.scrollY - NAV_OFFSET;
+          window.scrollTo({ top: top, behavior: motionQuery.matches ? "auto" : "smooth" });
+          try { history.pushState(null, null, href); } catch (err) {}
+        });
+      });
 
-      window.addEventListener("scroll", onScroll, { passive: true });
-      window.addEventListener("resize", onScroll);
-      computeActiveSection(); // 首次加载时立即计算
-
-      /* ------------------------------------------------------------
-         导航栏横向滑动的渐隐提示
-         ------------------------------------------------------------ */
+      /* 导航横向滑动渐隐提示 */
       function updateNavFade() {
         if (!navLinksEl || !navLinksWrap) return;
         var maxScroll = navLinksEl.scrollWidth - navLinksEl.clientWidth;
         navLinksWrap.classList.toggle("can-scroll-left", navLinksEl.scrollLeft > 4);
         navLinksWrap.classList.toggle("can-scroll-right", navLinksEl.scrollLeft < maxScroll - 4);
       }
-
       if (navLinksEl) {
         navLinksEl.addEventListener("scroll", updateNavFade, { passive: true });
         window.addEventListener("resize", updateNavFade);
         updateNavFade();
       }
 
-      /* ============================================================
-         返回顶部按钮 + 阅读进度圆环
-         ============================================================ */
-
-      // 创建按钮 DOM
-      function createBackToTopButton() {
-        var btn = document.createElement("button");
-        btn.className = "back-to-top";
-        // 根据页面语言设置 aria-label
-        var pageLang = htmlEl.getAttribute("lang") || "";
-        btn.setAttribute("aria-label", pageLang === "en" ? "Back to top" : "返回顶部");
-
-        // SVG: 外圈背景环 + 进度环 + 箭头图标
-        // 圆周长 = 2 * π * 22 ≈ 138.23
-        var svgNS = "http://www.w3.org/2000/svg";
-        var svg = document.createElementNS(svgNS, "svg");
-        svg.setAttribute("viewBox", "0 0 48 48");
-        svg.setAttribute("width", "48");
-        svg.setAttribute("height", "48");
-
-        // 背景圆环（轨道）
-        var bgCircle = document.createElementNS(svgNS, "circle");
-        bgCircle.setAttribute("cx", "24");
-        bgCircle.setAttribute("cy", "24");
-        bgCircle.setAttribute("r", "22");
-        bgCircle.setAttribute("fill", "none");
-        bgCircle.setAttribute("stroke-width", "2");
-        bgCircle.classList.add("back-to-top__track");
-
-        // 进度圆环（从顶部12点方向顺时针增长）
-        var progressCircle = document.createElementNS(svgNS, "circle");
-        progressCircle.setAttribute("cx", "24");
-        progressCircle.setAttribute("cy", "24");
-        progressCircle.setAttribute("r", "22");
-        progressCircle.setAttribute("fill", "none");
-        progressCircle.setAttribute("stroke-width", "2");
-        progressCircle.setAttribute("stroke-linecap", "round");
-        progressCircle.setAttribute("stroke-dasharray", "138.23");
-        progressCircle.setAttribute("stroke-dashoffset", "138.23"); // 初始空圆
-        progressCircle.setAttribute("transform", "rotate(-90 24 24)");
-        progressCircle.classList.add("back-to-top__progress");
-
-        // 向上箭头
-        var arrow = document.createElementNS(svgNS, "path");
-        arrow.setAttribute("d", "M24 32V16M18 22l6-6 6 6");
-        arrow.setAttribute("fill", "none");
-        arrow.setAttribute("stroke-width", "2");
-        arrow.setAttribute("stroke-linecap", "round");
-        arrow.setAttribute("stroke-linejoin", "round");
-        arrow.classList.add("back-to-top__arrow");
-
-        svg.appendChild(bgCircle);
-        svg.appendChild(progressCircle);
-        svg.appendChild(arrow);
-        btn.appendChild(svg);
-
-        document.body.appendChild(btn);
-
-        return {
-          btn: btn,
-          progressCircle: progressCircle
-        };
-      }
-
-      var backToTop = createBackToTopButton();
-      var bttBtn = backToTop.btn;
-      var bttProgress = backToTop.progressCircle;
-      var CIRCUMFERENCE = 138.23; // 2 * π * 22
-
-      // 缓存文档高度，避免每次 scroll 事件都强制 layout
-      var _cachedDocHeight = 0;
-      var _cachedWinHeight = 0;
-
-      function refreshCachedSizes() {
-        // getDocHeight() 会触发 layout，只在 resize 或首次计算时调用
-        _cachedDocHeight = getDocHeight();
-        _cachedWinHeight = window.innerHeight;
-      }
-
-      // 更新进度圆环 + 按钮显示/隐藏（rAF 节流）
-      var _bttTicking = false;
+      /* 返回顶部 + 阅读进度圆环 */
+      var bttBtn = document.getElementById("back-to-top");
+      var bttProgress = document.getElementById("btt-progress");
+      var bttTicking = false;
       function updateBackToTop() {
-        if (_bttTicking) return;
-        _bttTicking = true;
+        if (bttTicking) return;
+        bttTicking = true;
         window.requestAnimationFrame(function () {
           var scrollY = window.scrollY || window.pageYOffset;
-          var docHeight = _cachedDocHeight;
-          var winHeight = _cachedWinHeight;
-          var maxScroll = docHeight - winHeight;
-
+          var docHeight = Math.max(
+            document.body.scrollHeight, document.documentElement.scrollHeight,
+            document.body.offsetHeight, document.documentElement.offsetHeight
+          );
+          var maxScroll = docHeight - window.innerHeight;
           if (maxScroll <= 0) {
             bttBtn.classList.remove("visible");
             bttProgress.setAttribute("stroke-dashoffset", CIRCUMFERENCE);
-            _bttTicking = false;
+            bttTicking = false;
             return;
           }
-
           var progress = Math.min(1, Math.max(0, scrollY / maxScroll));
-          var offset = CIRCUMFERENCE * (1 - progress);
-          bttProgress.setAttribute("stroke-dashoffset", offset);
-
-          if (scrollY > 300) {
-            bttBtn.classList.add("visible");
-          } else {
-            bttBtn.classList.remove("visible");
-          }
-          _bttTicking = false;
+          bttProgress.setAttribute("stroke-dashoffset", String(CIRCUMFERENCE * (1 - progress)));
+          bttBtn.classList.toggle("visible", scrollY > 300);
+          bttTicking = false;
         });
       }
-
-      // 点击返回顶部：尊重 prefers-reduced-motion 设置
-      var _motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
       bttBtn.addEventListener("click", function () {
-        var behavior = _motionQuery.matches ? "auto" : "smooth";
-        window.scrollTo({ top: 0, behavior: behavior });
+        window.scrollTo({ top: 0, behavior: motionQuery.matches ? "auto" : "smooth" });
       });
-
-      // 绑定滚动更新（resize 时刷新缓存尺寸）
       window.addEventListener("scroll", updateBackToTop, { passive: true });
-      window.addEventListener("resize", function () {
-        refreshCachedSizes();
-        updateBackToTop();
-      });
-      refreshCachedSizes(); // 初始化缓存
-      updateBackToTop();    // 初始计算
-
+      window.addEventListener("resize", updateBackToTop);
+      updateBackToTop();
     })();
-
-</script>
-
+  </script>
 </body>
 </html>

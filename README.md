@@ -40,6 +40,9 @@
 > `DEPLOY.md`、`TROUBLESHOOTING.md`、`CONTENT-GUIDE.md` 等为内部文档，已在
 > `_config.yml` 的 `exclude` 中排除，不会发布到线上。`backups/` 为本地历史
 > 快照，已加入 `.gitignore` 不入库。
+>
+> `portfolio-single-file.html` 是受维护的单文件备案页（GitHub Pages 不可用时的
+> 离线查看版本），同样被 exclude 不发布，请勿删除。
 
 ## 本地预览
 

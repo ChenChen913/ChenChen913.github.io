@@ -21,6 +21,7 @@
 | **禁止修改 `script.js` 中的 `NAV_OFFSET`** | 第 66 行，值 80，必须与 CSS `scroll-margin-top` 一致 |
 | **禁止删除 `script.js` 中的 `computeActiveSection` / `createBackToTopButton` 函数** | 核心交互逻辑 |
 | **禁止修改 `_config.yml` 中的 `collections` 配置** | 控制论文/项目集合的输出 |
+| **禁止删除 `portfolio-single-file.html`** | 单文件备案页：GitHub Pages 不可用时的离线查看版本，需与主页内容保持同步（详见第七章备份与 README） |
 
 ### ⚠️ 谨慎操作
 
@@ -137,6 +138,25 @@ English abstract content.
 ### 新增一个项目
 
 同上，在 `_projects/` 下新建 `.md`，额外可填 `github` 和 `demo` 链接。
+
+注意：这两个字段必须放在 front matter **顶层**（`zh:` / `en:` 之外），否则按钮不会显示：
+
+```markdown
+---
+github: https://github.com/你的用户名/仓库名
+demo: https://demo-link.com
+zh:
+  type: 个人项目
+  title: 项目名称
+  meta: 独立开发 · 2026.03 — 2026.06
+  desc: 一句话描述项目亮点
+en:
+  type: Personal Project
+  title: Project Name
+  meta: Solo Developer · Mar 2026 — Jun 2026
+  desc: One-sentence description
+---
+```
 
 ### 原理：Markdown 如何变成网页
 

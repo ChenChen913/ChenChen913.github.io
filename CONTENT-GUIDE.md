@@ -34,21 +34,22 @@ assets/avatar.jpg     →      头像照片
 
 ```markdown
 ---
+# ⚠️ github / demo 必须放在顶层（zh/en 之外），模板才能识别
+github: https://github.com/你的用户名/仓库名
+demo: https://demo-link.com
 zh:
   type: 个人项目
   title: 项目名称
   meta: 独立开发 · 2026.03 — 2026.06
   desc: 一句话描述项目亮点
-  github: https://github.com/你的用户名/仓库名
-  demo: https://demo-link.com
 en:
   type: Personal Project
   title: Project Name
   meta: Solo Developer · Mar 2026 — Jun 2026
   desc: One-sentence description
-  github: https://github.com/your-username/repo
-  demo: https://demo-link.com
 ---
+
+> 没有开源或在线演示时，直接删掉 `github` / `demo` 两行即可，模板会自动隐藏对应按钮。
 
 ## 项目介绍
 

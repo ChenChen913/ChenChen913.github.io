@@ -240,32 +240,34 @@ en:
 
 ### 问题现象
 
-Markdown 中使用 `$$ E=mc^2 $$` 写数学公式，页面显示为 `[E=mc^2]` 原始文本，未渲染为数学公式。
+在 Markdown 中写数学公式后，页面显示为原始文本（如 `[E=mc^2]`、`$ a + b = c $`），未渲染。
 
-### 尝试过的方案（均失败）
+### 历史尝试（已废弃）
 
 | 方案 | 结果 |
 |---|---|
-| `_config.yml` 添加 `kramdown.math_engine: mathjax` | 不生效，kramdown 仍将 `$$` 转换为方括号 |
-| 添加 MathJax CDN 到 `_layouts/detail.html` | MathJax 已加载，但 kramdown 输出的不是 `<script type="math/tex">` 标签，MathJax 无法处理 |
+| `_config.yml` 添加 `kramdown.math_engine: mathjax` | 不生效，kramdown 仍不输出 KaTeX/MathJax 专用标签 |
+| 添加 MathJax CDN 到 `_layouts/detail.html` | kramdown 输出的不是 `<script type="math/tex">` 标签，MathJax 无法处理 |
 
 ### 根因
 
-GitHub Pages 的 kramdown 版本在 GFM 输入模式下，`math_engine` 配置不生效。kramdown 将 `$$...$$` 当作普通段落处理，转换为了 HTML 中的方括号格式。
+GitHub Pages 的 kramdown 在 GFM 输入模式下不启用数学引擎，`$$` / `\[` 等分隔符会被当作普通文本改写（实测：`$$...$$` → `\(...\)`，`\[...\]` → `[...]`，`\(...\)` → `(...)`），不会保留为 KaTeX 需要的专用标签。
 
-### 解决方案
+### 当前方案（2026-07 起）
 
-将所有 `$$...$$` 公式用 HTML `<div>` 标签包裹：
+详情页已改用 **KaTeX auto-render**：
 
-```html
-<div>
-$$
-\text{similarity}(\mathbf{q}, \mathbf{d}) = \frac{\mathbf{q} \cdot \mathbf{d}}{\|\mathbf{q}\| \cdot \|\mathbf{d}\|}
-$$
-</div>
-```
+1. `_layouts/detail.html` 检测原始 Markdown（`page.content`）中是否含 `$$`、`\(` 或 `\[`，有则条件加载 KaTeX 与 auto-render。
+2. auto-render 只扫描当前可见的语言区块（`.detail-zh` / `.detail-en`），识别 `$$...$$`（块级）、`\[...\]`（块级）、`\(...\)`（行内）；单 `$` 分隔符已关闭，避免误判普通文本中的美元符号。
 
-原理：kramdown 不处理 `<div>` 内部的 Markdown 语法，`$$` 原样输出到 HTML。浏览器端的 MathJax 直接识别并渲染。
+### 推荐写法（按实测结论）
+
+| 想要的样式 | 推荐写法 | 说明 |
+|---|---|---|
+| 行内公式 | `$$ a^2 + b^2 = c^2 $$` | kramdown 会转成 `\(...\)`，auto-render 渲染为行内 |
+| 独立成块（居中） | 用 `<div>` 包裹：`<div>$$ F = ma $$</div>` | kramdown 原样保留 `$$`，auto-render 渲染为块级 |
+
+> 注意：`\(...\)`、`\[...\]` 直接写在 Markdown 正文里会被 kramdown 去掉反斜杠（变成普通括号），不要这样写；`$...$` 单美元因误判风险已关闭，也不要用。公式没渲染时，先确认详情页 URL 带 `?lang=zh` 或 `?lang=en`（auto-render 只渲染当前可见语言区块），再确认使用了上面的推荐写法。
 
 ---
 

@@ -40,6 +40,10 @@ A personal homepage built with Jekyll, deployed on GitHub Pages.
 > `DEPLOY.md`, `TROUBLESHOOTING.md`, `CONTENT-GUIDE.md` and other internal docs are
 > listed in `exclude` in `_config.yml` and never published. `backups/` holds local
 > snapshots and is git-ignored.
+>
+> `portfolio-single-file.html` is a maintained single-file fallback page (offline
+> view when GitHub Pages is unavailable). It is also excluded from the build —
+> please do not delete it.
 
 ## Local Preview
 

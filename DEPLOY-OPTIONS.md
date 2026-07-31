@@ -289,6 +289,8 @@ Netlify 是最早的 JAMstack 平台之一，对 Jekyll 有原生支持——检
   RUBY_VERSION = "3.3"
 
 # 可选：配置重定向规则
+# 注：/index-en.html 为早期版本的旧文件名，当前站点已使用 /en.html；
+#     以下规则仅为兼容历史链接而保留，新站点不需要配置。
 [[redirects]]
   from = "/index-en.html"
   to = "/en.html"

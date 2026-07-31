@@ -615,7 +615,7 @@ exclude:
 
 推送后验证（按第九章清单）：Actions `success` → Pages 状态 `built` → 三个关键页面 curl 均返回 200。
 
-> **当前状态（2026-07-28 注）**：上方代码块为当时的修复记录。`AUDIT-REPORT.md` 与 `INDEPENDENT-AUDIT.md` 后已先后删除（内容逐代融入 `COMPREHENSIVE-REVIEW.md`），`exclude` 列表已同步替换为 `COMPREHENSIVE-REVIEW.md`，当前有效清单以 `_config.yml` 为准。
+> **当前状态（2026-07-31 注）**：上方代码块为当时的修复记录。`AUDIT-REPORT.md`、`INDEPENDENT-AUDIT.md`、`COMPREHENSIVE-REVIEW.md` 等审查报告文件均已删除，`exclude` 列表已同步清理。当前有效清单以 `_config.yml` 为准。
 
 ### 教训
 

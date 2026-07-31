@@ -55,7 +55,7 @@ en:
 中文正文内容。可以用 Markdown 语法：**加粗**、`代码`、列表等。
 
 如果需要展示 PDF，用 iframe：
-<iframe src="{{ '/assets/pdf-viewer.html?file=/assets/your-file.pdf' | relative_url }}" width="100%" height="500" frameborder="0"></iframe>
+<iframe src="{{ '/assets/pdf-viewer.html?file=/assets/your-file.pdf' | relative_url }}" width="100%" height="500" style="border:1px solid var(--border); border-radius:8px;"></iframe>
 
 <!-- English -->
 
@@ -76,18 +76,28 @@ English content here.
 
 ### 1.3 新增工作/实习经历
 
-编辑 `_data/experience.yml`，在 `roles:` 下追加一个条目：
+编辑 `_data/experience.yml`，在 `roles:` 下追加一个条目（注意中英文都要写）：
 
 ```yaml
 roles:
   # ... 已有的经历 ...
-  - company: 新公司名称
-    title: 职位名称
-    period: 2026.06 — 至今
-    description: 做了什么、用了什么技术、成果如何
+  - zh:
+      role: 职位名称
+      company: 公司名 · 部门
+      period: 2026.06 — 至今
+      bullets:
+        - 做了什么、用了什么技术、成果如何
+        - 第二条要点
+    en:
+      role: Job Title
+      company: Company · Department
+      period: Jun 2026 — Present
+      bullets:
+        - What you did, tech used, outcomes
+        - Second bullet point
 ```
 
-英文版同步添加对应字段。
+> ⚠️ 注意：每条经历必须有 `zh:` 和 `en:` 两个语言块，字段名用 `role`（不是 title）、`bullets`（列表，不是 description 字符串）。
 
 ### 1.4 新增技能分类
 
@@ -147,12 +157,12 @@ zh:
   name: 新名字
   tagline: 新头衔
   footer_copyright: © 2026 新名字
-  footer_updated: 2026 年 08 月 01 日
+  footer_updated: 页面最后更新：2026 年 08 月 01 日
 en:
   name: New Name
   tagline: New Tagline
   footer_copyright: © 2026 New Name
-  footer_updated: August 01, 2026
+  footer_updated: "Last updated: August 01, 2026"
 ```
 
 ### 3.2 改联系方式
@@ -185,7 +195,7 @@ en:
 |---|---|
 | `_layouts/default.html` | 不要改 CSS/JS 引用、section 的 id 属性、主题切换逻辑 |
 | `_layouts/detail.html` | 不要改 `<!-- English -->` 分隔符逻辑、KaTeX 加载逻辑 |
-| `style.css` | 不要改第 1-38 行的 CSS 变量块、第 61 行的 `scroll-margin-top` |
+| `style.css` | 不要改第 4-35 行的 CSS 变量块、第 61 行的 `scroll-margin-top` |
 | `script.js` | 不要改 `NAV_OFFSET`（第 66 行，值 80）、核心函数 |
 | `_config.yml` | 不要改 `collections` 配置、`exclude` 列表（除非你确定知道后果）|
 | `_data/navigation.yml` | 不要改 `id` 字段（可以改 `label`）|
@@ -228,7 +238,7 @@ en:
 1. **中文和英文必须同步修改**：改了中文的姓名，英文也要改
 2. **`<!-- English -->` 是分隔符**：详情页正文中，分隔符上面是中文，下面是英文
 3. **YAML 中的 `zh:` 和 `en:`**：每个字段都有中英文两个版本，缺一不可
-4. **`footer_updated` 格式**：中文用"2026 年 08 月 01 日"，英文用"August 01, 2026"
+4. **`footer_updated` 格式**：中文用"页面最后更新：2026 年 08 月 01 日"，英文用"Last updated: August 01, 2026"（前缀不能少，否则 `update-date.py` 无法自动更新）
 
 ---
 

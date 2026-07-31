@@ -1,10 +1,12 @@
 ---
 zh:
+  type: 毕业设计
   title: 校园知识库问答机器人（毕业设计）
   meta: 独立开发 · 2019.09 — 2020.05
   desc: 基于 RAG 架构的毕业设计，向量化教务文档支持多轮问答。
   tech: [Python, LangChain, FAISS, Streamlit]
 en:
+  type: Capstone Project
   title: Campus Knowledge-Base Q&A Bot (Capstone Project)
   meta: Solo Developer · Sep 2019 — May 2020
   desc: RAG-based capstone project powering multi-turn Q&A with campus document vectorization.

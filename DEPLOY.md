@@ -13,7 +13,7 @@
 | 规则 | 说明 |
 |---|---|
 | **禁止删除或修改 `_layouts/default.html` 中的 CSS 引用** | `<link rel="stylesheet" href="{{ '/style.css' | relative_url }}">` 和 `<script src="script.js">` 不可删除 |
-| **禁止修改 `style.css` 中的 CSS 变量块** | 第 1-38 行的 `:root` / `html[data-theme="light"]` / `html[data-theme="dark"]` 三个块 |
+| **禁止修改 `style.css` 中的 CSS 变量块** | 第 4-35 行的 `:root` / `html[data-theme="light"]` / `html[data-theme="dark"]` 变量定义 |
 | **禁止修改 `style.css` 中的 `scroll-margin-top`** | 第 61 行，值必须与 `script.js` 第 66 行的 `NAV_OFFSET` 相等 |
 | **禁止修改 `_layouts/default.html` 中 `<header>` 和 `<section>` 的 `id` 属性** | `about`/`education`/`experience`/`skills`/`projects`/`publications`/`contact` |
 | **禁止修改 `_data/navigation.yml` 中的 `id` 字段** | 必须与 HTML 中的 section id 严格对应 |
@@ -459,7 +459,7 @@ git push
 
 脚本会自动：
 1. 在 `backups/` 下创建 `YYYY-MM-DD-备注` 文件夹
-2. 复制所有核心文件（`_data/`、`_layouts/`、`_projects/`、`_publications/`、`index.html`、`en.html`、`style.css`、`script.js`、`_config.yml`）
+2. 复制所有核心文件（`_data/`、`_layouts/`、`_projects/`、`_publications/`、`assets/`、`index.html`、`en.html`、`404.html`、`index_empty.html`、`style.css`、`script.js`、`_config.yml`）
 3. 打包 Git tag 供远程追溯（可选）
 
 ### 方式二：手动备份
@@ -468,13 +468,13 @@ git push
 # PowerShell（Windows）
 $date = Get-Date -Format "yyyy-MM-dd"
 New-Item -ItemType Directory -Path "backups\$date-stable" -Force
-Copy-Item -Recurse _data, _layouts, _projects, _publications, index.html, en.html, style.css, script.js, _config.yml "backups\$date-stable\"
+Copy-Item -Recurse _data, _layouts, _projects, _publications, assets, index.html, en.html, 404.html, index_empty.html, style.css, script.js, _config.yml "backups\$date-stable\"
 ```
 
 ```bash
 # Bash（macOS/Linux）
 mkdir -p backups/$(date +%Y-%m-%d)-stable
-cp -r _data _layouts _projects _publications index.html en.html style.css script.js _config.yml backups/$(date +%Y-%m-%d)-stable/
+cp -r _data _layouts _projects _publications assets index.html en.html 404.html index_empty.html style.css script.js _config.yml backups/$(date +%Y-%m-%d)-stable/
 ```
 
 ### 方式三：用 Git Tag 做版本快照（远程备份）

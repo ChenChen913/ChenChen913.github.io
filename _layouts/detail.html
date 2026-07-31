@@ -2,7 +2,7 @@
 {% assign meta_en = page.en %}
 {% assign p = site.data.personal.zh %}
 {% assign p_en = site.data.personal.en %}
-{% assign has_math = false %}{% if content contains 'math/tex' or content contains '$$' %}{% assign has_math = true %}{% endif %}
+{% assign has_math = false %}{% if page.content contains '$$' or page.content contains '\(' or page.content contains '\[' %}{% assign has_math = true %}{% endif %}
 {% assign has_code = false %}{% if content contains '<pre' or content contains '```' %}{% assign has_code = true %}{% endif %}
 <!DOCTYPE html>
 <html lang="zh-CN">
@@ -36,6 +36,10 @@
   })();
 </script>
 <meta property="og:type" content="article">
+<meta name="description" content="{{ meta_zh.desc }}">
+<meta property="og:description" content="{{ meta_zh.desc }}">
+<meta property="og:image" content="{{ '/assets/avatar.jpg' | absolute_url }}">
+<meta property="og:url" content="{{ page.url | absolute_url }}">
 <link rel="canonical" href="{{ page.url | absolute_url }}">
 <meta name="theme-color" content="#F4F5F7" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#14161A" media="(prefers-color-scheme: dark)">
@@ -180,28 +184,26 @@
   {% if has_math %}
   <!-- KaTeX: 数学公式渲染 -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js" integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"></script>
   <script>
   (function() {
     // 仅渲染当前可见语言区域的公式，避免浪费性能
     var isZh = document.documentElement.classList.contains('lang-zh');
     var isEn = document.documentElement.classList.contains('lang-en');
-    var selector = 'script[type^="math/tex"]';
-    if (isZh) selector = '.detail-zh script[type^="math/tex"]';
-    else if (isEn) selector = '.detail-en script[type^="math/tex"]';
-    var scripts = document.querySelectorAll(selector);
-    scripts.forEach(function(s) {
-      var display = s.getAttribute('type').indexOf('mode=display') > -1;
-      try {
-        var html = katex.renderToString(s.textContent, { displayMode: display, throwOnError: false });
-        var span = document.createElement(display ? 'div' : 'span');
-        // KaTeX renderToString 内部对输入做了转义，innerHTML 此处安全（非用户直接输入）
-        span.innerHTML = html;
-        if (display) { span.style.margin = '1em 0'; span.style.textAlign = 'center'; }
-        s.parentNode.replaceChild(span, s);
-      } catch(e) {
-        // 渲染失败则显示原始文本
-        s.parentNode.replaceChild(document.createTextNode(s.textContent), s);
-      }
+    var scope = document;
+    if (isZh) scope = document.querySelector('.detail-zh');
+    else if (isEn) scope = document.querySelector('.detail-en');
+    if (!scope || typeof renderMathInElement !== 'function') return;
+    // 支持 $$...$$、\[...\]、\(...\)；关闭单 $ 分隔符避免误判普通文本。
+    // 注：kramdown 会把直接书写的 $$...$$ 转成 \(...\)（行内渲染）；
+    //     块级公式建议用 <div>$$...$$</div> 包裹，kramdown 会原样保留。
+    renderMathInElement(scope, {
+      delimiters: [
+        { left: '$$', right: '$$', display: true },
+        { left: '\\[', right: '\\]', display: true },
+        { left: '\\(', right: '\\)', display: false }
+      ],
+      throwOnError: false
     });
   })();
   </script>

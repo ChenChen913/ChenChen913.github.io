@@ -13,7 +13,7 @@
 
   ⚠️ 注意：本文件是纯 HTML（无 Jekyll frontmatter），邮箱地址是
   硬编码的，无法从 _data/social.yml 自动读取。如果你改了邮箱，
-  请同步修改下方 data-u / data-d 属性（共两处：中文区和英文区）。
+  请同步修改下方字符码数组（共两处：中文区和英文区）。
   ============================================================
 -->
 <html lang="zh-CN">
@@ -95,16 +95,17 @@
     <p class="zh">我的个人主页目前暂时关闭，稍后会重新开放。</p>
     <p class="en">Hello, I'm Chen Wang.</p>
     <p class="en">My personal homepage is temporarily closed and will be back soon.</p>
-    <p class="zh">如有需要，可以通过邮箱联系我：<br><a href="#" id="email-link" data-u="wcn913" data-d="gmail.com" rel="nofollow">wcn913 [at] gmail.com</a></p>
-    <p class="en">If you need to reach me, please contact via email:<br><a href="#" id="email-link-en" data-u="wcn913" data-d="gmail.com" rel="nofollow">wcn913 [at] gmail.com</a></p>
+    <p class="zh">如有需要，可以通过邮箱联系我：<br><a href="#" id="email-link" rel="nofollow"><noscript>wcn913 [at] gmail.com</noscript></a></p>
+    <p class="en">If you need to reach me, please contact via email:<br><a href="#" id="email-link-en" rel="nofollow"><noscript>wcn913 [at] gmail.com</noscript></a></p>
   </div>
   <script>
     (function () {
-      // 邮箱混淆：拼接 data-u + @ + data-d，避免明文暴露被爬虫抓取
+      // 邮箱由字符码数组 JS 拼接，仅防简单抓取；改邮箱请同步 _data/social.yml 与此处数组
+      var codes = [119, 99, 110, 57, 49, 51, 64, 103, 109, 97, 105, 108, 46, 99, 111, 109];
+      var addr = codes.map(function (c) { return String.fromCharCode(c); }).join('');
       ['email-link', 'email-link-en'].forEach(function (id) {
         var a = document.getElementById(id);
         if (a) {
-          var addr = a.getAttribute('data-u') + '@' + a.getAttribute('data-d');
           a.href = 'mailto:' + addr;
           a.textContent = addr;
         }

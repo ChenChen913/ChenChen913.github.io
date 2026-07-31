@@ -176,6 +176,12 @@
           }
           clearTimeout(_spyResumeTimer);
           window.addEventListener("scroll", _spyResumeOnScroll, { passive: true, once: false });
+          // 兜底：若点击后没有产生任何滚动事件（例如重复点击当前已激活锚点），
+          // 也必须恢复 scroll spy，避免高亮功能被永久暂停。
+          _spyResumeTimer = setTimeout(function () {
+            _spyPaused = false;
+            window.removeEventListener("scroll", _spyResumeOnScroll);
+          }, 1000);
         });
       });
 
@@ -203,6 +209,7 @@
       function createBackToTopButton() {
         var btn = document.createElement("button");
         btn.className = "back-to-top";
+        btn.type = "button";
         // 根据页面语言设置 aria-label
         var pageLang = htmlEl.getAttribute("lang") || "";
         btn.setAttribute("aria-label", pageLang === "en" ? "Back to top" : "返回顶部");

@@ -43,6 +43,9 @@ exclude:
   - index_empty.html
   - portfolio-single-file.html
   - vendor/
+  - Gemfile
+  - Gemfile.lock
+  - .ruby-version
   - DEPLOY.md
   - TROUBLESHOOTING.md
   - DEPLOY-OPTIONS.md

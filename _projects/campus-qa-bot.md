@@ -20,21 +20,9 @@ en:
 
 本项目的目标就是用一个基于 RAG（Retrieval-Augmented Generation，检索增强生成）架构的智能问答机器人，把散落的教务文档"喂"给大模型，让学生用自然语言提问就能拿到带来源引用的准确答案。
 
-<iframe src="{{ '/assets/pdf-viewer.html?file=' | relative_url }}{{ '/assets/projects/campus-qa-report.pdf' | relative_url }}"
-  width="100%" height="850px"
-  style="border:1px solid var(--border); border-radius:8px;"
-  title="项目完整报告 PDF">
-</iframe>
-
 <!-- English -->
 ## Project Introduction
 
 Every year during freshman orientation, the academic affairs office gets flooded with repetitive questions — "How do I use the course selection system?" "What's the credit transfer process?" "When's the deadline for minor applications?" The answers are all buried in dozens of PDFs and web pages scattered across the campus network, and students simply can't find them.
 
 This project builds a RAG (Retrieval-Augmented Generation) powered Q&A bot that ingests all those scattered academic documents and feeds them to an LLM. Students ask questions in natural language and get accurate answers with source citations.
-
-<iframe src="{{ '/assets/pdf-viewer.html?file=' | relative_url }}{{ '/assets/projects/campus-qa-report.pdf' | relative_url }}"
-  width="100%" height="850px"
-  style="border:1px solid var(--border); border-radius:8px;"
-  title="Full Project Report PDF">
-</iframe>

@@ -4,8 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PDF 查看器</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" integrity="sha384-/1qUCSGwTur9vjf/z9lmu/eCUYbpOTgSjmpbMQZ1/CtX2v/WcAIKqRv+U1DUCG6e" crossorigin="anonymous"></script>
-<!-- 注：pdf.worker.min.js 由 pdf.js 内部加载，浏览器不支持对其应用 SRI -->
+<!-- SRI 预加载 pdf.js 主模块；worker 由 pdf.js 运行时动态加载，无法附加 SRI -->
+<link rel="modulepreload" href="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/6.1.200/pdf.min.mjs"
+      integrity="sha384-DVT/98LrvV8RwTKMrO+XhNmriXzZXkaBiUEzFou91SiquMt7FvC3TMHs4tMlDQhD"
+      crossorigin="anonymous">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
@@ -102,22 +104,24 @@
   <div id="progress-bar"><div id="progress-fill"></div></div>
 </div>
 <div id="error">
-  <span id="error-text">PDF 加载失败。<br><a href="#" id="error-link">点击此处直接打开</a></span>
+  <span id="error-text"></span>
 </div>
 <div id="pages"></div>
 
-<script>
+<script type="module">
+import * as pdfjsLib from 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/6.1.200/pdf.min.mjs';
+
 pdfjsLib.GlobalWorkerOptions.workerSrc =
-  'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/6.1.200/pdf.worker.min.mjs';
 
 // 国际化：语言来自自身 ?lang= 参数，或嵌入本页的详情页 URL（referrer）
 var I18N = {
   zh: { title: 'PDF 查看器', zoomin: '放大', zoomout: '缩小', download: '📥 下载', fullscreen: '⛶ 全屏',
-        loading: '正在加载 PDF…', nofile: '未指定 PDF 文件', pageloading: '加载中…',
-        error: 'PDF 加载失败。', errorlink: '点击此处直接打开', htmllang: 'zh-CN' },
+        loading: '正在加载 PDF…', nofile: '未指定 PDF 文件', invalid: 'PDF 地址不合法：仅支持本站 /assets/ 目录下的 PDF 文件。',
+        pageloading: '加载中…', error: 'PDF 加载失败。', errorlink: '点击此处直接打开', htmllang: 'zh-CN' },
   en: { title: 'PDF Viewer', zoomin: 'Zoom in', zoomout: 'Zoom out', download: '📥 Download', fullscreen: '⛶ Fullscreen',
-        loading: 'Loading PDF…', nofile: 'No PDF file specified', pageloading: 'Loading…',
-        error: 'Failed to load PDF.', errorlink: 'Click here to open it directly', htmllang: 'en' }
+        loading: 'Loading PDF…', nofile: 'No PDF file specified', invalid: 'Invalid PDF URL: only same-site /assets/*.pdf files are supported.',
+        pageloading: 'Loading…', error: 'Failed to load PDF.', errorlink: 'Click here to open it directly', htmllang: 'en' }
 };
 var lang = 'zh';
 try {
@@ -132,23 +136,64 @@ document.getElementById('btn-zoomout').title = T.zoomout;
 document.getElementById('btn-download').textContent = T.download;
 document.getElementById('btn-fullscreen').textContent = T.fullscreen;
 document.getElementById('loading-text').textContent = T.loading;
-document.getElementById('error-text').innerHTML = '';
-document.getElementById('error-text').appendChild(document.createTextNode(T.error));
-document.getElementById('error-text').appendChild(document.createElement('br'));
-var _el = document.createElement('a'); _el.href = '#'; _el.id = 'error-link'; _el.textContent = T.errorlink;
-document.getElementById('error-text').appendChild(_el);
+
+// 只允许同站 /assets/ 目录下的 PDF：拦截 javascript:/data:/外部 URL 等非法地址
+function resolveLocalPdf(raw) {
+  if (!raw || typeof raw !== 'string') return null;
+  try {
+    var u = new URL(raw, window.location.href);
+    if (u.origin !== window.location.origin) return null;
+    var path = decodeURIComponent(u.pathname);
+    if (path.indexOf('/assets/') !== 0) return null;
+    if (!/\.pdf$/i.test(path)) return null;
+    return u.pathname + u.search;
+  } catch (e) {
+    return null;
+  }
+}
+
+function showError(message, withLink) {
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('error').style.display = 'flex';
+  var el = document.getElementById('error-text');
+  el.innerHTML = '';
+  el.appendChild(document.createTextNode(message));
+  if (withLink) {
+    el.appendChild(document.createElement('br'));
+    var a = document.createElement('a');
+    a.id = 'error-link';
+    a.href = pdfUrl;
+    a.textContent = T.errorlink;
+    el.appendChild(a);
+  }
+}
 
 var params = new URLSearchParams(location.search);
-var pdfUrl = params.get('file');
-if (!pdfUrl) {
-  document.getElementById('loading-text').textContent = T.nofile;
+var rawFile = params.get('file');
+var pdfUrl = rawFile ? resolveLocalPdf(rawFile) : null;
+
+if (!rawFile) {
+  showError(T.nofile, false);
   document.getElementById('progress-bar').style.display = 'none';
+} else if (!pdfUrl) {
+  // 非法地址：不设置下载/全屏/错误链接，避免 javascript: 等注入
+  showError(T.invalid, false);
+  document.getElementById('progress-bar').style.display = 'none';
+  document.getElementById('btn-download').href = '#';
+  document.getElementById('btn-fullscreen').href = '#';
 } else {
-  // 下载链接指向原始 PDF
+  // 下载链接指向原始 PDF（已通过白名单校验）
   document.getElementById('btn-download').href = pdfUrl;
   // 全屏按钮打开当前查看器页面（而非原始 PDF），带上语言参数，避免手机端触发下载弹窗
-  document.getElementById('btn-fullscreen').href = location.href + (location.search.indexOf('lang=') > -1 ? '' : '&lang=' + lang);
-  document.getElementById('error-link').href = pdfUrl;
+  var q = location.search;
+  var fsHref = location.pathname;
+  if (q) {
+    fsHref += q;
+    if (q.indexOf('lang=') === -1) fsHref += '&lang=' + lang;
+  } else {
+    fsHref += '?lang=' + lang;
+  }
+  document.getElementById('btn-fullscreen').href = fsHref;
   init(pdfUrl);
 }
 
@@ -161,7 +206,7 @@ function init(url) {
   var task = pdfjsLib.getDocument({
     url: url,
     disableAutoFetch: true,   // 只按需拉取页面，大幅加快首屏
-    disableStream: false,      // 启用流式加载，边下载边解析
+    disableStream: false      // 启用流式加载，边下载边解析
   });
 
   // 显示下载进度
@@ -184,8 +229,7 @@ function init(url) {
     renderPage(1);
   }).catch(function(err) {
     console.error(err);
-    document.getElementById('loading').style.display = 'none';
-    document.getElementById('error').style.display = 'flex';
+    showError(T.error, true);
   });
 }
 

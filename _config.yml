@@ -47,7 +47,9 @@ exclude:
   - TROUBLESHOOTING.md
   - DEPLOY-OPTIONS.md
   - RUBY-JEKYLL.md
+  - CONTENT-GUIDE.md
   - update-date.py
+  - backup.ps1
   - README.md
   - README_EN.md
   - LICENSE

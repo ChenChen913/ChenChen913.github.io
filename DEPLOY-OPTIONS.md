@@ -13,7 +13,7 @@
 | `Gemfile` | 声明 Ruby 依赖（Jekyll、github-pages 等） | ✅ 已有 |
 | `Gemfile.lock` | 锁定依赖版本（确保本地和构建环境一致） | ✅ 已有 |
 | `_config.yml` | Jekyll 配置（注意 `url` 和 `baseurl`） | ✅ 已有 |
-| `.ruby-version` | 指定 Ruby 版本（如 `3.3`），Netlify 和 Cloudflare 均支持 | ❌ 建议新建 |
+| `.ruby-version` | 指定 Ruby 版本（如 `3.3`），Netlify 和 Cloudflare 均支持 | ✅ 已有 |
 
 > ⚠️ **`Gemfile.lock` 不能加入 `.gitignore`**。所有平台的自动构建都需要它来锁定依赖版本。
 

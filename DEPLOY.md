@@ -27,8 +27,8 @@
 | 规则 | 说明 |
 |---|---|
 | **修改 `_data/navigation.yml`** | 增删导航项需同步修改 `_layouts/default.html` 中对应的 `<section>` |
-| **修改 `style.css` 底部留白** | 第 400 行 `clamp(200px, 25vh, 300px)`，减小可能导致联系方式导航不亮 |
-| **修改 `script.js` 第 65 行 `NAV_OFFSET`** | 必须同步修改 `style.css` 第 61 行 `scroll-margin-top` |
+| **修改 `style.css` 底部留白** | 第 401 行 `clamp(200px, 25vh, 300px)`，减小可能导致联系方式导航不亮 |
+| **修改 `script.js` 第 66 行 `NAV_OFFSET`** | 必须同步修改 `style.css` 第 61 行 `scroll-margin-top` |
 
 ### ✅ 可以自由修改的内容
 
@@ -435,21 +435,63 @@ git push
 
 ## 六、如何撤回访问
 
-1. 用 `index_empty.html` 的内容覆盖 `index.html`（或删除 `_layouts/` 中的内容）
+1. 用 `index_empty.html` 的内容覆盖 `index.html`（把 `index_empty.html` 复制一份并重命名为 `index.html`）
 2. Push，GitHub 自动构建
 3. 访问者看到"主页暂时关闭"提示页
-4. 恢复：从 `backups/` 或 Git 历史恢复 `index.html` + `_layouts/default.html`，重新 push
+4. 恢复：从 `backups/` 或 Git 历史恢复原始 `index.html`，重新 push
 
 ---
 
 ## 七、备份机制
 
-`backups/` 文件夹存放历史版本。每次大改前备份：
+`backups/` 文件夹存放历史版本。每次大改前备份。
+
+### 方式一：用备份脚本（推荐）
+
+项目根目录下有 `backup.ps1` 脚本，双击或在终端运行：
+
+```powershell
+# PowerShell（Windows）
+.\backup.ps1
+# 或带备注
+.\backup.ps1 -Note "新增实习经历"
+```
+
+脚本会自动：
+1. 在 `backups/` 下创建 `YYYY-MM-DD-备注` 文件夹
+2. 复制所有核心文件（`_data/`、`_layouts/`、`_projects/`、`_publications/`、`index.html`、`en.html`、`style.css`、`script.js`、`_config.yml`）
+3. 打包 Git tag 供远程追溯（可选）
+
+### 方式二：手动备份
+
+```powershell
+# PowerShell（Windows）
+$date = Get-Date -Format "yyyy-MM-dd"
+New-Item -ItemType Directory -Path "backups\$date-stable" -Force
+Copy-Item -Recurse _data, _layouts, _projects, _publications, index.html, en.html, style.css, script.js, _config.yml "backups\$date-stable\"
+```
 
 ```bash
+# Bash（macOS/Linux）
 mkdir -p backups/$(date +%Y-%m-%d)-stable
-cp -r _layouts _data _config.yml index.html en.html style.css script.js backups/$(date +%Y-%m-%d)-stable/
+cp -r _data _layouts _projects _publications index.html en.html style.css script.js _config.yml backups/$(date +%Y-%m-%d)-stable/
 ```
+
+### 方式三：用 Git Tag 做版本快照（远程备份）
+
+```bash
+# 打标签（每月或每次大改后）
+git tag -a v2026-07 -m "7月版本：包含校园问答机器人和论文"
+git push origin v2026-07
+
+# 查看所有历史版本
+git tag -l
+
+# 回到某个历史版本查看
+git checkout v2026-07
+```
+
+> 💡 **建议组合使用**：本地 `backups/` 文件夹方便随时查看，Git tag 提供远程备份不怕丢。
 
 ---
 

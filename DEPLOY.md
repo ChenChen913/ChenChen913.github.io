@@ -340,21 +340,17 @@ GitHub 从 2021 年起不支持命令行直接使用账号密码。需要创建 
 7. 复制生成的 token（只显示一次，别关页面！）
 8. 回到终端，用户名填你的 GitHub 用户名，**密码那一栏粘贴这个 token**
 
-### 4.6 两个分支是怎么来的
+### 4.6 GitHub Actions 部署是怎么工作的
 
-项目在 GitHub 上有两个分支：
+项目在 GitHub 上只有一个分支 `main`。部署完全由 GitHub Actions 自动完成，**不需要 `gh-pages` 分支**。
 
-| 分支 | 创建方式 | 存放内容 |
-|---|---|---|
-| `main` | `git init` + `git push` 时 Git 自动创建 | Jekyll 源码（模板、数据、Markdown） |
-| `gh-pages` | `peaceiris/actions-gh-pages` Action 首次运行成功时自动创建 | 编译后的纯 HTML/CSS/JS |
-
-**gh-pages 分支的创建过程：**
+**部署流程：**
 
 1. 你 `git push` → GitHub 发现 `.github/workflows/deploy.yml`
 2. Actions 自动运行：checkout 源码 → 装 Ruby → `jekyll build` 生成 `_site/`
-3. `peaceiris/actions-gh-pages@v4` 发现仓库还没有 `gh-pages` 分支 → 自动创建 → 把 `_site/` 内容推进去
-4. 之后每次 `git push`，不会重新创建分支，而是覆盖分支内容
+3. `actions/upload-pages-artifact@v3` 把 `_site/` 打包为部署构件
+4. `actions/deploy-pages@v4` 把构件直接部署到 GitHub Pages 服务器
+5. 约 1 分钟后，`https://用户名.github.io` 更新为新内容
 
 **不需要手动创建任何分支。** 整个过程你只做了一件事：`git push`。其余都是 `.github/workflows/deploy.yml` 驱动 GitHub 自动完成的。
 
@@ -473,4 +469,4 @@ A：(1) 在 `_data/navigation.yml` 加导航项；(2) 在 `_data/` 新建数据�
 
 ---
 
-最后更新：2026 年 07 月 04 日
+最后更新：2026 年 07 月 31 日

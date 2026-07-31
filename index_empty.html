@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!--
   ============================================================
-  index_empty.html — 主页暂时关闭提示页
+  index_empty.html — 主页暂时关闭提示页（双语）
 
   用途：当你想让已分享的主页链接失效时，用此文件覆盖
         GitHub 仓库中的 index.html，push 后约 1 分钟生效。
@@ -16,7 +16,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>主页暂时关闭</title>
+<title>主页暂时关闭 / Homepage Temporarily Closed</title>
 <style>
   :root {
     --bg: #F4F5F7;
@@ -68,15 +68,44 @@
     margin: 0 auto 1.5em;
     opacity: 0.6;
   }
+  /* 双语切换 */
+  .en { display: none; }
+  html.lang-en .zh { display: none; }
+  html.lang-en .en { display: block; }
 </style>
+<script>
+  (function () {
+    var m = location.search.match(/[?&]lang=(zh|en)/);
+    var lang = m ? m[1] : ((navigator.language || "zh").indexOf("en") > -1 ? "en" : "zh");
+    document.documentElement.setAttribute("lang", lang === "en" ? "en" : "zh-CN");
+    document.documentElement.classList.add("lang-" + lang);
+  })();
+</script>
 </head>
 <body>
   <div class="card">
-    <h1>主页暂时关闭</h1>
+    <h1 class="zh">主页暂时关闭</h1>
+    <h1 class="en">Homepage Temporarily Closed</h1>
     <div class="divider"></div>
-    <p>你好，我是王晨。</p>
-    <p>我的个人主页目前暂时关闭，稍后会重新开放。</p>
-    <p>如有需要，可以通过邮箱联系我：<br><a href="mailto:wcn913@gmail.com">wcn913@gmail.com</a></p>
+    <p class="zh">你好，我是王晨。</p>
+    <p class="zh">我的个人主页目前暂时关闭，稍后会重新开放。</p>
+    <p class="en">Hello, I'm Chen Wang.</p>
+    <p class="en">My personal homepage is temporarily closed and will be back soon.</p>
+    <p class="zh">如有需要，可以通过邮箱联系我：<br><a href="#" id="email-link" data-u="wcn913" data-d="gmail.com" rel="nofollow">wcn913 [at] gmail.com</a></p>
+    <p class="en">If you need to reach me, please contact via email:<br><a href="#" id="email-link-en" data-u="wcn913" data-d="gmail.com" rel="nofollow">wcn913 [at] gmail.com</a></p>
   </div>
+  <script>
+    (function () {
+      // 邮箱混淆：拼接 data-u + @ + data-d，避免明文暴露被爬虫抓取
+      ['email-link', 'email-link-en'].forEach(function (id) {
+        var a = document.getElementById(id);
+        if (a) {
+          var addr = a.getAttribute('data-u') + '@' + a.getAttribute('data-d');
+          a.href = 'mailto:' + addr;
+          a.textContent = addr;
+        }
+      });
+    })();
+  </script>
 </body>
 </html>

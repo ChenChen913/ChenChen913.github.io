@@ -34,6 +34,9 @@
   "name": "{{ p.name }}",
   "url": "{{ site.url }}/",
   "image": "{{ '/assets/avatar.jpg' | absolute_url }}",
+  "jobTitle": "{{ p.tagline }}",
+  "alumniOf": "{{ site.data.education[l].school }}",
+  "knowsAbout": [{% for cat in site.data.skills[l] %}"{{ cat.category }}"{% unless forloop.last %}, {% endunless %}{% endfor %}],
   "sameAs": ["{{ s.github }}", "{{ s.gitee }}", "{{ s.x }}"]
 }
 </script>
@@ -128,7 +131,7 @@
             <p class="tagline">{{ p.tagline }}</p>
           </div>
           <div class="avatar">
-            <img src="{{ '/assets/avatar.jpg' | relative_url }}" alt="{{ p.name }}" onerror="this.style.display='none';">
+            <img src="{{ '/assets/avatar.jpg' | relative_url }}" alt="{{ p.name }}">
             <div class="avatar-fallback" id="avatar-fallback" aria-hidden="true"></div>
           </div>
         </div>

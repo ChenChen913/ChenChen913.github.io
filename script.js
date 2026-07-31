@@ -170,6 +170,7 @@
               clearTimeout(_spyResumeTimer);
               _spyResumeTimer = setTimeout(function () {
                 _spyPaused = false;
+                window.removeEventListener("scroll", _spyResumeOnScroll);
               }, 150);
             };
           }
@@ -339,5 +340,11 @@
           } catch (e) {}
         });
       }
+
+    // 头像加载失败时隐藏（从 default.html 内联 onerror 迁移至此）
+    var _avatarImg = document.querySelector('.avatar img');
+    if (_avatarImg) {
+      _avatarImg.addEventListener('error', function () { this.style.display = 'none'; });
+    }
 
     })();

@@ -17,6 +17,9 @@
     if (m) {
       document.documentElement.classList.add('lang-' + m[1]);
       document.documentElement.setAttribute('lang', m[1] === 'en' ? 'en' : 'zh-CN');
+    } else {
+      // 无 ?lang= 参数时默认显示中文，避免中英文同时展示（搜索引擎/直接分享链接进入）
+      document.documentElement.classList.add('lang-zh');
     }
   })();
 </script>
@@ -148,7 +151,7 @@
   </main>
 
   <footer class="site-footer container" style="padding-bottom:60px;">
-    <span>&copy; 2026 {{ p.name }}</span>
+    <span>&copy; 2026 <span class="detail-zh">{{ p.name }}</span><span class="detail-en">{{ p_en.name }}</span></span>
   </footer>
 
   <script src="{{ '/script.js' | relative_url }}"></script>
@@ -191,6 +194,7 @@
       try {
         var html = katex.renderToString(s.textContent, { displayMode: display, throwOnError: false });
         var span = document.createElement(display ? 'div' : 'span');
+        // KaTeX renderToString 内部对输入做了转义，innerHTML 此处安全（非用户直接输入）
         span.innerHTML = html;
         if (display) { span.style.margin = '1em 0'; span.style.textAlign = 'center'; }
         s.parentNode.replaceChild(span, s);

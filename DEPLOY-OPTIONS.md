@@ -11,16 +11,9 @@
 | 文件 | 作用 | 本项目状态 |
 |------|------|:--:|
 | `Gemfile` | 声明 Ruby 依赖（Jekyll、github-pages 等） | ✅ 已有 |
-| `Gemfile.lock` | 锁定依赖版本（确保本地和构建环境一致） | ❌ 需生成（见下方命令） |
+| `Gemfile.lock` | 锁定依赖版本（确保本地和构建环境一致） | ✅ 已有 |
 | `_config.yml` | Jekyll 配置（注意 `url` 和 `baseurl`） | ✅ 已有 |
 | `.ruby-version` | 指定 Ruby 版本（如 `3.3`），Netlify 和 Cloudflare 均支持 | ❌ 建议新建 |
-
-> ⚠️ **生成 `Gemfile.lock`**：本仓库尚未提交 `Gemfile.lock`。在本地安装 Ruby 与 Bundler 后，于项目根目录执行：
-> ```bash
-> bundle install
-> bundle lock --add-platform x86_64-linux
-> ```
-> 然后将生成的 `Gemfile.lock` 一并提交入库。
 
 > ⚠️ **`Gemfile.lock` 不能加入 `.gitignore`**。所有平台的自动构建都需要它来锁定依赖版本。
 
@@ -416,17 +409,19 @@ Gitee（码云）是国内最大的 Git 托管平台。Gitee Pages 是它的静�
    - 正确：`ChenChen913` → 访问地址 `chenchen913.gitee.io`
    - 错误：`ChenChen913.github.io` → 访问地址 `chenchen913.gitee.io/ChenChen913.github.io`
 
-**第二步：修改 PDF.js CDN 为国内源**
+**第二步：PDF.js CDN 源说明**
 
-Gitee Pages 在国内服务器构建，使用 `cdnjs.cloudflare.com` 可能有加载速度问题。建议在 `assets/pdf-viewer.html` 中替换：
+本项目使用 `cdnjs.cloudflare.com` 作为 CDN 源，该服务已全球加速，国内访问速度通常可接受。如果部署到 Gitee Pages 后发现 PDF 加载缓慢，可考虑替换为 `unpkg.com` 等安全替代源：
 
 ```diff
 - https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js
-+ https://cdn.bootcdn.net/ajax/libs/pdf.js/3.11.174/pdf.min.js
++ https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.min.js
 
 - https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js
-+ https://cdn.bootcdn.net/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js
++ https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js
 ```
+
+> ⚠️ **不要使用 `cdn.bootcdn.net`**：bootcdn 在 2024 年发生过供应链安全事件（恶意代码注入），存在安全风险。
 
 如果要两边都兼顾（GitHub + Gitee），可以通过这个方式在 Gitee 分支上维护不同版本。
 
@@ -504,4 +499,4 @@ Gitee 提供从 GitHub 自动同步的功能，这样你只需要 push 到 GitHu
 
 ---
 
-> 最后更新：2026-07-04
+> 最后更新：2026-07-31

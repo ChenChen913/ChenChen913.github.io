@@ -14,6 +14,6 @@ en:
   - category: AI / Machine Learning
     items: [Prompt Engineering, RAG, LangChain]
   - category: Web Fundamentals
-    items: [HTML / CSS, React Basics, FastAPI]
+    items: [HTML / CSS, React, FastAPI]
   - category: Tools & Collaboration
     items: [Git, Docker, Linux, Claude Code, Codex, Openclaw, Hermes, Trae]

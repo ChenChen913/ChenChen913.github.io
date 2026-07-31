@@ -36,7 +36,6 @@ markdown: kramdown
 markdown_ext: "markdown,mkdown,mkdn,mkd,md"
 kramdown:
   input: GFM
-  math_engine: mathjax
 
 # 排除
 exclude:
@@ -53,6 +52,8 @@ exclude:
   - README.md
   - README_EN.md
   - LICENSE
+  - 项目审查提示词-Jekyll双语个人主页版.md
+  - INDEPENDENT-ADVERSARIAL-REVIEW.md
 
 # 保留
 keep_files:

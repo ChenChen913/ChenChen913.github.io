@@ -37,6 +37,8 @@
 2. 使用 `peaceiris/actions-gh-pages@v4` 将 `_site/` 推送到 `gh-pages` 分支
 3. 将 GitHub Pages 源从 `main` 分支切换到 `gh-pages` 分支
 
+> **注：** 后续已迁移至 `actions/deploy-pages@v4`（无需 `gh-pages` 分支），详见本文档第十章"从 legacy Pages 部署迁移到 workflow 部署"。
+
 **关键教训：** 涉及 Jekyll 的项目，不要依赖 GitHub 内置构建的"黑盒"错误提示。初次部署就直接用 GitHub Actions，或者本地 `jekyll build` 验证后再 push。
 
 ---

@@ -12,13 +12,13 @@
 
 | 规则 | 说明 |
 |---|---|
-| **禁止删除或修改 `_layouts/default.html` 中的 CSS 引用** | `<link rel="stylesheet" href="style.css">` 和 `<script src="script.js">` 不可删除 |
-| **禁止修改 `style.css` 中的 CSS 变量块** | 第 1-35 行的 `:root` / `html[data-theme="light"]` / `html[data-theme="dark"]` 三个块 |
-| **禁止修改 `style.css` 中的 `scroll-margin-top`** | 第 61 行，值必须与 `script.js` 第 65 行的 `NAV_OFFSET` 相等 |
+| **禁止删除或修改 `_layouts/default.html` 中的 CSS 引用** | `<link rel="stylesheet" href="{{ '/style.css' | relative_url }}">` 和 `<script src="script.js">` 不可删除 |
+| **禁止修改 `style.css` 中的 CSS 变量块** | 第 1-38 行的 `:root` / `html[data-theme="light"]` / `html[data-theme="dark"]` 三个块 |
+| **禁止修改 `style.css` 中的 `scroll-margin-top`** | 第 61 行，值必须与 `script.js` 第 66 行的 `NAV_OFFSET` 相等 |
 | **禁止修改 `_layouts/default.html` 中 `<header>` 和 `<section>` 的 `id` 属性** | `about`/`education`/`experience`/`skills`/`projects`/`publications`/`contact` |
 | **禁止修改 `_data/navigation.yml` 中的 `id` 字段** | 必须与 HTML 中的 section id 严格对应 |
 | **禁止删除 `_layouts/` 中的 `{% if has_pubs %}` 等条件判断** | 这些控制栏目和导航项的自动显示/隐藏 |
-| **禁止修改 `script.js` 中的 `NAV_OFFSET`** | 第 65 行，值 80，必须与 CSS `scroll-margin-top` 一致 |
+| **禁止修改 `script.js` 中的 `NAV_OFFSET`** | 第 66 行，值 80，必须与 CSS `scroll-margin-top` 一致 |
 | **禁止删除 `script.js` 中的 `computeActiveSection` / `createBackToTopButton` 函数** | 核心交互逻辑 |
 | **禁止修改 `_config.yml` 中的 `collections` 配置** | 控制论文/项目集合的输出 |
 

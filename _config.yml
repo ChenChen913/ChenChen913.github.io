@@ -45,15 +45,13 @@ exclude:
   - vendor/
   - DEPLOY.md
   - TROUBLESHOOTING.md
-  - COMPREHENSIVE-REVIEW.md
   - DEPLOY-OPTIONS.md
   - RUBY-JEKYLL.md
   - update-date.py
   - README.md
   - README_EN.md
   - LICENSE
-  - 项目审查提示词-Jekyll双语个人主页版.md
-  - INDEPENDENT-ADVERSARIAL-REVIEW.md
+  - .workbuddy/
 
 # 保留
 keep_files:

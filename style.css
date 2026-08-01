@@ -12,8 +12,8 @@
     --border: #E1E4E8;
     --border-strong: #CBD1D7;
     --accent: #4A6FA0;
-    --accent-soft: rgba(74, 111, 160, 0.08);
-    --accent-soft-strong: rgba(74, 111, 160, 0.14);
+    --accent-soft: rgba(74, 111, 160, 0.06);
+    --accent-soft-strong: rgba(74, 111, 160, 0.12);
     --shadow: 0 1px 2px rgba(31, 35, 40, 0.05), 0 4px 16px rgba(31, 35, 40, 0.05);
     --shadow-hover: 0 2px 4px rgba(31, 35, 40, 0.06), 0 10px 24px rgba(31, 35, 40, 0.08);
   }
@@ -281,8 +281,11 @@
   .tag-accent {
     background: var(--accent-soft);
     border-color: transparent;
-    color: var(--accent);
+    color: #3E5F8C; /* 独立加深：12px 标签文字须满足 WCAG AA ≥ 4.5:1；深色主题下由下方规则覆盖 */
     font-weight: 600;
+  }
+  html[data-theme="dark"] .tag-accent {
+    color: var(--accent);
   }
   .tag-row { display: flex; flex-wrap: wrap; gap: 8px; }
 

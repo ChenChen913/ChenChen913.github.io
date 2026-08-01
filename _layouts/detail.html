@@ -30,7 +30,11 @@
 
 <title>{{ meta_zh.title }} — {{ p.name }}</title>
 <meta property="og:title" content="{{ meta_zh.title }}">
-<!-- ?lang=en 时同步替换浏览器标签标题与分享卡片标题（语言 class 已在上方脚本中设置） -->
+<meta property="og:type" content="article">
+<meta name="description" content="{{ meta_zh.desc }}">
+<meta property="og:description" content="{{ meta_zh.desc }}">
+<!-- 语言相关 meta 同步：必须在上方 meta description / og:description 声明之后执行，
+     否则 querySelector 取不到元素，切换不生效（历史教训：曾因此修复无效） -->
 <script>
   (function () {
     var isEn = document.documentElement.classList.contains('lang-en');
@@ -41,16 +45,13 @@
       if (og) og.setAttribute('content', {{ meta_en.title | jsonify }});
     }
     // 搜索摘要与分享描述随语言同步（jsonify 保证特殊字符安全）
-    var desc = isEn ? {{ meta_en.desc | jsonify }} : {{ meta_zh.desc | jsonify }};
+    var desc = isEn ? {{ meta_en.desc | default: '' | jsonify }} : {{ meta_zh.desc | default: '' | jsonify }};
     var md = document.querySelector('meta[name="description"]');
     if (md) md.setAttribute('content', desc);
     var od = document.querySelector('meta[property="og:description"]');
     if (od) od.setAttribute('content', desc);
   })();
 </script>
-<meta property="og:type" content="article">
-<meta name="description" content="{{ meta_zh.desc }}">
-<meta property="og:description" content="{{ meta_zh.desc }}">
 <meta property="og:image" content="{{ '/assets/avatar.jpg' | absolute_url }}">
 <meta property="og:url" content="{{ page.url | absolute_url }}">
 <link rel="canonical" href="{{ page.url | absolute_url }}">
@@ -148,7 +149,7 @@
       <!-- 英文 -->
       <div class="detail-en">
         <span class="tag tag-accent pub-type" style="margin-bottom:1em;">{{ meta_en.type }}</span>
-        <h2 class="section-title" style="font-size:1.2rem; margin-bottom:0.3em;">{{ meta_en.title }}</h2>
+        <h1 class="section-title" style="font-size:1.2rem; margin-bottom:0.3em;">{{ meta_en.title }}</h1>
         <p class="pub-meta" style="margin-bottom:1.5em;">{{ meta_en.meta }}</p>
         <div style="line-height:2; color:var(--ink-secondary);">
           {% assign parts = content | split: '<!-- English -->' %}
@@ -218,6 +219,13 @@
         { left: '\\(', right: '\\)', display: false }
       ],
       throwOnError: false
+    });
+    // 公式渲染会改变文档高度：等两帧布局稳定后触发 resize，
+    // 让 script.js 的阅读进度缓存（_cachedDocHeight）刷新，避免进度环/底部判断失准。
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () {
+        window.dispatchEvent(new Event('resize'));
+      });
     });
   })();
   </script>

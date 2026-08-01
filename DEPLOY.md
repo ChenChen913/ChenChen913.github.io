@@ -28,7 +28,7 @@
 | 规则 | 说明 |
 |---|---|
 | **修改 `_data/navigation.yml`** | 增删导航项需同步修改 `_layouts/default.html` 中对应的 `<section>` |
-| **修改 `style.css` 底部留白** | 第 401 行 `clamp(200px, 25vh, 300px)`，减小可能导致联系方式导航不亮 |
+| **修改 `style.css` 底部留白** | `footer.site-footer` 的 `padding-bottom: clamp(200px, 25vh, 300px)`（行号随维护会漂移，以选择器为准），减小可能导致联系方式导航不亮 |
 | **修改 `script.js` 第 66 行 `NAV_OFFSET`** | 必须同步修改 `style.css` 第 61 行 `scroll-margin-top` |
 
 ### ✅ 可以自由修改的内容

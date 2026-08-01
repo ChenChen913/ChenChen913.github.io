@@ -10,7 +10,15 @@
         : (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
       document.documentElement.setAttribute("data-theme", theme);
     } catch (e) {
-      document.documentElement.setAttribute("data-theme", "light");
+      // localStorage 不可用时仍尽量跟随系统偏好；实在不行才默认浅色
+      try {
+        document.documentElement.setAttribute(
+          "data-theme",
+          (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) ? "dark" : "light"
+        );
+      } catch (e2) {
+        document.documentElement.setAttribute("data-theme", "light");
+      }
     }
   })();
 </script>

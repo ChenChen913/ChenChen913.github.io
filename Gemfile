@@ -10,6 +10,7 @@ group :development do
 end
 
 group :test do
-  # 有意锁在 5.x：6.x 有 API 变化，升级前需重新验证 htmlproofer 命令兼容性；后续定期重估
-  gem "html-proofer", "~> 5.2"
+  # 收紧到已验证版本 5.2.2：5.x 内部 minor 也可能改变行为/参数（如 5.x 曾移除
+  # --assume-extension），常规 bundle update 不应静默升级；升级前需重新验证
+  gem "html-proofer", "~> 5.2.2"
 end

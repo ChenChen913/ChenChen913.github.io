@@ -3,7 +3,8 @@
 
       const storage = {
         get: function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
-        set: function (k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+        set: function (k, v) { try { localStorage.setItem(k, v); } catch (e) {} },
+        remove: function (k) { try { localStorage.removeItem(k); } catch (e) {} }
       };
 
       const htmlEl = document.documentElement;
@@ -35,10 +36,15 @@
         resolvedTheme = mql.matches ? "dark" : "light";
       }
       applyTheme(resolvedTheme);
+      // 清理非法遗留值，避免其阻断后续系统主题跟随
+      if (savedTheme !== null && savedTheme !== "dark" && savedTheme !== "light") {
+        storage.remove("theme");
+      }
 
       const themeChangeHandler = function (e) {
-        // 仅在用户未手动选择过主题时跟随系统变化；手动选择后以 localStorage 为准
-        if (!storage.get("theme")) applyTheme(e.matches ? "dark" : "light");
+        // 仅当本地没有有效的手动主题时才跟随系统变化；非法遗留值视同未选择
+        const t = storage.get("theme");
+        if (t !== "dark" && t !== "light") applyTheme(e.matches ? "dark" : "light");
       };
       // Safari < 14 不支持 MediaQueryList.addEventListener，回退 addListener
       if (typeof mql.addEventListener === "function") {
@@ -139,9 +145,10 @@
         const pos = scrollY + NAV_OFFSET;
         let currentId = sections.length ? sections[0].id : null;
 
-        // 常规判断：找到最后一个 offsetTop <= pos 的 section
+        // 常规判断：找到最后一个文档位置 <= pos 的 section
+        // （getBoundingClientRect 不受定位祖先影响，offsetTop 相对 offsetParent）
         for (let i = 0; i < sections.length; i++) {
-          if (sections[i].offsetTop <= pos) currentId = sections[i].id;
+          if (sections[i].getBoundingClientRect().top + scrollY <= pos) currentId = sections[i].id;
         }
 
         // 关键修复：如果页面已经滚动到底部，强制激活最后一个 section
@@ -375,10 +382,10 @@
         langToggleBtn.addEventListener("click", function () {
           try {
             const dh = _cachedDocHeight || getDocHeight();
-            if (dh > 0) {
-              const ratio = (window.scrollY || window.pageYOffset) / dh;
-              sessionStorage.setItem("_scrollRatio", String(ratio));
-            }
+            // 用最大可滚动距离做分母，目标语言页高度不同时保持相对位置
+            const maxScroll = Math.max(1, dh - (window.innerHeight || 1));
+            const ratio = (window.scrollY || window.pageYOffset) / maxScroll;
+            sessionStorage.setItem("_scrollRatio", String(ratio));
           } catch (e) {}
         });
       }
@@ -387,6 +394,10 @@
     const _avatarImg = document.querySelector('.avatar img');
     if (_avatarImg) {
       _avatarImg.addEventListener('error', function () { this.style.display = 'none'; });
+      // 已处于失败状态（缓存/坏图）的图片不会再次触发 error，需立即隐藏
+      if (_avatarImg.complete && _avatarImg.naturalWidth === 0) {
+        _avatarImg.style.display = 'none';
+      }
     }
 
     })();

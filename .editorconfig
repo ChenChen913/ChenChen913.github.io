@@ -9,9 +9,23 @@ trim_trailing_whitespace = true
 indent_style = space
 indent_size = 2
 
+# 二进制文件：不做行尾/末尾换行处理，防止编辑器改写损坏
+[*.{png,jpg,jpeg,gif,ico,webp,woff,woff2,ttf,eot,otf,zip,tar,gz,pdf,mp4}]
+insert_final_newline = false
+trim_trailing_whitespace = false
+end_of_line = unset
+
+# Makefile 配方必须以 TAB 缩进
+[Makefile]
+indent_style = tab
+
+# Windows 批处理脚本需要 CRLF 行尾
+[*.{bat,cmd}]
+end_of_line = crlf
+
+# Markdown / 补丁文件的行尾空白有语义，不能裁剪
+[*.{md,diff,patch}]
+trim_trailing_whitespace = false
+
 [*.py]
 indent_size = 4
-
-[*.md]
-# Markdown 行尾双空格有换行语义，不能裁剪
-trim_trailing_whitespace = false

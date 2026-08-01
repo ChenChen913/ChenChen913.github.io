@@ -10,15 +10,19 @@ now = datetime.now(BEIJING)
 
 # 中文格式：2026 年 07 月 05 日
 zh_date = f"{now.year} 年 {now.month:02d} 月 {now.day:02d} 日"
-# 英文格式：July 5, 2026
+# 英文格式：July 5, 2026（美式惯例不补零；若正文手写补零会被规范化为不补零，属预期行为）
 en_months = ['January','February','March','April','May','June',
              'July','August','September','October','November','December']
 en_date = f"{en_months[now.month-1]} {now.day}, {now.year}"
 
 # 基于本脚本所在目录定位，保证在任意机器/系统上都能运行
 path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "_data", "personal.yml")
-with open(path, encoding='utf-8') as f:
-    content = f.read()
+try:
+    with open(path, encoding='utf-8') as f:
+        content = f.read()
+except OSError as e:
+    print(f"错误：无法读取 {path}：{e}", file=sys.stderr)
+    sys.exit(1)
 original = content
 
 # 替换中文日期（精确匹配日期格式，其余行尾内容原样保留，防止吞掉注释/空白）
@@ -49,8 +53,20 @@ if not (zh_matched and en_matched):
     print("错误：仅部分日期模式匹配成功，为防止日期静默过期，已中止写入。", file=sys.stderr)
     sys.exit(1)
 
-# 固定写回 LF 行尾，与 .editorconfig / .gitattributes 约定一致
-with open(path, 'w', encoding='utf-8', newline='\n') as f:
-    f.write(content)
+# 固定写回 LF 行尾，与 .editorconfig / .gitattributes 约定一致；
+# 先写临时文件再原子替换，避免中途中断截断原文件
+tmp_path = path + '.tmp'
+try:
+    with open(tmp_path, 'w', encoding='utf-8', newline='\n') as f:
+        f.write(content)
+    os.replace(tmp_path, path)
+except OSError as e:
+    try:
+        if os.path.exists(tmp_path):
+            os.remove(tmp_path)
+    except OSError:
+        pass
+    print(f"错误：写入 {path} 失败：{e}", file=sys.stderr)
+    sys.exit(1)
 
 print(f"Updated: {zh_date} / {en_date}")

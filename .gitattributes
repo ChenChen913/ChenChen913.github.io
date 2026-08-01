@@ -7,9 +7,28 @@
 *.png binary
 *.gif binary
 *.webp binary
+*.ico binary
 *.pdf binary
 *.zip binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.eot binary
+*.mp4 binary
+*.exe binary
+*.dll binary
+*.so binary
+*.jar binary
+*.ps binary
+*.eps binary
+*.rtf binary
 
 # Windows 批处理脚本依赖 CRLF 行尾
 *.bat text eol=crlf
 *.cmd text eol=crlf
+
+# 其他依赖 CRLF 的 Windows 文本格式（与 .editorconfig 保持同步）
+*.reg text eol=crlf
+*.rc text eol=crlf
+*.sln text eol=crlf
+*.csproj text eol=crlf

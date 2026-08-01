@@ -21,16 +21,14 @@ if ([string]::IsNullOrWhiteSpace($SafeNote)) { $SafeNote = "stable" }
 
 $BackupName = "$Date-$SafeNote"
 
-# 解析并校验最终备份路径必须位于 backups/ 根目录下（纵深防御）
-$RepoRoot = (Get-Location).Path
-$BackupRoot = [System.IO.Path]::GetFullPath((Join-Path $RepoRoot 'backups'))
-$BackupPath = Join-Path $RepoRoot "backups\$BackupName"
-$ResolvedBackup = [System.IO.Path]::GetFullPath($BackupPath)
-if (-not $ResolvedBackup.StartsWith($BackupRoot + [System.IO.Path]::DirectorySeparatorChar, [System.StringComparison]::OrdinalIgnoreCase)) {
-    Write-Error "备份路径越界，已中止: $ResolvedBackup"
+# 脚本固定位于仓库根目录，不依赖调用者 CWD（跨平台用 Path.Combine，不用硬编码反斜杠）
+$RepoRoot = $PSScriptRoot
+$BackupRoot = [System.IO.Path]::GetFullPath([System.IO.Path]::Combine($RepoRoot, 'backups'))
+$BackupPath = [System.IO.Path]::GetFullPath([System.IO.Path]::Combine($RepoRoot, 'backups', $BackupName))
+if (-not $BackupPath.StartsWith($BackupRoot + [System.IO.Path]::DirectorySeparatorChar, [System.StringComparison]::OrdinalIgnoreCase)) {
+    Write-Error "备份路径越界，已中止: $BackupPath"
     exit 1
 }
-$BackupPath = $ResolvedBackup
 
 # 核心文件和目录列表
 $CoreItems = @(
@@ -48,27 +46,19 @@ $CoreItems = @(
     "_config.yml"
 )
 
-# 创建备份目录
-if (Test-Path -LiteralPath $BackupPath) {
-    # 不删除旧备份：先归档（带时间戳重命名），复制中断也不会丢失唯一备份
-    $OldPath = "$BackupPath-旧-" + (Get-Date -Format 'yyyyMMdd-HHmmss')
-    Write-Host "备份目录已存在，旧备份归档为: $OldPath" -ForegroundColor Yellow
-    try {
-        Move-Item -LiteralPath $BackupPath -Destination $OldPath -Force -ErrorAction Stop
-    } catch {
-        Write-Error "归档旧备份失败，已中止以避免覆盖旧备份: $($_.Exception.Message)"
-        exit 1
-    }
-}
-New-Item -ItemType Directory -Path $BackupPath -Force | Out-Null
+# 先复制到暂存目录，全部成功后再替换正式备份：
+# 任一复制失败都不会破坏上一份完好备份（不再"先归档后复制"）
+$StagingPath = "$BackupPath.tmp-" + (Get-Date -Format 'yyyyMMdd-HHmmss')
+New-Item -ItemType Directory -Path $StagingPath -Force | Out-Null
 
 # 复制核心文件
 $CopiedCount = 0
 $CopyFailed = $false
 foreach ($item in $CoreItems) {
-    if (Test-Path -LiteralPath $item) {
+    $src = Join-Path $RepoRoot $item
+    if (Test-Path -LiteralPath $src) {
         try {
-            Copy-Item -LiteralPath $item -Destination $BackupPath -Recurse -ErrorAction Stop
+            Copy-Item -LiteralPath $src -Destination $StagingPath -Recurse -ErrorAction Stop
             $CopiedCount++
         } catch {
             Write-Error "复制失败: $item — $($_.Exception.Message)"
@@ -79,8 +69,9 @@ foreach ($item in $CoreItems) {
     }
 }
 
-if ($CopyFailed) {
-    Write-Error "备份过程中存在失败项，未写入'备份完成'，请检查后重试。"
+if ($CopyFailed -or $CopiedCount -eq 0) {
+    Write-Error "备份过程中存在失败项（或没有任何核心项被复制），已中止；暂存目录将被清理。"
+    Remove-Item -LiteralPath $StagingPath -Recurse -Force -ErrorAction SilentlyContinue
     exit 1
 }
 
@@ -91,7 +82,34 @@ $Info = @"
 备份文件数: $CopiedCount 项
 创建者: backup.ps1 自动生成
 "@
-$Info | Out-File (Join-Path $BackupPath 'BACKUP-INFO.txt') -Encoding UTF8
+try {
+    $Info | Out-File (Join-Path $StagingPath 'BACKUP-INFO.txt') -Encoding UTF8 -ErrorAction Stop
+} catch {
+    Write-Error "写入备份信息失败，已中止: $($_.Exception.Message)"
+    Remove-Item -LiteralPath $StagingPath -Recurse -Force -ErrorAction SilentlyContinue
+    exit 1
+}
+
+# 暂存成功：若存在旧备份，先归档（带时间戳重命名）
+if (Test-Path -LiteralPath $BackupPath) {
+    $OldPath = "$BackupPath-旧-" + (Get-Date -Format 'yyyyMMdd-HHmmss')
+    Write-Host "备份目录已存在，旧备份归档为: $OldPath" -ForegroundColor Yellow
+    try {
+        Move-Item -LiteralPath $BackupPath -Destination $OldPath -Force -ErrorAction Stop
+    } catch {
+        Write-Error "归档旧备份失败，已中止: $($_.Exception.Message)"
+        Remove-Item -LiteralPath $StagingPath -Recurse -Force -ErrorAction SilentlyContinue
+        exit 1
+    }
+}
+
+# 暂存目录转正为正式备份
+try {
+    Move-Item -LiteralPath $StagingPath -Destination $BackupPath -Force -ErrorAction Stop
+} catch {
+    Write-Error "正式化备份目录失败，已中止: $($_.Exception.Message)"
+    exit 1
+}
 
 Write-Host ""
 Write-Host "==========================================" -ForegroundColor Green

@@ -24,7 +24,7 @@ en:
 
 发表期刊：《新型工业化》2019 年第 1 期，87-90 页。
 
-<!-- English -->
+<!-- PAGE_ENGLISH_SPLIT_2026 -->
 ## Project Introduction
 
 As automation and intelligent technologies continue to permeate various fields, scheduling strategy algorithms have become a hot research topic. This paper studies the dynamic scheduling problem of intelligent Rail Guided Vehicles (RGV) in smart manufacturing systems.

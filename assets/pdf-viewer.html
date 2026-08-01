@@ -128,8 +128,10 @@ var I18N = {
 };
 var lang = 'zh';
 try {
-  var ml = location.search.match(/[?&]lang=(zh|en)/) || (document.referrer || '').match(/[?&]lang=(zh|en)/);
-  if (ml) lang = ml[1];
+  var sp = new URLSearchParams(location.search);
+  var ml = sp.get('lang');
+  if (!ml && document.referrer) ml = new URL(document.referrer).searchParams.get('lang');
+  if (ml === 'zh' || ml === 'en') lang = ml;
 } catch (e) {}
 var T = I18N[lang];
 document.documentElement.setAttribute('lang', T.htmllang);
@@ -174,8 +176,10 @@ function resolveLocalPdf(raw) {
     var normalized = '/' + parts.join('/');
     if (normalized.indexOf('/assets/') !== 0) return null;
     if (!/\.pdf$/i.test(normalized)) return null;
-    // 返回重新编码的规范化路径，杜绝服务器二次解码差异
-    return encodeURI(normalized) + u.search;
+    // 拒绝规范化路径中残留的字面 ?/#（解码后会把 URL 截断成 query/fragment）
+    if (normalized.indexOf('?') !== -1 || normalized.indexOf('#') !== -1) return null;
+    // 逐段 encodeURIComponent 重新编码，保证 % / ? # 均按字面处理
+    return '/' + parts.map(function (seg) { return encodeURIComponent(seg); }).join('/') + u.search;
   } catch (e) {
     return null;
   }
@@ -282,6 +286,10 @@ function autoScale() {
 
 function renderPage(num) {
   if (!pdfDoc) return;
+  // 新一轮渲染开始：隐藏错误横幅、取消挂起的延迟清理，避免与渲染竞争
+  var errorEl = document.getElementById('error');
+  if (errorEl) errorEl.style.display = 'none';
+  clearTimeout(_cleanupTimer);
   var token = ++renderToken; // 单调递增令牌：只有最新一次渲染允许触碰 currentRenderTask
   // 取消上一次未完成的渲染任务，避免快速翻页时旧任务继续向已脱离 DOM 的 canvas 绘制
   if (currentRenderTask) { try { currentRenderTask.cancel(); } catch (e) {} currentRenderTask = null; }
@@ -315,8 +323,12 @@ function renderPage(num) {
         }
       }
     }).catch(function(err) {
-      // 渲染被取消（快速翻页）时 promise 会 reject，忽略即可
-      if (token === renderToken) currentRenderTask = null;
+      if (token !== renderToken) return;
+      currentRenderTask = null;
+      // 仅"渲染被取消"（快速翻页）静默；真实失败（worker 崩溃/画布超限）给出提示
+      if (err && err.name === 'RenderingCancelledException') return;
+      console.error(err);
+      showError(T.error, true);
     });
   }).catch(function(err) {
     // 页面获取失败（网络错误/损坏文件）：显示错误而非永久停留在"加载中…"

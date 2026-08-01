@@ -14,11 +14,13 @@
 {% include lang-init.html default='auto' %}
 <script>
   (function () {
-    var lang = (document.documentElement.getAttribute('lang') || 'zh').indexOf('en') === 0 ? 'en' : 'zh';
-    document.title = lang === 'en' ? '404 — Page Not Found' : '404 — 页面未找到';
+    var isEn = document.documentElement.classList.contains('lang-en');
+    document.title = isEn ? '404 — Page Not Found' : '404 — 页面未找到';
   })();
 </script>
 {% include theme-init.html %}
+<!-- 无 JS 时同时展示中英文，避免英文内容被 .nf-en{display:none} 锁死 -->
+<noscript><style>.nf-zh, .nf-en { display: block; }</style></noscript>
 <link rel="stylesheet" href="{{ '/style.css' | relative_url }}">
 <style>
   .nf-wrap { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; }
@@ -28,6 +30,7 @@
   .nf-desc { font-size: 15px; color: var(--ink-secondary); margin-bottom: 28px; line-height: 1.7; }
   .nf-btn { display: inline-block; padding: 10px 24px; background: var(--accent); color: #fff; border-radius: 8px; text-decoration: none; font-size: 14px; }
   .nf-btn:hover { text-decoration: none; opacity: 0.9; }
+  html[data-theme="dark"] .nf-btn { color: #14161A; }
   .nf-en { display: none; }
   html.lang-en .nf-zh { display: none; }
   html.lang-en .nf-en { display: block; }

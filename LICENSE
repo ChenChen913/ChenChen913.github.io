@@ -2,6 +2,19 @@ MIT License
 
 Copyright (c) 2026 ChenChen913 (王晨)
 
+重要范围说明（IMPORTANT SCOPE NOTICE）：
+本仓库采用双重许可。下文的 MIT 许可文本仅适用于本仓库中的源代码与构建配置文件
+（"Software"，范围见文末清单）。仓库中的个人信息、文字内容、图片与 PDF 文档等
+"保留内容"不属于被许可的 Software，保留所有权利（All Rights Reserved），
+未经所有者书面许可不得复制、修改或再分发。
+
+This repository is dual-licensed. The MIT license text below applies only to
+the source code and build configuration files in this repository (the
+"Software", listed at the end of this file). Personal information, written
+content, images, and PDF documents (the "Reserved Content") are NOT part of
+the licensed "Software" and are All Rights Reserved; they may not be copied,
+modified, or redistributed without written permission from the owner.
+
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
 in the Software without restriction, including without limitation the rights
@@ -22,34 +35,33 @@ SOFTWARE.
 
 ---
 
-附加说明（Additional Notice）:
+范围清单（SCOPE）
 
-上述 MIT 许可证仅适用于本仓库中的源代码与构建配置文件（HTML / CSS /
-JavaScript / Liquid 模板 / Python 脚本 / PowerShell 脚本 / Gemfile 与构建
-配置，如 _config.yml、.github/workflows/、.editorconfig、.gitattributes、
-.gitignore）。此处的"配置文件"不包括 _data/ 下的内容数据。
+许可范围（MIT，即上述 "Software"）：
+- 源代码：HTML / CSS / JavaScript（含 .mjs）/ Liquid 模板（_layouts/、
+  _includes/）/ Python 脚本 / PowerShell 脚本
+- 构建与配置：Gemfile、_config.yml、.github/workflows/、.editorconfig、
+  .gitattributes、.gitignore、robots.txt
+- 未在上文列出的仓库文件一律不在 MIT 许可范围内
 
-以下内容不适用 MIT 许可证，保留所有权利（All Rights Reserved），未经
-所有者书面许可不得复制、修改或再分发：
+保留范围（All Rights Reserved，不适用 MIT）：
+- _data/ 目录下所有文件（含将来新增）
+- _projects/ 与 _publications/ 目录下所有正文（含将来新增）
+- assets/ 下所有非代码资源：图片（含 avatar.jpg、favicon.svg）、PDF、字体等
+- 根目录文档：README*.md、README_EN.md、DEPLOY*.md、CONTENT-GUIDE.md、
+  TROUBLESHOOTING.md、RUBY-JEKYLL.md
 
-- 个人信息与文字内容：_data/ 下的简历数据（personal.yml、education.yml、
-  experience.yml、skills.yml、social.yml、navigation.yml）以及 _projects/
-  与 _publications/ 下的正文
-- 图片：assets/avatar.jpg 等
-- PDF 文档：assets/projects/、assets/publications/ 下的报告与论文
+Licensed under MIT (the "Software"):
+- Source code: HTML / CSS / JavaScript (including .mjs) / Liquid templates
+  (_layouts/, _includes/) / Python scripts / PowerShell scripts
+- Build and configuration: Gemfile, _config.yml, .github/workflows/,
+  .editorconfig, .gitattributes, .gitignore, robots.txt
+- Any repository file not listed above is NOT licensed under MIT.
 
-The MIT License above applies only to the source code and build
-configuration files in this repository: HTML / CSS / JavaScript / Liquid
-templates / Python scripts / PowerShell scripts / Gemfile and build
-configuration (such as _config.yml, .github/workflows/, .editorconfig,
-.gitattributes, .gitignore). "Configuration files" here does not include
-the content data under _data/.
-
-The following are NOT part of the licensed "Software" and are All Rights
-Reserved: personal information and written content (resume data under
-_data/, including personal.yml, education.yml, experience.yml, skills.yml,
-social.yml and navigation.yml; and the body text under _projects/ and
-_publications/), images (such as assets/avatar.jpg), and PDF documents
-(reports and papers under assets/projects/ and assets/publications/).
-They may not be copied, modified, or redistributed without written
-permission from the owner.
+Reserved Content (All Rights Reserved, not licensed under MIT):
+- All files under _data/ (including files added later)
+- All body text under _projects/ and _publications/ (including files added later)
+- All non-code assets under assets/: images (including avatar.jpg and
+  favicon.svg), PDFs, fonts, etc.
+- Root documentation: README*.md, README_EN.md, DEPLOY*.md,
+  CONTENT-GUIDE.md, TROUBLESHOOTING.md, RUBY-JEKYLL.md

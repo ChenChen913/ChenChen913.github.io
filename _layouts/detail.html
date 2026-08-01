@@ -1,8 +1,10 @@
-{% assign meta_zh = page.zh %}
-{% assign meta_en = page.en %}
+{% assign meta_zh = page.zh | default: page.en %}
+{% assign meta_en = page.en | default: page.zh %}
 {% assign p = site.data.personal.zh %}
 {% assign p_en = site.data.personal.en %}
 {% assign has_math = false %}{% if page.content contains '$$' or page.content contains '\(' or page.content contains '\[' %}{% assign has_math = true %}{% endif %}
+{% comment %}注：围栏代码块内的 $$/\( 可能误触发 has_math（仅多加载 KaTeX，不会误渲染——
+renderMathInElement 默认忽略 pre/code 内容），此为已知取舍。{% endcomment %}
 {% assign has_code = false %}{% if content contains '<pre' or content contains '```' %}{% assign has_code = true %}{% endif %}
 <!DOCTYPE html>
 <html lang="zh-CN">
@@ -150,12 +152,12 @@
 
       <!-- 中文 -->
       <div class="detail-zh">
-        <span class="tag tag-accent pub-type">{{ meta_zh.type }}</span>
-        <h1 class="section-title" style="font-size:1.4rem; margin-bottom:0.3em;">{{ meta_zh.title }}</h1>
-        <p class="pub-meta" style="margin-bottom:1.5em;">{{ meta_zh.meta }}</p>
+        <span class="tag tag-accent pub-type">{{ meta_zh.type | escape }}</span>
+        <h1 class="section-title" style="font-size:1.4rem; margin-bottom:0.3em;">{{ meta_zh.title | escape }}</h1>
+        <p class="pub-meta" style="margin-bottom:1.5em;">{{ meta_zh.meta | escape }}</p>
         <div style="line-height:2; color:var(--ink-secondary);">
           <!-- content 已是 Markdown 渲染后的 HTML，直接分割输出，避免二次 markdownify -->
-          {{ content | split: '<!-- English -->' | first }}
+          {{ content | split: '<!-- PAGE_ENGLISH_SPLIT_2026 -->' | first }}
         </div>
       </div>
 
@@ -164,33 +166,36 @@
 
       <!-- 英文 -->
       <div class="detail-en">
-        <span class="tag tag-accent pub-type" style="margin-bottom:1em;">{{ meta_en.type }}</span>
-        <h1 class="section-title" style="font-size:1.2rem; margin-bottom:0.3em;">{{ meta_en.title }}</h1>
-        <p class="pub-meta" style="margin-bottom:1.5em;">{{ meta_en.meta }}</p>
+        <span class="tag tag-accent pub-type" style="margin-bottom:1em;">{{ meta_en.type | escape }}</span>
+        <h1 class="section-title" style="font-size:1.2rem; margin-bottom:0.3em;">{{ meta_en.title | escape }}</h1>
+        <p class="pub-meta" style="margin-bottom:1.5em;">{{ meta_en.meta | escape }}</p>
         <div style="line-height:2; color:var(--ink-secondary);">
-          {% assign parts = content | split: '<!-- English -->' %}
+          {% assign parts = content | split: '<!-- PAGE_ENGLISH_SPLIT_2026 -->' %}
           {% if parts.size > 1 %}
             {{ parts[1] }}
+          {% else %}
+            <!-- 未找到英文分割标记：英文块留空（避免误截断），请检查正文是否包含标记 -->
           {% endif %}
         </div>
       </div>
 
-      <!-- PDF 查看器：单实例放在语言区块之外，中英文共用，避免同一 PDF 被加载两次 -->
+      <!-- PDF 查看器：单实例放在语言区块之外，中英文共用，避免同一 PDF 被加载两次。
+           初始不写 src，由脚本按语言从 data-zh/data-en 赋值，避免两种 PDF 都被下载；
+           无 JS 时 iframe 为空为文档化取舍。 -->
       {% if page.zh.pdf or page.en.pdf %}
       <div style="margin-top:2em;">
-        <iframe id="pdf-frame" src="{{ '/assets/pdf-viewer.html?file=' | relative_url }}{{ page.zh.pdf | default: page.en.pdf | prepend: '/assets/publications/' | relative_url }}"{% if page.zh.pdf %} data-zh="{{ '/assets/pdf-viewer.html?file=' | relative_url }}{{ page.zh.pdf | prepend: '/assets/publications/' | relative_url }}"{% endif %}{% if page.en.pdf %} data-en="{{ '/assets/pdf-viewer.html?file=' | relative_url }}{{ page.en.pdf | prepend: '/assets/publications/' | relative_url }}"{% endif %} style="width:100%; height:850px; border:1px solid var(--border); border-radius:8px;" title="PDF 文档 / PDF Document"></iframe>
+        <iframe id="pdf-frame"{% if page.zh.pdf %} data-zh="{{ '/assets/pdf-viewer.html?file=' | relative_url }}{{ page.zh.pdf | prepend: '/assets/publications/' | relative_url }}"{% endif %}{% if page.en.pdf %} data-en="{{ '/assets/pdf-viewer.html?file=' | relative_url }}{{ page.en.pdf | prepend: '/assets/publications/' | relative_url }}"{% endif %} style="width:100%; height:850px; border:1px solid var(--border); border-radius:8px;" title="PDF 文档 / PDF Document"></iframe>
         <script>
           (function () {
             var f = document.getElementById('pdf-frame');
             if (!f) return;
             var en = f.getAttribute('data-en');
             var zh = f.getAttribute('data-zh');
-            // 英文模式且存在英文 PDF 时切换；无 JS 时保留默认中文 PDF（zh 优先）
-            if (document.documentElement.classList.contains('lang-en') && en) {
-              f.src = en;
-            } else if (zh) {
-              f.src = zh;
-            }
+            var isEn = document.documentElement.classList.contains('lang-en');
+            if (isEn && en) f.src = en;
+            else if (!isEn && zh) f.src = zh;
+            else if (en) f.src = en;
+            else if (zh) f.src = zh;
           })();
         </script>
       </div>
@@ -200,7 +205,7 @@
   </main>
 
   <footer class="site-footer container" style="padding-bottom:60px;">
-    <span>&copy; 2026 <span class="detail-zh">{{ p.name }}</span><span class="detail-en">{{ p_en.name }}</span></span>
+    <span>&copy; 2026 <span class="detail-zh">{{ p.name | escape }}</span><span class="detail-en">{{ p_en.name | escape }}</span></span>
   </footer>
 
   <script src="{{ '/script.js' | relative_url }}"></script>

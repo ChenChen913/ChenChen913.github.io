@@ -21,7 +21,7 @@ en:
 
 本项目的目标就是用一个基于 RAG（Retrieval-Augmented Generation，检索增强生成）架构的智能问答机器人，把散落的教务文档"喂"给大模型，让学生用自然语言提问就能拿到带来源引用的准确答案。
 
-<!-- English -->
+<!-- PAGE_ENGLISH_SPLIT_2026 -->
 ## Project Introduction
 
 Every year during freshman orientation, the academic affairs office gets flooded with repetitive questions — "How do I use the course selection system?" "What's the credit transfer process?" "When's the deadline for minor applications?" The answers are all buried in dozens of PDFs and web pages scattered across the campus network, and students simply can't find them.

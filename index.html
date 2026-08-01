@@ -22,5 +22,9 @@ lang: zh
     https://你的用户名.github.io
 
   详见 DEPLOY.md 第三节"本地预览"。
+
+  注意：本页面 body 必须保持为空——页面内容完全由 default.html 布局从
+  site data 渲染，layout 不输出 {{ content }}。若将来需要页面特有内容，
+  请在 _layouts/default.html 中加入 {{ content }} 输出点。
   ============================================================
 {% endcomment %}

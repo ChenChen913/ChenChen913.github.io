@@ -30,8 +30,13 @@
   (function () {
     try {
       var saved = localStorage.getItem("theme");
-      var theme = saved || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+      var theme = (saved === "light" || saved === "dark")
+        ? saved
+        : (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
       document.documentElement.setAttribute("data-theme", theme);
+      if (saved !== null && saved !== "light" && saved !== "dark") {
+        localStorage.removeItem("theme");
+      }
     } catch (e) {
       document.documentElement.setAttribute("data-theme", "light");
     }
@@ -46,7 +51,7 @@
       var storedLang = localStorage.getItem("fallback-lang");
       if (storedLang === "en" || storedLang === "zh") {
         lang = storedLang;
-      } else if ((navigator.language || "zh").indexOf("en") > -1) {
+      } else if ((navigator.language || "zh").toLowerCase().indexOf("en") === 0) {
         lang = "en";
       }
     } catch (e) {}
@@ -55,9 +60,6 @@
     document.documentElement.classList.add("lang-" + lang);
   })();
 </script>
-
-<!-- 无 JS 时隐藏邮箱占位锚点，只保留 mailto 兜底链接 -->
-<noscript><style>#email-link{display:none}</style></noscript>
 
 <style>
   /* ============================================================
@@ -422,7 +424,8 @@
     opacity: 0;
     transform: translateY(12px);
     pointer-events: none;
-    transition: opacity 0.3s ease, transform 0.3s ease, box-shadow 0.2s ease;
+    visibility: hidden; /* 隐藏态退出 Tab 顺序 */
+    transition: opacity 0.3s ease, transform 0.3s ease, box-shadow 0.2s ease, visibility 0s linear 0.3s;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -430,7 +433,17 @@
     -webkit-tap-highlight-color: transparent;
     outline: none;
   }
-  .back-to-top.visible { opacity: 1; transform: translateY(0); pointer-events: auto; }
+  .back-to-top.visible {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+    visibility: visible;
+    transition: opacity 0.3s ease, transform 0.3s ease, box-shadow 0.2s ease, visibility 0s;
+  }
+  .back-to-top:focus {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
   .back-to-top:hover { box-shadow: var(--shadow-hover); transform: translateY(-2px); }
   .back-to-top:active { transform: scale(0.94); }
   .back-to-top svg { width: 48px; height: 48px; display: block; }
@@ -657,7 +670,7 @@
       <div class="contact-row">
         <span class="contact-item">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>
-<noscript><a href="mailto:wcn913@gmail.com">wcn913@gmail.com</a></noscript><a href="#" id="email-link" rel="nofollow"></a>
+<a href="mailto:wcn913@gmail.com" id="email-link" rel="nofollow"><noscript>wcn913@gmail.com</noscript></a>
         </span>
         <span class="contact-item">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6 0 0 0-1.3-3.2 4.2 4.2 0 0 0-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3 0 0 0-6.2 0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2 0 0 0-.1 3.2A4.6 4.6 0 0 0 4 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"/></svg>
@@ -714,10 +727,17 @@
         }
       }
       applyTheme((function () {
-        try { return localStorage.getItem("theme") || (mql.matches ? "dark" : "light"); } catch (e) { return "light"; }
+        try {
+          var t = localStorage.getItem("theme");
+          if (t === "dark" || t === "light") return t;
+          return mql.matches ? "dark" : "light";
+        } catch (e) { return "light"; }
       })());
       var themeChangeHandler = function (e) {
-        try { if (!localStorage.getItem("theme")) applyTheme(e.matches ? "dark" : "light"); } catch (err) {}
+        try {
+          var t = localStorage.getItem("theme");
+          if (t !== "dark" && t !== "light") applyTheme(e.matches ? "dark" : "light");
+        } catch (err) {}
       };
       // Safari < 14 不支持 MediaQueryList.addEventListener，回退 addListener
       if (typeof mql.addEventListener === "function") {
@@ -759,7 +779,7 @@
       try {
         var storedLang = localStorage.getItem("fallback-lang");
         if (storedLang === "en" || storedLang === "zh") initLang = storedLang;
-        else if ((navigator.language || "zh").indexOf("en") > -1) initLang = "en";
+        else if ((navigator.language || "zh").toLowerCase().indexOf("en") === 0) initLang = "en";
       } catch (e) {}
       setLang(initLang);
       var langToggle = document.getElementById("lang-toggle");
@@ -773,6 +793,9 @@
       var avatarImg = document.getElementById("avatar-img");
       if (avatarImg) {
         avatarImg.addEventListener("error", function () { this.style.display = "none"; });
+        if (avatarImg.complete && avatarImg.naturalWidth === 0) {
+          avatarImg.style.display = "none";
+        }
       }
 
       /* 邮箱由字符码数组 JS 拼接，仅防简单抓取 */
@@ -780,7 +803,6 @@
       if (emailLink) {
         var codes = [119, 99, 110, 57, 49, 51, 64, 103, 109, 97, 105, 108, 46, 99, 111, 109];
         var addr = codes.map(function (c) { return String.fromCharCode(c); }).join("");
-        emailLink.href = "mailto:" + addr;
         emailLink.textContent = addr;
       }
 
@@ -797,7 +819,8 @@
         var pos = scrollY + NAV_OFFSET;
         var currentId = sections.length ? sections[0].id : null;
         for (var i = 0; i < sections.length; i++) {
-          if (sections[i].offsetTop <= pos) currentId = sections[i].id;
+          // getBoundingClientRect 不受定位祖先影响
+          if (sections[i].getBoundingClientRect().top + scrollY <= pos) currentId = sections[i].id;
         }
         var docHeight = Math.max(
           document.body.scrollHeight, document.documentElement.scrollHeight,

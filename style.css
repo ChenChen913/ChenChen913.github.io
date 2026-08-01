@@ -70,8 +70,10 @@
   .top-ribbon-wrap { padding: 0 24px; }
   .top-ribbon {
     height: 4px;
-    max-width: var(--container-max);
+    width: 100%;
     margin: 0 auto;
+    /* 实际可见宽度与 .container 内容列一致（容器含 2×24px 内边距） */
+    max-width: calc(var(--container-max) - 48px);
     background: linear-gradient(90deg, #AEC0D6 0%, #C7D3C7 33%, #D3CBE0 66%, #9FB8CC 100%);
     opacity: 0.55;
     border-radius: 0 0 3px 3px;
@@ -236,8 +238,8 @@
   /* ============================================================
      通用板块 & 卡片
      ============================================================ */
-  .section { padding: 40px 0; border-top: 1px solid var(--border); }
-  .section:first-of-type { border-top: none; }
+  .section { padding: 40px 0; }
+  .section + .section { border-top: 1px solid var(--border); }
 
   .section-title {
     display: flex;
@@ -433,7 +435,8 @@
     opacity: 0;
     transform: translateY(12px);
     pointer-events: none;
-    transition: opacity 0.3s ease, transform 0.3s ease, box-shadow 0.2s ease;
+    visibility: hidden; /* 隐藏态退出 Tab 顺序，避免键盘聚焦不可见控件 */
+    transition: opacity 0.3s ease, transform 0.3s ease, box-shadow 0.2s ease, visibility 0s linear 0.3s;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -445,6 +448,13 @@
     opacity: 1;
     transform: translateY(0);
     pointer-events: auto;
+    visibility: visible;
+    transition: opacity 0.3s ease, transform 0.3s ease, box-shadow 0.2s ease, visibility 0s;
+  }
+  /* 不支持 :focus-visible 的浏览器（旧 Safari/Firefox）用普通 :focus 兜底 */
+  .back-to-top:focus {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
   }
   /* 键盘焦点可见（WCAG 2.4.7）：outline:none 后必须提供替代焦点指示 */
   .back-to-top:focus-visible {
@@ -551,3 +561,5 @@
     top: 0;
     text-decoration: none;
   }
+  /* 深色主题下 --accent 为浅蓝，白字对比度不足（WCAG AA 4.5:1），改用深色文字 */
+  html[data-theme="dark"] .skip-link { color: #14161A; }

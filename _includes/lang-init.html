@@ -3,21 +3,28 @@
 用法：
   {% include lang-init.html default='auto' %}  # ?lang 参数 → 浏览器语言 → zh
   {% include lang-init.html default='zh' %}   # ?lang 参数 → zh（详情页默认中文，爬虫友好）
+  {% include lang-init.html default='en' %}   # ?lang 参数 → en
 pdf-viewer.html 因支持从 referrer 推断语言，保持独立实现。
 {% endcomment %}
-{% assign _lang_default = include.default | default: 'auto' %}
+{% if include.default == 'en' %}{% assign _lang_mode = 'en' %}{% elsif include.default == 'auto' %}{% assign _lang_mode = 'auto' %}{% else %}{% assign _lang_mode = 'zh' %}{% endif %}
 <script>
   (function () {
-    var m = location.search.match(/[?&]lang=(zh|en)(?=&|$)/);
-    var lang;
-    if (m) {
-      lang = m[1];
-    } else if ('{{ _lang_default }}' === 'en') {
-      lang = 'en';
-    } else if ('{{ _lang_default }}' === 'auto') {
-      lang = ((navigator.language || 'zh').indexOf('en') > -1) ? 'en' : 'zh';
-    } else {
-      lang = 'zh';
+    var lang = null;
+    try {
+      var sp = new URLSearchParams(location.search);
+      var m = sp.get('lang');
+      if (m === 'zh' || m === 'en') lang = m;
+    } catch (e) {}
+    if (!lang) {
+      // 浏览器语言做小写前缀匹配，避免 men/den/zen 等含 en 的主标签误判
+      var navLang = (navigator.language || 'zh').toLowerCase();
+      if ('{{ _lang_mode }}' === 'en') {
+        lang = 'en';
+      } else if ('{{ _lang_mode }}' === 'auto') {
+        lang = navLang.indexOf('en') === 0 ? 'en' : 'zh';
+      } else {
+        lang = 'zh';
+      }
     }
     document.documentElement.setAttribute('lang', lang === 'en' ? 'en' : 'zh-CN');
     document.documentElement.classList.add('lang-' + lang);

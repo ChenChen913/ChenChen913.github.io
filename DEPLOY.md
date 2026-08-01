@@ -120,10 +120,12 @@ zh:
   type: 期刊论文
   title: 你的论文标题
   meta: 期刊名 · 2026
+  pdf: 论文文件名.pdf     # 可选：PDF 放入 assets/publications/，两处都填则详情页内嵌 PDF 查看器
 en:
   type: Journal Article
   title: Your Paper Title
   meta: Journal Name · 2026
+  pdf: 论文文件名.pdf     # 与 zh 保持一致
 ---
 
 中文摘要内容。

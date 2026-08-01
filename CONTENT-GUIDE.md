@@ -75,6 +75,30 @@ English content here.
 
 在 `_publications/` 下新建 `.md`，格式与项目相同。`type` 字段填"期刊论文"/"会议论文"/"Journal Article"等。
 
+如需在详情页内嵌 PDF 全文（在线查看，不触发下载），需要：
+1. 把 PDF 文件放到 `assets/publications/` 目录；
+2. 在 front matter 的 `zh:` 和 `en:` 下各加一行 `pdf: 文件名.pdf`（两处都填，文件名与文件一致）；
+3. 模板会自动在详情页末尾渲染 PDF 查看器（pdf.js，支持翻页/缩放/下载/全屏）。
+
+示例：
+
+```markdown
+---
+zh:
+  type: 期刊论文
+  title: 论文标题
+  meta: 期刊名 · 2026
+  pdf: 论文文件名.pdf
+en:
+  type: Journal Article
+  title: Paper Title
+  meta: Journal Name · 2026
+  pdf: 论文文件名.pdf
+---
+```
+
+> 不填 `pdf` 字段则该论文详情页不显示 PDF 查看器，其余功能不受影响。
+
 ### 1.3 新增工作/实习经历
 
 编辑 `_data/experience.yml`，在 `roles:` 下追加一个条目（注意中英文都要写）：

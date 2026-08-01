@@ -160,9 +160,9 @@
       </div>
 
       <!-- PDF 查看器：单实例放在语言区块之外，中英文共用，避免同一 PDF 被加载两次 -->
-      {% if page.zh.pdf %}
+      {% if page.zh.pdf or page.en.pdf %}
       <div style="margin-top:2em;">
-        <iframe src="{{ '/assets/pdf-viewer.html?file=' | relative_url }}{{ page.zh.pdf | prepend: '/assets/publications/' | relative_url }}" width="100%" height="850px" style="border:1px solid var(--border); border-radius:8px;" title="PDF 文档 / PDF Document"></iframe>
+        <iframe src="{{ '/assets/pdf-viewer.html?file=' | relative_url }}{{ page.zh.pdf | default: page.en.pdf | prepend: '/assets/publications/' | relative_url }}" width="100%" height="850px" style="border:1px solid var(--border); border-radius:8px;" title="PDF 文档 / PDF Document"></iframe>
       </div>
       {% endif %}
 

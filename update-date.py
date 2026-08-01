@@ -21,20 +21,20 @@ with open(path, encoding='utf-8') as f:
     content = f.read()
 original = content
 
-# 替换中文日期
-zh_pattern = re.compile(r"(footer_updated: 页面最后更新：).*")
-en_pattern = re.compile(r'(footer_updated: "Last updated: ).*(")')
+# 替换中文日期（精确匹配日期格式，其余行尾内容原样保留，防止吞掉注释/空白）
+zh_pattern = re.compile(r"(footer_updated: 页面最后更新：)(\d{4} 年 \d{2} 月 \d{2} 日)(.*)$", re.M)
+en_pattern = re.compile(r'(footer_updated: "Last updated: )([A-Za-z]+ \d{1,2}, \d{4})(".*)$', re.M)
 zh_matched = bool(zh_pattern.search(content))
 en_matched = bool(en_pattern.search(content))
 content = re.sub(
     zh_pattern,
-    rf"\g<1>{zh_date}",
+    rf"\g<1>{zh_date}\g<3>",
     content
 )
 # 替换英文日期
 content = re.sub(
     en_pattern,
-    rf'\g<1>{en_date}\g<2>',
+    rf'\g<1>{en_date}\g<3>',
     content
 )
 
@@ -43,6 +43,10 @@ if content == original:
         print("日期已是最新，无需更新。")
         sys.exit(0)
     print("错误：未匹配到 footer_updated 日期格式，请检查 _data/personal.yml 中的字段格式。", file=sys.stderr)
+    sys.exit(1)
+
+if not (zh_matched and en_matched):
+    print("错误：仅部分日期模式匹配成功，为防止日期静默过期，已中止写入。", file=sys.stderr)
     sys.exit(1)
 
 # 固定写回 LF 行尾，与 .editorconfig / .gitattributes 约定一致

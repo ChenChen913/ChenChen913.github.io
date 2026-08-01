@@ -4,9 +4,16 @@ _site/
 .jekyll-metadata
 .bundle/
 *.gem
-vendor/
+/vendor/
 .DS_Store
 Thumbs.db
+
+# 凭据/密钥防误提交
+.env
+.env.*
+*.pem
+*.key
+secrets.yml
 
 # 本地历史快照，不入库（历史版本已在 Git 提交记录中）
 backups/
@@ -15,3 +22,7 @@ backups/
 .workbuddy/
 .trae-cn/
 .trae/
+.cursor/
+.codex/
+.aider/
+.claude/

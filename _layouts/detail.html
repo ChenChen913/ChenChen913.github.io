@@ -14,49 +14,53 @@
 <!-- 语言修正尽早执行：根据 ?lang= 参数在解析正文前修正 <html lang>，避免屏幕阅读器以错误语言朗读。
      注：单文件双内容方案下无法在构建期区分语言，静态 lang="zh-CN" 仅为无 JS 环境的兜底（爬虫视角），
      已用 JS 修正实际浏览体验，此限制为已知取舍。 -->
-<script>
-  (function () {
-    var m = location.search.match(/[?&]lang=(zh|en)/);
-    if (m) {
-      document.documentElement.classList.add('lang-' + m[1]);
-      document.documentElement.setAttribute('lang', m[1] === 'en' ? 'en' : 'zh-CN');
-    } else {
-      // 无 ?lang= 参数时默认显示中文，避免中英文同时展示（搜索引擎/直接分享链接进入）。
-      // 与 404/应急页的浏览器语言检测不同是有意为之：Googlebot 等爬虫以 en-US 渲染，
-      // 若按浏览器语言检测会把默认索引版本变成英文，故详情页保持中文为默认。
-      document.documentElement.classList.add('lang-zh');
-    }
-  })();
-</script>
+{% include lang-init.html default='zh' %}
 
-<title>{{ meta_zh.title }} — {{ p.name }}</title>
-<meta property="og:title" content="{{ meta_zh.title }}">
+<title>{{ meta_zh.title | escape }} — {{ p.name | escape }}</title>
+<meta property="og:title" content="{{ meta_zh.title | escape }}">
 <meta property="og:type" content="article">
-<meta name="description" content="{{ meta_zh.seo_desc | default: meta_zh.desc }}">
-<meta property="og:description" content="{{ meta_zh.seo_desc | default: meta_zh.desc }}">
+<meta name="description" content="{{ meta_zh.seo_desc | default: meta_zh.desc | escape }}">
+<meta property="og:description" content="{{ meta_zh.seo_desc | default: meta_zh.desc | escape }}">
 <!-- 语言相关 meta 同步：必须在上方 meta description / og:description 声明之后执行，
      否则 querySelector 取不到元素，切换不生效（历史教训：曾因此修复无效） -->
 <script>
   (function () {
     var isEn = document.documentElement.classList.contains('lang-en');
-    // 标签页标题与 og:title 随语言切换（无 ?lang= 时默认中文）
+    // 标签页标题与 og:title 随语言切换（无 ?lang= 时默认中文）；
+    // jsonify 后再把 < 替换为 \u003c，防止 <\/script> 提前终止内联脚本
     if (isEn) {
-      document.title = {{ meta_en.title | jsonify }} + " — " + {{ p_en.name | jsonify }};
+      document.title = {{ meta_en.title | jsonify | replace: '<', '\u003c' }} + " — " + {{ p_en.name | jsonify | replace: '<', '\u003c' }};
       var og = document.querySelector('meta[property="og:title"]');
-      if (og) og.setAttribute('content', {{ meta_en.title | jsonify }});
+      if (og) og.setAttribute('content', {{ meta_en.title | jsonify | replace: '<', '\u003c' }});
     }
-    // 搜索摘要与分享描述随语言同步（jsonify 保证特殊字符安全）
-    var desc = isEn ? {{ meta_en.seo_desc | default: meta_en.desc | default: '' | jsonify }} : {{ meta_zh.seo_desc | default: meta_zh.desc | default: '' | jsonify }};
+    // 搜索摘要与分享描述随语言同步（jsonify + < 转义保证特殊字符安全）
+    var desc = isEn ? {{ meta_en.seo_desc | default: meta_en.desc | default: '' | jsonify | replace: '<', '\u003c' }} : {{ meta_zh.seo_desc | default: meta_zh.desc | default: '' | jsonify | replace: '<', '\u003c' }};
     var md = document.querySelector('meta[name="description"]');
     if (md) md.setAttribute('content', desc);
     var od = document.querySelector('meta[property="og:description"]');
     if (od) od.setAttribute('content', desc);
+    // JSON-LD 同步为当前语言（仅在英文模式改写；中文保持构建期默认值）。
+    // ld-json 元素在文档后方才出现，需等 DOMContentLoaded 后再操作。
+    if (isEn) {
+      document.addEventListener('DOMContentLoaded', function () {
+        var ld = document.getElementById('ld-json');
+        if (!ld) return;
+        try {
+          var obj = JSON.parse(ld.textContent);
+          obj.headline = {{ meta_en.title | jsonify | replace: '<', '\u003c' }};
+          obj.description = {{ meta_en.seo_desc | default: meta_en.desc | jsonify | replace: '<', '\u003c' }};
+          obj.inLanguage = 'en';
+          if (obj.author) obj.author.name = {{ p_en.name | jsonify | replace: '<', '\u003c' }};
+          ld.textContent = JSON.stringify(obj, null, 2);
+        } catch (err) {}
+      });
+    }
   })();
 </script>
 <meta property="og:image" content="{{ '/assets/avatar.jpg' | absolute_url }}">
 <meta property="og:url" content="{{ page.url | absolute_url }}">
 <link rel="canonical" href="{{ page.url | absolute_url }}">
-<script type="application/ld+json">
+<script type="application/ld+json" id="ld-json">
 {
   "@context": "https://schema.org",
   "@type": "{% if page.zh.pdf or page.en.pdf %}ScholarlyArticle{% else %}Article{% endif %}",
@@ -150,7 +154,8 @@
         <h1 class="section-title" style="font-size:1.4rem; margin-bottom:0.3em;">{{ meta_zh.title }}</h1>
         <p class="pub-meta" style="margin-bottom:1.5em;">{{ meta_zh.meta }}</p>
         <div style="line-height:2; color:var(--ink-secondary);">
-          {{ content | split: '<!-- English -->' | first | markdownify }}
+          <!-- content 已是 Markdown 渲染后的 HTML，直接分割输出，避免二次 markdownify -->
+          {{ content | split: '<!-- English -->' | first }}
         </div>
       </div>
 
@@ -165,7 +170,7 @@
         <div style="line-height:2; color:var(--ink-secondary);">
           {% assign parts = content | split: '<!-- English -->' %}
           {% if parts.size > 1 %}
-            {{ parts[1] | markdownify }}
+            {{ parts[1] }}
           {% endif %}
         </div>
       </div>
@@ -173,7 +178,21 @@
       <!-- PDF 查看器：单实例放在语言区块之外，中英文共用，避免同一 PDF 被加载两次 -->
       {% if page.zh.pdf or page.en.pdf %}
       <div style="margin-top:2em;">
-        <iframe src="{{ '/assets/pdf-viewer.html?file=' | relative_url }}{{ page.zh.pdf | default: page.en.pdf | prepend: '/assets/publications/' | relative_url }}" style="width:100%; height:850px; border:1px solid var(--border); border-radius:8px;" title="PDF 文档 / PDF Document"></iframe>
+        <iframe id="pdf-frame" src="{{ '/assets/pdf-viewer.html?file=' | relative_url }}{{ page.zh.pdf | default: page.en.pdf | prepend: '/assets/publications/' | relative_url }}"{% if page.zh.pdf %} data-zh="{{ '/assets/pdf-viewer.html?file=' | relative_url }}{{ page.zh.pdf | prepend: '/assets/publications/' | relative_url }}"{% endif %}{% if page.en.pdf %} data-en="{{ '/assets/pdf-viewer.html?file=' | relative_url }}{{ page.en.pdf | prepend: '/assets/publications/' | relative_url }}"{% endif %} style="width:100%; height:850px; border:1px solid var(--border); border-radius:8px;" title="PDF 文档 / PDF Document"></iframe>
+        <script>
+          (function () {
+            var f = document.getElementById('pdf-frame');
+            if (!f) return;
+            var en = f.getAttribute('data-en');
+            var zh = f.getAttribute('data-zh');
+            // 英文模式且存在英文 PDF 时切换；无 JS 时保留默认中文 PDF（zh 优先）
+            if (document.documentElement.classList.contains('lang-en') && en) {
+              f.src = en;
+            } else if (zh) {
+              f.src = zh;
+            }
+          })();
+        </script>
       </div>
       {% endif %}
 

@@ -14,6 +14,7 @@ concurrency:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     permissions:
       contents: read
       pages: write
@@ -22,11 +23,12 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - uses: actions/checkout@v7
+      # action 固定到完整 commit SHA，防止可变主版本标签被重定向/攻破后获得部署级权限
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
 
-      - uses: ruby/setup-ruby@v1
+      - uses: ruby/setup-ruby@95ef2b042f9d7a56d8268cba8559e2842e2ad01b
         with:
-          ruby-version: '3.3'
+          ruby-version: '3.3.12'
           bundler-cache: true
 
       - name: Static checks
@@ -34,6 +36,8 @@ jobs:
           node --check script.js
           ruby -e 'require "yaml"; Dir["_data/*.yml", "_config.yml"].each { |f| YAML.safe_load_file(f, permitted_classes: [], aliases: false) }; puts "YAML OK"'
 
+      # 本站为用户名级站点（chenchen913.github.io），baseurl 为空，
+      # 构建产物即部署在域名根，无需 actions/configure-pages / --baseurl。
       - name: Build site
         run: |
           bundle exec jekyll build
@@ -51,10 +55,10 @@ jobs:
           bundle exec htmlproofer ./_site --disable-external --allow-missing-href --no-enforce-https
 
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa
         with:
           path: ./_site
 
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e

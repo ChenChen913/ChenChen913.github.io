@@ -8,10 +8,7 @@ sitemap: false
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex">
 <title>PDF 查看器</title>
-<!-- SRI 预加载 pdf.js 主模块；worker 由 pdf.js 运行时动态加载，无法附加 SRI -->
-<link rel="modulepreload" href="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/6.1.200/pdf.min.mjs"
-      integrity="sha384-DVT/98LrvV8RwTKMrO+XhNmriXzZXkaBiUEzFou91SiquMt7FvC3TMHs4tMlDQhD"
-      crossorigin="anonymous">
+<!-- pdf.js 6.1.200 已自托管于 assets/pdfjs/（同源加载，无 CDN 可用性与供应链依赖） -->
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
@@ -113,10 +110,10 @@ sitemap: false
 <div id="pages"></div>
 
 <script type="module">
-import * as pdfjsLib from 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/6.1.200/pdf.min.mjs';
+import * as pdfjsLib from './pdfjs/pdf.min.mjs';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc =
-  'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/6.1.200/pdf.worker.min.mjs';
+  './pdfjs/pdf.worker.min.mjs';
 
 // 国际化：语言来自自身 ?lang= 参数，或嵌入本页的详情页 URL（referrer）
 var I18N = {
@@ -153,10 +150,32 @@ function resolveLocalPdf(raw) {
   try {
     var u = new URL(raw, window.location.href);
     if (u.origin !== window.location.origin) return null;
-    var path = decodeURIComponent(u.pathname);
-    if (path.indexOf('/assets/') !== 0) return null;
-    if (!/\.pdf$/i.test(path)) return null;
-    return u.pathname + u.search;
+    var path;
+    try {
+      path = decodeURIComponent(u.pathname);
+    } catch (e) {
+      return null; // 非法百分号编码
+    }
+    // 手工规范化 . 与 .. 段，防止 %2e/%2f 编码绕过 new URL 的字面规范化
+    var parts = [];
+    var ok = true;
+    path.split('/').forEach(function (seg) {
+      if (!ok) return;
+      // 拒绝含反斜杠的段（部分服务器把 %5C 当路径分隔符）
+      if (seg.indexOf('\\') !== -1) { ok = false; return; }
+      if (seg === '..') {
+        if (parts.length === 0) { ok = false; return; } // 越过根目录视为非法
+        parts.pop();
+      } else if (seg !== '.' && seg !== '') {
+        parts.push(seg);
+      }
+    });
+    if (!ok) return null;
+    var normalized = '/' + parts.join('/');
+    if (normalized.indexOf('/assets/') !== 0) return null;
+    if (!/\.pdf$/i.test(normalized)) return null;
+    // 返回重新编码的规范化路径，杜绝服务器二次解码差异
+    return encodeURI(normalized) + u.search;
   } catch (e) {
     return null;
   }
@@ -207,7 +226,7 @@ if (!rawFile) {
   init(pdfUrl);
 }
 
-var pdfDoc = null, pageNum = 1, totalPages = 0, scale = 1.2, currentRenderTask = null;
+var pdfDoc = null, pageNum = 1, totalPages = 0, scale = 1.2, currentRenderTask = null, renderToken = 0, _cleanupTimer = null;
 
 function init(url) {
   var fill = document.getElementById('progress-fill');
@@ -243,6 +262,19 @@ function init(url) {
   });
 }
 
+// 页面离开时释放 pdf.js 文档对象（worker/字体缓存/进行中任务）
+window.addEventListener('pagehide', function (e) {
+  // bfcache 恢复时会保留 JS 状态：persisted 时不销毁，否则返回后查看器失效
+  if (e.persisted) return;
+  if (pdfDoc) {
+    try { pdfDoc.destroy(); } catch (err) {}
+    pdfDoc = null;
+  }
+});
+window.addEventListener('pageshow', function (e) {
+  if (e.persisted && !pdfDoc && pdfUrl) init(pdfUrl);
+});
+
 function autoScale() {
   var w = document.getElementById('pages').clientWidth;
   scale = Math.max(0.5, (w - 20) / 612); // 612 = US Letter 默认宽度（8.5in × 72dpi）
@@ -250,6 +282,7 @@ function autoScale() {
 
 function renderPage(num) {
   if (!pdfDoc) return;
+  var token = ++renderToken; // 单调递增令牌：只有最新一次渲染允许触碰 currentRenderTask
   // 取消上一次未完成的渲染任务，避免快速翻页时旧任务继续向已脱离 DOM 的 canvas 绘制
   if (currentRenderTask) { try { currentRenderTask.cancel(); } catch (e) {} currentRenderTask = null; }
   pageNum = num;  // 立即更新，防止快速连续翻页时重复渲染同一页
@@ -261,22 +294,35 @@ function renderPage(num) {
   document.getElementById('pages').firstChild.textContent = T.pageloading;
 
   pdfDoc.getPage(num).then(function(page) {
-    // getPage 期间若又触发了新的 renderPage（pageNum 已变），跳过本次渲染
-    if (pageNum !== num) return;
+    // getPage 期间若又触发了新的 renderPage（页码或令牌已变），跳过本次渲染
+    if (pageNum !== num || token !== renderToken) return;
     var viewport = page.getViewport({ scale: scale });
     var canvas = document.createElement('canvas');
     canvas.width = viewport.width;
     canvas.height = viewport.height;
     var ctx = canvas.getContext('2d');
+    if (token !== renderToken) return;
     document.getElementById('pages').innerHTML = '';
     document.getElementById('pages').appendChild(canvas);
     currentRenderTask = page.render({ canvasContext: ctx, viewport: viewport });
     currentRenderTask.promise.then(function() {
-      currentRenderTask = null;
+      if (token === renderToken) {
+        currentRenderTask = null;
+        // 延迟清理，避免快速翻页反复 evict 字体/对象缓存
+        if (pdfDoc && document.visibilityState === 'visible') {
+          clearTimeout(_cleanupTimer);
+          _cleanupTimer = setTimeout(function () { try { pdfDoc.cleanup(); } catch (err) {} }, 3000);
+        }
+      }
     }).catch(function(err) {
       // 渲染被取消（快速翻页）时 promise 会 reject，忽略即可
-      currentRenderTask = null;
+      if (token === renderToken) currentRenderTask = null;
     });
+  }).catch(function(err) {
+    // 页面获取失败（网络错误/损坏文件）：显示错误而非永久停留在"加载中…"
+    if (token !== renderToken) return;
+    console.error(err);
+    showError(T.error, true);
   });
 }
 

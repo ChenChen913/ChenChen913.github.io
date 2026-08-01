@@ -10,8 +10,10 @@
   同步：本文件为手工维护，内容需与以下文件保持一致：
     _data/personal.yml / education.yml / experience.yml / skills.yml / social.yml
     _projects/campus-qa-bot.md / _publications/rgv-dynamic-scheduling.md
+  最后同步：2026-08-01（含 _data/*.yml 与两个详情页正文）
   每次更新主页内容后，请同步修改本文件（含页脚日期），
-  否则离线版本会与线上不一致。修改邮箱时同步 social.yml 与本文件字符码数组。
+  否则离线版本会与线上不一致。修改邮箱时同步 social.yml、_layouts/default.html、
+  index_empty.html 与本文件字符码数组/noscript 兜底。
 
   本文件已在 _config.yml 中被 exclude，不参与 Jekyll 构建，不影响线上站点。
   ============================================================
@@ -35,6 +37,27 @@
     }
   })();
 </script>
+
+<!-- 语言初始化同样前置到 head，避免英文偏好用户首帧闪中文（与主题防闪烁同理） -->
+<script>
+  (function () {
+    var lang = 'zh';
+    try {
+      var storedLang = localStorage.getItem("fallback-lang");
+      if (storedLang === "en" || storedLang === "zh") {
+        lang = storedLang;
+      } else if ((navigator.language || "zh").indexOf("en") > -1) {
+        lang = "en";
+      }
+    } catch (e) {}
+    document.documentElement.classList.remove("lang-zh", "lang-en");
+    document.documentElement.setAttribute("lang", lang === "en" ? "en" : "zh-CN");
+    document.documentElement.classList.add("lang-" + lang);
+  })();
+</script>
+
+<!-- 无 JS 时隐藏邮箱占位锚点，只保留 mailto 兜底链接 -->
+<noscript><style>#email-link{display:none}</style></noscript>
 
 <style>
   /* ============================================================
@@ -634,7 +657,7 @@
       <div class="contact-row">
         <span class="contact-item">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>
-          <a href="#" id="email-link" rel="nofollow"><noscript>wcn913 [at] gmail.com</noscript></a>
+<noscript><a href="mailto:wcn913@gmail.com">wcn913@gmail.com</a></noscript><a href="#" id="email-link" rel="nofollow"></a>
         </span>
         <span class="contact-item">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6 0 0 0-1.3-3.2 4.2 4.2 0 0 0-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3 0 0 0-6.2 0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2 0 0 0-.1 3.2A4.6 4.6 0 0 0 4 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"/></svg>
@@ -693,9 +716,15 @@
       applyTheme((function () {
         try { return localStorage.getItem("theme") || (mql.matches ? "dark" : "light"); } catch (e) { return "light"; }
       })());
-      mql.addEventListener("change", function (e) {
+      var themeChangeHandler = function (e) {
         try { if (!localStorage.getItem("theme")) applyTheme(e.matches ? "dark" : "light"); } catch (err) {}
-      });
+      };
+      // Safari < 14 不支持 MediaQueryList.addEventListener，回退 addListener
+      if (typeof mql.addEventListener === "function") {
+        mql.addEventListener("change", themeChangeHandler);
+      } else if (typeof mql.addListener === "function") {
+        mql.addListener(themeChangeHandler);
+      }
       var themeToggle = document.getElementById("theme-toggle");
       if (themeToggle) {
         themeToggle.addEventListener("click", function () {
@@ -714,6 +743,14 @@
         if (btn) {
           btn.textContent = lang === "zh" ? "EN" : "中文";
           btn.setAttribute("aria-label", lang === "zh" ? "切换到英文版" : "Switch to Chinese");
+        }
+        var themeBtn = document.getElementById("theme-toggle");
+        if (themeBtn) {
+          themeBtn.setAttribute("aria-label", lang === "zh" ? "切换深浅色模式" : "Toggle dark/light mode");
+        }
+        var btt = document.getElementById("back-to-top");
+        if (btt) {
+          btt.setAttribute("aria-label", lang === "zh" ? "返回顶部" : "Back to top");
         }
         document.title = lang === "zh" ? "王晨 · 个人主页" : "Chen Wang · Personal Homepage";
         try { localStorage.setItem("fallback-lang", lang); } catch (e) {}
@@ -795,6 +832,16 @@
           window.scrollTo({ top: top, behavior: motionQuery.matches ? "auto" : "smooth" });
           try { history.pushState(null, null, href); } catch (err) {}
         });
+      });
+
+      /* 前进/后退：popstate 时按 hash 滚动到对应板块，与 pushState 配对 */
+      window.addEventListener("popstate", function () {
+        var hash = window.location.hash;
+        if (!hash || hash.charAt(0) !== "#") return;
+        var target = document.getElementById(hash.slice(1));
+        if (!target) return;
+        var top = target.getBoundingClientRect().top + window.scrollY - NAV_OFFSET;
+        window.scrollTo({ top: top, behavior: motionQuery.matches ? "auto" : "smooth" });
       });
 
       /* 导航横向滑动渐隐提示 */

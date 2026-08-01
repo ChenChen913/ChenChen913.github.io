@@ -4,7 +4,10 @@
   (function () {
     try {
       var saved = localStorage.getItem("theme");
-      var theme = saved || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+      // 校验 localStorage 值：历史遗留非法值（如 "auto"/"system"）回退到系统偏好
+      var theme = (saved === "light" || saved === "dark")
+        ? saved
+        : (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
       document.documentElement.setAttribute("data-theme", theme);
     } catch (e) {
       document.documentElement.setAttribute("data-theme", "light");

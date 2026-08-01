@@ -1,3 +1,6 @@
+---
+---
+
 <!DOCTYPE html>
 <!--
   ============================================================
@@ -11,9 +14,10 @@
 
   此文件风格与主页一致，让访问者知道是主动关闭而非网站挂了。
 
-  ⚠️ 注意：本文件是纯 HTML（无 Jekyll frontmatter），邮箱地址是
-  硬编码的，无法从 _data/social.yml 自动读取。如果你改了邮箱，
-  请同步修改下方字符码数组（共两处：中文区和英文区）。
+  ⚠️ 注意：本文件带空 frontmatter，会被 Jekyll 处理（含共享语言初始化）。
+  邮箱地址是硬编码的，无法从 _data/social.yml 自动读取。如果你改了邮箱，
+  请同步修改下方字符码数组、两个 noscript 兜底、_data/social.yml、
+  _layouts/default.html 与 portfolio-single-file.html 中的对应位置。
   ============================================================
 -->
 <html lang="zh-CN">
@@ -78,14 +82,9 @@
   html.lang-en .zh { display: none; }
   html.lang-en .en { display: block; }
 </style>
-<script>
-  (function () {
-    var m = location.search.match(/[?&]lang=(zh|en)/);
-    var lang = m ? m[1] : ((navigator.language || "zh").indexOf("en") > -1 ? "en" : "zh");
-    document.documentElement.setAttribute("lang", lang === "en" ? "en" : "zh-CN");
-    document.documentElement.classList.add("lang-" + lang);
-  })();
-</script>
+<!-- 无 JS 时同时展示中英文，避免英文内容被 .en{display:none} 锁死；并隐藏邮箱占位锚点 -->
+<noscript><style>.zh, .en { display: block; } #email-link, #email-link-en { display: none; }</style></noscript>
+{% include lang-init.html default='auto' %}
 </head>
 <body>
   <div class="card">
@@ -96,8 +95,8 @@
     <p class="zh">我的个人主页目前暂时关闭，稍后会重新开放。</p>
     <p class="en">Hello, I'm Chen Wang.</p>
     <p class="en">My personal homepage is temporarily closed and will be back soon.</p>
-    <p class="zh">如有需要，可以通过邮箱联系我：<br><a href="#" id="email-link" rel="nofollow"><noscript>wcn913 [at] gmail.com</noscript></a></p>
-    <p class="en">If you need to reach me, please contact via email:<br><a href="#" id="email-link-en" rel="nofollow"><noscript>wcn913 [at] gmail.com</noscript></a></p>
+    <p class="zh">如有需要，可以通过邮箱联系我：<br><noscript><a href="mailto:wcn913@gmail.com">wcn913@gmail.com</a></noscript><a href="#" id="email-link" rel="nofollow"></a></p>
+    <p class="en">If you need to reach me, please contact via email:<br><noscript><a href="mailto:wcn913@gmail.com">wcn913@gmail.com</a></noscript><a href="#" id="email-link-en" rel="nofollow"></a></p>
   </div>
   <script>
     (function () {

@@ -1,0 +1,25 @@
+{% comment %}
+共享语言初始化脚本（避免 404/index_empty/detail 三处逻辑漂移）。
+用法：
+  {% include lang-init.html default='auto' %}  # ?lang 参数 → 浏览器语言 → zh
+  {% include lang-init.html default='zh' %}   # ?lang 参数 → zh（详情页默认中文，爬虫友好）
+pdf-viewer.html 因支持从 referrer 推断语言，保持独立实现。
+{% endcomment %}
+{% assign _lang_default = include.default | default: 'auto' %}
+<script>
+  (function () {
+    var m = location.search.match(/[?&]lang=(zh|en)(?=&|$)/);
+    var lang;
+    if (m) {
+      lang = m[1];
+    } else if ('{{ _lang_default }}' === 'en') {
+      lang = 'en';
+    } else if ('{{ _lang_default }}' === 'auto') {
+      lang = ((navigator.language || 'zh').indexOf('en') > -1) ? 'en' : 'zh';
+    } else {
+      lang = 'zh';
+    }
+    document.documentElement.setAttribute('lang', lang === 'en' ? 'en' : 'zh-CN');
+    document.documentElement.classList.add('lang-' + lang);
+  })();
+</script>

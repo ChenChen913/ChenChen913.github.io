@@ -347,7 +347,7 @@ git commit -m "更新了xxx内容"
 git push
 ```
 
-约 30-60 秒后网站自动更新。不需要手动点任何按钮。
+约 1-2 分钟后网站自动更新。不需要手动点任何按钮。
 
 ### 4.5 如果 git push 要求输密码但 GitHub 密码无效
 
@@ -372,7 +372,7 @@ GitHub 从 2021 年起不支持命令行直接使用账号密码。需要创建 
 2. Actions 自动运行：checkout 源码 → 装 Ruby → `jekyll build` 生成 `_site/`
 3. `actions/upload-pages-artifact@v3` 把 `_site/` 打包为部署构件
 4. `actions/deploy-pages@v4` 把构件直接部署到 GitHub Pages 服务器
-5. 约 1 分钟后，`https://用户名.github.io` 更新为新内容
+5. 约 1-2 分钟后，`https://用户名.github.io` 更新为新内容
 
 **不需要手动创建任何分支。** 整个过程你只做了一件事：`git push`。其余都是 `.github/workflows/deploy.yml` 驱动 GitHub 自动完成的。
 
@@ -520,7 +520,7 @@ git checkout v2026-07
 ## 八、常见问题
 
 **Q：push 后网站没更新？**
-A：GitHub Pages 构建需要 30-90 秒。如果超过 2 分钟没变化，去仓库 Settings → Pages 看构建状态。红色表示构建失败（通常是 YAML 语法错误）。
+A：GitHub Pages 构建通常需要 1-2 分钟。如果超过 3 分钟没变化，去仓库 Settings → Pages 看构建状态。红色表示构建失败（通常是 YAML 语法错误）。
 
 **Q：本地 `bundle exec jekyll serve` 报错？**
 A：确保 `bundle install` 成功。如果 Windows 上安装 `github-pages` gem 失败，尝试 `gem install jekyll` 后用 `jekyll serve`（功能相同）。

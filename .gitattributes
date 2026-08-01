@@ -1,2 +1,15 @@
 # 强制所有文本文件使用 LF 行尾符，与 .editorconfig 的 end_of_line = lf 一致
 * text=auto eol=lf
+
+# 二进制文件显式声明，防止 text=auto 启发式误判后做行尾转换损坏文件
+*.jpg binary
+*.jpeg binary
+*.png binary
+*.gif binary
+*.webp binary
+*.pdf binary
+*.zip binary
+
+# Windows 批处理脚本依赖 CRLF 行尾
+*.bat text eol=crlf
+*.cmd text eol=crlf

@@ -3,8 +3,8 @@
 # ============================================================
 
 email: wcn913@gmail.com
-# 注意：邮箱同时在 _layouts/default.html 与 index_empty.html 中以字符码数组硬编码
-# （防简单抓取）。修改邮箱时，请同步更新这三处。
+# 注意：邮箱同时在 _layouts/default.html、index_empty.html 与 portfolio-single-file.html
+# 中以字符码数组/noscript 硬编码（防简单抓取）。修改邮箱时，请同步更新这四处。
 github: https://github.com/ChenChen913
 github_display: github.com/ChenChen913
 gitee: https://gitee.com/ChenChen913

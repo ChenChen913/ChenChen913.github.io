@@ -3,6 +3,9 @@
      ============================================================ */
   :root,
   html[data-theme="light"] {
+    --container-max: 760px;      /* 正文容器最大宽度（.container/.nav-inner/.top-ribbon/.back-to-top 共用） */
+    --container-half: 380px;     /* = var(--container-max)/2（CSS calc 不支持除法，故显式给出） */
+    --back-to-top-offset: calc(var(--container-half) + 12px);
     --bg: #F4F5F7;
     --bg-elevated: #FFFFFF;
     --bg-tag: #EDEFF2;
@@ -39,6 +42,7 @@
 
   @media (prefers-reduced-motion: reduce) {
     html { scroll-behavior: auto; }
+    .nav-links { scroll-behavior: auto; }
     * { transition-duration: 0.001ms !important; animation-duration: 0.001ms !important; }
   }
 
@@ -56,7 +60,7 @@
   a { color: var(--accent); text-decoration: none; }
   a:hover { text-decoration: underline; text-underline-offset: 2px; }
 
-  .container { max-width: 760px; margin: 0 auto; padding: 0 24px; }
+  .container { max-width: var(--container-max); margin: 0 auto; padding: 0 24px; }
 
   section[id], header[id] { scroll-margin-top: 80px; }
 
@@ -66,7 +70,7 @@
   .top-ribbon-wrap { padding: 0 24px; }
   .top-ribbon {
     height: 4px;
-    max-width: 760px;
+    max-width: var(--container-max);
     margin: 0 auto;
     background: linear-gradient(90deg, #AEC0D6 0%, #C7D3C7 33%, #D3CBE0 66%, #9FB8CC 100%);
     opacity: 0.55;
@@ -87,7 +91,7 @@
   }
 
   .nav-inner {
-    max-width: 760px;
+    max-width: var(--container-max);
     margin: 0 auto;
     padding: 0 24px;
     height: 54px;
@@ -415,7 +419,7 @@
   .back-to-top {
     position: fixed;
     /* 桌面端：紧贴主题内容(.container)右侧，12px 间距 */
-    left: calc(50% + 392px);  /* 760/2 + 12px gap */
+    left: calc(50% + var(--back-to-top-offset));
     right: auto;
     bottom: 30px;
     z-index: 40;
@@ -517,6 +521,7 @@
     .back-to-top {
       left: auto;
       right: 16px;
+      bottom: 20px; /* 渐进增强降级：不支持 max()/env() 时使用普通值 */
       bottom: max(20px, calc(20px + env(safe-area-inset-bottom)));
     }
 

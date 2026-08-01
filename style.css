@@ -361,7 +361,7 @@
     pointer-events: none;
     user-select: none;
   }
-  .project-title { font-size: 1.02rem; font-weight: 700; margin-bottom: 0.2em; position: relative; padding-right: 76px; }
+  .project-title { font-size: 1.02rem; font-weight: 700; margin: 0 0 0.2em; position: relative; padding-right: 76px; }
   .project-meta { font-size: 0.8rem; color: var(--ink-tertiary); margin-bottom: 0.7em; position: relative; }
   .project-desc { font-size: 0.9rem; color: var(--ink-secondary); margin-bottom: 0.9em; position: relative; max-width: 46ch; }
   .project-links { font-size: 0.85rem; position: relative; }

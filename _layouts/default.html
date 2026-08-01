@@ -3,6 +3,7 @@
 {% assign p = site.data.personal[l] %}
 {% assign s = site.data.social %}
 {% assign e = site.data.experience %}
+{% if l == 'zh' %}{% assign page_desc = p.name | append: '的个人主页 —— 青岛理工大学信息与计算科学专业毕业生，AI 应用开发方向，展示教育背景、项目经历与论文成果。' %}{% else %}{% assign page_desc = p.name | append: 's personal homepage — B.Sc. in Information and Computing Science, Qingdao University of Technology, focused on AI application development.' %}{% endif %}
 {% assign has_pubs = false %}{% if site.publications.size > 0 %}{% assign has_pubs = true %}{% endif %}
 {% assign has_projs = false %}{% if site.projects.size > 0 %}{% assign has_projs = true %}{% endif %}
 {% assign has_exp = false %}{% if e.roles.size > 0 %}{% assign has_exp = true %}{% endif %}
@@ -11,11 +12,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/svg+xml" href="{{ '/assets/favicon.svg' | relative_url }}">
 <title>{{ p.name }} · {% if l == 'zh' %}个人主页{% else %}Personal Homepage{% endif %}</title>
-<meta name="description" content="{% if l == 'zh' %}{{ p.name }}的个人主页 —— 青岛理工大学信息与计算科学专业毕业生{% else %}{{ p.name }}'s personal homepage — B.Sc. in Information and Computing Science, Qingdao University of Technology{% endif %}">
+<meta name="description" content="{{ page_desc }}">
 <meta property="og:title" content="{{ p.name }} · {% if l == 'zh' %}个人主页{% else %}Personal Homepage{% endif %}">
 <meta property="og:type" content="website">
-<meta property="og:description" content="{% if l == 'zh' %}{{ p.name }}的个人主页{% else %}{{ p.name }}'s personal homepage{% endif %}">
+<meta property="og:description" content="{{ page_desc }}">
 <meta property="og:url" content="{{ page.url | absolute_url }}">
 <meta property="og:image" content="{{ '/assets/avatar.jpg' | absolute_url }}">
 <link rel="canonical" href="{{ page.url | absolute_url }}">
@@ -97,9 +99,9 @@
 
       <div class="nav-controls">
         {% if l == 'zh' %}
-        <a href="{{ '/en.html' | relative_url }}" class="lang-btn" aria-label="切换到英文版">EN</a>
+        <a href="{{ '/en.html' | relative_url }}" class="lang-btn" aria-label="EN - English version">EN</a>
         {% else %}
-        <a href="{{ '/index.html' | relative_url }}" class="lang-btn" aria-label="Switch to Chinese">中文</a>
+        <a href="{{ '/index.html' | relative_url }}" class="lang-btn" aria-label="中文 - Switch to Chinese">中文</a>
         {% endif %}
         <button id="theme-toggle" class="theme-btn" type="button" aria-label="{% if l == 'zh' %}切换深浅色模式{% else %}Toggle dark/light mode{% endif %}">
           <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.3"/><path d="M12 2.5v3M12 18.5v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2.5 12h3M18.5 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg>
@@ -194,9 +196,9 @@
       {% for proj in site.projects %}
       <article class="card project-entry">
         <span class="project-index" aria-hidden="true">{{ forloop.index | prepend: '00' | slice: -2, 2 }}</span>
-        <div class="project-title">
+        <h3 class="project-title">
           <a href="{{ proj.url | relative_url }}?lang={{ l }}" style="color:inherit;text-decoration:none;">{{ proj[l].title }}</a>
-        </div>
+        </h3>
         <div class="project-meta">{{ proj[l].meta }}</div>
         <p class="project-desc">{{ proj[l].desc }}</p>
         <div class="tag-row" style="margin-bottom:0.9em;">

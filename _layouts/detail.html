@@ -9,6 +9,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/svg+xml" href="{{ '/assets/favicon.svg' | relative_url }}">
 
 <!-- 语言修正尽早执行：根据 ?lang= 参数在解析正文前修正 <html lang>，避免屏幕阅读器以错误语言朗读。
      注：单文件双内容方案下无法在构建期区分语言，静态 lang="zh-CN" 仅为无 JS 环境的兜底（爬虫视角），
@@ -31,8 +32,8 @@
 <title>{{ meta_zh.title }} — {{ p.name }}</title>
 <meta property="og:title" content="{{ meta_zh.title }}">
 <meta property="og:type" content="article">
-<meta name="description" content="{{ meta_zh.desc }}">
-<meta property="og:description" content="{{ meta_zh.desc }}">
+<meta name="description" content="{{ meta_zh.seo_desc | default: meta_zh.desc }}">
+<meta property="og:description" content="{{ meta_zh.seo_desc | default: meta_zh.desc }}">
 <!-- 语言相关 meta 同步：必须在上方 meta description / og:description 声明之后执行，
      否则 querySelector 取不到元素，切换不生效（历史教训：曾因此修复无效） -->
 <script>
@@ -45,7 +46,7 @@
       if (og) og.setAttribute('content', {{ meta_en.title | jsonify }});
     }
     // 搜索摘要与分享描述随语言同步（jsonify 保证特殊字符安全）
-    var desc = isEn ? {{ meta_en.desc | default: '' | jsonify }} : {{ meta_zh.desc | default: '' | jsonify }};
+    var desc = isEn ? {{ meta_en.seo_desc | default: meta_en.desc | default: '' | jsonify }} : {{ meta_zh.seo_desc | default: meta_zh.desc | default: '' | jsonify }};
     var md = document.querySelector('meta[name="description"]');
     if (md) md.setAttribute('content', desc);
     var od = document.querySelector('meta[property="og:description"]');
@@ -55,6 +56,16 @@
 <meta property="og:image" content="{{ '/assets/avatar.jpg' | absolute_url }}">
 <meta property="og:url" content="{{ page.url | absolute_url }}">
 <link rel="canonical" href="{{ page.url | absolute_url }}">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "{% if page.zh.pdf or page.en.pdf %}ScholarlyArticle{% else %}Article{% endif %}",
+  "headline": "{{ meta_zh.title | escape }}",
+  "description": "{{ meta_zh.seo_desc | default: meta_zh.desc | escape }}",
+  "inLanguage": "zh-CN",
+  "author": { "@type": "Person", "name": "{{ p.name }}" }
+}
+</script>
 <!-- 双语互指（尽力而为）：中英文共用同一 URL、以 ?lang= 参数区分，
      搜索引擎对带查询参数的 hreflang 支持有限，此处仅作声明，不承诺索引效果 -->
 <link rel="alternate" hreflang="zh-CN" href="{{ page.url | absolute_url }}?lang=zh">
@@ -162,7 +173,7 @@
       <!-- PDF 查看器：单实例放在语言区块之外，中英文共用，避免同一 PDF 被加载两次 -->
       {% if page.zh.pdf or page.en.pdf %}
       <div style="margin-top:2em;">
-        <iframe src="{{ '/assets/pdf-viewer.html?file=' | relative_url }}{{ page.zh.pdf | default: page.en.pdf | prepend: '/assets/publications/' | relative_url }}" width="100%" height="850px" style="border:1px solid var(--border); border-radius:8px;" title="PDF 文档 / PDF Document"></iframe>
+        <iframe src="{{ '/assets/pdf-viewer.html?file=' | relative_url }}{{ page.zh.pdf | default: page.en.pdf | prepend: '/assets/publications/' | relative_url }}" style="width:100%; height:850px; border:1px solid var(--border); border-radius:8px;" title="PDF 文档 / PDF Document"></iframe>
       </div>
       {% endif %}
 

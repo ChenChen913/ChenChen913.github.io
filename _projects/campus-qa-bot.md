@@ -4,6 +4,7 @@ zh:
   title: 校园知识库问答机器人（毕业设计）
   meta: 独立开发 · 2019.09 — 2020.05
   desc: 基于 RAG 架构的毕业设计，向量化教务文档支持多轮问答。
+  seo_desc: 基于 RAG 架构的毕业设计，向量化教务文档支持多轮问答，覆盖选课、学分置换、辅修申请等高频咨询场景，独立完成全栈开发。
   tech: [Python, LangChain, FAISS, Streamlit]
 en:
   type: Capstone Project

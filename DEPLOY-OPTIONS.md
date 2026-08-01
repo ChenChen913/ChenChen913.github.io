@@ -413,14 +413,14 @@ Gitee（码云）是国内最大的 Git 托管平台。Gitee Pages 是它的静�
 
 **第二步：PDF.js CDN 源说明**
 
-本项目使用 `cdnjs.cloudflare.com` 作为 CDN 源，该服务已全球加速，国内访问速度通常可接受。如果部署到 Gitee Pages 后发现 PDF 加载缓慢，可考虑替换为 `unpkg.com` 等安全替代源：
+本项目使用 `cdnjs.cloudflare.com` 作为 CDN 源，该服务已全球加速，国内访问速度通常可接受。如果部署到 Gitee Pages 后发现 PDF 加载缓慢，可考虑替换为 `unpkg.com` 等安全替代源（版本与文件名以 `assets/pdf-viewer.html` 实际引用为准，当前为 6.1.200 / `.mjs` 格式）：
 
 ```diff
-- https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js
-+ https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.min.js
+- https://cdnjs.cloudflare.com/ajax/libs/pdf.js/6.1.200/pdf.min.mjs
++ https://unpkg.com/pdfjs-dist@6.1.200/build/pdf.min.mjs
 
-- https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js
-+ https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js
+- https://cdnjs.cloudflare.com/ajax/libs/pdf.js/6.1.200/pdf.worker.min.mjs
++ https://unpkg.com/pdfjs-dist@6.1.200/build/pdf.worker.min.mjs
 ```
 
 > ⚠️ **不要使用 `cdn.bootcdn.net`**：bootcdn 在 2024 年发生过供应链安全事件（恶意代码注入），存在安全风险。

@@ -10,7 +10,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<!-- 语言修正尽早执行：根据 ?lang= 参数在解析正文前修正 <html lang>，避免屏幕阅读器以错误语言朗读 -->
+<!-- 语言修正尽早执行：根据 ?lang= 参数在解析正文前修正 <html lang>，避免屏幕阅读器以错误语言朗读。
+     注：单文件双内容方案下无法在构建期区分语言，静态 lang="zh-CN" 仅为无 JS 环境的兜底（爬虫视角），
+     已用 JS 修正实际浏览体验，此限制为已知取舍。 -->
 <script>
   (function () {
     var m = location.search.match(/[?&]lang=(zh|en)/);
@@ -18,7 +20,9 @@
       document.documentElement.classList.add('lang-' + m[1]);
       document.documentElement.setAttribute('lang', m[1] === 'en' ? 'en' : 'zh-CN');
     } else {
-      // 无 ?lang= 参数时默认显示中文，避免中英文同时展示（搜索引擎/直接分享链接进入）
+      // 无 ?lang= 参数时默认显示中文，避免中英文同时展示（搜索引擎/直接分享链接进入）。
+      // 与 404/应急页的浏览器语言检测不同是有意为之：Googlebot 等爬虫以 en-US 渲染，
+      // 若按浏览器语言检测会把默认索引版本变成英文，故详情页保持中文为默认。
       document.documentElement.classList.add('lang-zh');
     }
   })();
@@ -29,10 +33,19 @@
 <!-- ?lang=en 时同步替换浏览器标签标题与分享卡片标题（语言 class 已在上方脚本中设置） -->
 <script>
   (function () {
-    if (!document.documentElement.classList.contains('lang-en')) return;
-    document.title = {{ meta_en.title | jsonify }} + " — " + {{ p_en.name | jsonify }};
-    var og = document.querySelector('meta[property="og:title"]');
-    if (og) og.setAttribute('content', {{ meta_en.title | jsonify }});
+    var isEn = document.documentElement.classList.contains('lang-en');
+    // 标签页标题与 og:title 随语言切换（无 ?lang= 时默认中文）
+    if (isEn) {
+      document.title = {{ meta_en.title | jsonify }} + " — " + {{ p_en.name | jsonify }};
+      var og = document.querySelector('meta[property="og:title"]');
+      if (og) og.setAttribute('content', {{ meta_en.title | jsonify }});
+    }
+    // 搜索摘要与分享描述随语言同步（jsonify 保证特殊字符安全）
+    var desc = isEn ? {{ meta_en.desc | jsonify }} : {{ meta_zh.desc | jsonify }};
+    var md = document.querySelector('meta[name="description"]');
+    if (md) md.setAttribute('content', desc);
+    var od = document.querySelector('meta[property="og:description"]');
+    if (od) od.setAttribute('content', desc);
   })();
 </script>
 <meta property="og:type" content="article">
@@ -41,21 +54,14 @@
 <meta property="og:image" content="{{ '/assets/avatar.jpg' | absolute_url }}">
 <meta property="og:url" content="{{ page.url | absolute_url }}">
 <link rel="canonical" href="{{ page.url | absolute_url }}">
+<!-- 双语互指（尽力而为）：中英文共用同一 URL、以 ?lang= 参数区分，
+     搜索引擎对带查询参数的 hreflang 支持有限，此处仅作声明，不承诺索引效果 -->
+<link rel="alternate" hreflang="zh-CN" href="{{ page.url | absolute_url }}?lang=zh">
+<link rel="alternate" hreflang="en" href="{{ page.url | absolute_url }}?lang=en">
 <meta name="theme-color" content="#F4F5F7" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#14161A" media="(prefers-color-scheme: dark)">
 
-<!-- 防止深浅色主题闪烁；无手动选择记录时跟随系统偏好（与上方 theme-color meta 行为一致） -->
-<script>
-  (function () {
-    try {
-      var saved = localStorage.getItem("theme");
-      var theme = saved || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
-      document.documentElement.setAttribute("data-theme", theme);
-    } catch (e) {
-      document.documentElement.setAttribute("data-theme", "light");
-    }
-  })();
-</script>
+{% include theme-init.html %}
 
 <!-- 语言过滤：根据 ?lang=zh 或 ?lang=en 只显示对应语言（lang 属性已在 head 最早处修正） -->
 <style>
@@ -66,12 +72,13 @@
 <link rel="stylesheet" href="{{ '/style.css' | relative_url }}">
 
 {% if has_math %}
-<!-- KaTeX: 数学公式（仅在正文含公式时加载） -->
+<!-- KaTeX: 数学公式（仅在正文含公式时加载）。
+     注：cdnjs 在部分地区访问慢/不可达，无降级方案为已知取舍——加载失败时公式显示为原始文本，不影响页面其余内容。 -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
 {% endif %}
 
 {% if has_code %}
-<!-- highlight.js: 代码高亮（仅在正文含代码块时加载） -->
+<!-- highlight.js: 代码高亮（仅在正文含代码块时加载）。加载失败时代码以 <pre> 原始样式显示，不影响其余内容。 -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css" integrity="sha384-eFTL69TLRZTkNfYZOLM+G04821K1qZao/4QLJbet1pP4tcF+fdXq/9CdqAbWRl/L" crossorigin="anonymous" id="hljs-light">
 <style id="hljs-dark" disabled>
   .hljs { color: #e1e4e8; background: #161b22; }
@@ -150,6 +157,13 @@
           {% endif %}
         </div>
       </div>
+
+      <!-- PDF 查看器：单实例放在语言区块之外，中英文共用，避免同一 PDF 被加载两次 -->
+      {% if page.zh.pdf %}
+      <div style="margin-top:2em;">
+        <iframe src="{{ '/assets/pdf-viewer.html?file=' | relative_url }}{{ page.zh.pdf | prepend: '/assets/publications/' | relative_url }}" width="100%" height="850px" style="border:1px solid var(--border); border-radius:8px;" title="PDF 文档 / PDF Document"></iframe>
+      </div>
+      {% endif %}
 
     </article>
   </main>

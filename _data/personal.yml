@@ -2,11 +2,13 @@
 zh:
   name: 王晨
   tagline: 信息与计算科学 · 2020 届本科毕业生 · AI 应用开发方向
+  job_title: AI 应用开发
   footer_copyright: "© 2026 王晨，保留所有权利"
-  footer_updated: 页面最后更新：2026 年 07 月 31 日
+  footer_updated: 页面最后更新：2026 年 08 月 01 日
 
 en:
   name: Chen Wang
   tagline: Information and Computing Science · Class of 2020 · AI Application Development
+  job_title: AI Application Developer
   footer_copyright: "© 2026 Chen Wang. All rights reserved."
-  footer_updated: "Last updated: July 31, 2026"
+  footer_updated: "Last updated: August 1, 2026"

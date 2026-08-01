@@ -57,7 +57,3 @@ exclude:
   - README_EN.md
   - LICENSE
   - .workbuddy/
-
-# 保留
-keep_files:
-  - .git

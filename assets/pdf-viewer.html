@@ -1,8 +1,12 @@
+---
+sitemap: false
+---
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
 <title>PDF 查看器</title>
 <!-- SRI 预加载 pdf.js 主模块；worker 由 pdf.js 运行时动态加载，无法附加 SRI -->
 <link rel="modulepreload" href="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/6.1.200/pdf.min.mjs"
@@ -96,7 +100,7 @@
   <button id="btn-zoomin" title="放大">＋</button>
   <button id="btn-zoomout" title="缩小">－</button>
   <a id="btn-download" class="btn" href="#" download>📥 下载</a>
-  <a id="btn-fullscreen" class="btn" href="#" target="_blank">⛶ 全屏</a>
+  <a id="btn-fullscreen" class="btn" href="#" target="_blank" rel="noopener noreferrer">⛶ 全屏</a>
 </div>
 
 <div id="loading">
@@ -117,9 +121,11 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
 // 国际化：语言来自自身 ?lang= 参数，或嵌入本页的详情页 URL（referrer）
 var I18N = {
   zh: { title: 'PDF 查看器', zoomin: '放大', zoomout: '缩小', download: '📥 下载', fullscreen: '⛶ 全屏',
+        prev: '上一页', next: '下一页',
         loading: '正在加载 PDF…', nofile: '未指定 PDF 文件', invalid: 'PDF 地址不合法：仅支持本站 /assets/ 目录下的 PDF 文件。',
         pageloading: '加载中…', error: 'PDF 加载失败。', errorlink: '点击此处直接打开', htmllang: 'zh-CN' },
   en: { title: 'PDF Viewer', zoomin: 'Zoom in', zoomout: 'Zoom out', download: '📥 Download', fullscreen: '⛶ Fullscreen',
+        prev: 'Previous page', next: 'Next page',
         loading: 'Loading PDF…', nofile: 'No PDF file specified', invalid: 'Invalid PDF URL: only same-site /assets/*.pdf files are supported.',
         pageloading: 'Loading…', error: 'Failed to load PDF.', errorlink: 'Click here to open it directly', htmllang: 'en' }
 };
@@ -131,6 +137,10 @@ try {
 var T = I18N[lang];
 document.documentElement.setAttribute('lang', T.htmllang);
 document.title = T.title;
+document.getElementById('btn-prev').title = T.prev;
+document.getElementById('btn-prev').setAttribute('aria-label', T.prev);
+document.getElementById('btn-next').title = T.next;
+document.getElementById('btn-next').setAttribute('aria-label', T.next);
 document.getElementById('btn-zoomin').title = T.zoomin;
 document.getElementById('btn-zoomout').title = T.zoomout;
 document.getElementById('btn-download').textContent = T.download;
@@ -235,7 +245,7 @@ function init(url) {
 
 function autoScale() {
   var w = document.getElementById('pages').clientWidth;
-  scale = Math.max(0.5, (w - 20) / 612);
+  scale = Math.max(0.5, (w - 20) / 612); // 612 = US Letter 默认宽度（8.5in × 72dpi）
 }
 
 function renderPage(num) {

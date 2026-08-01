@@ -35,11 +35,17 @@ jobs:
           ruby -e 'require "yaml"; Dir["_data/*.yml", "_config.yml"].each { |f| YAML.safe_load_file(f, permitted_classes: [], aliases: false) }; puts "YAML OK"'
 
       - name: Build site
-        run: bundle exec jekyll build
+        run: |
+          bundle exec jekyll build
+          # 移除 github-pages gem 默认主题(minima)自动生成的未引用样式表 assets/css/style.css
+          # （约 136KB 死重量，本站实际使用根目录 style.css）。若未来新增真正的 assets/css 资源请删除本行。
+          rm -rf _site/assets/css
 
       # 链接/产物校验：检查内部死链与图片 alt 缺失等，防止内容性回归。
       # 阻断式：任何死链或 alt 缺失都会让部署失败。
       # 注：html-proofer 5.x 移除了 --assume-extension（jekyll 目录型 permalink 默认即按 index.html 解析）。
+      # 注：--disable-external 为有意取舍——外部站点（X/GitHub 等）的反爬策略会导致误报，
+      #     外链有效性由内容维护时人工确认（社交链接集中在 _data/social.yml）。
       - name: Check internal links (blocking)
         run: |
           bundle exec htmlproofer ./_site --disable-external --allow-missing-href --no-enforce-https

@@ -1,0 +1,13 @@
+<!-- 主题初始化：无手动选择记录时跟随系统偏好（与 theme-color meta 行为一致）。
+     必须在 <head> 同步执行（不能加 defer），否则首帧会出现主题闪烁。 -->
+<script>
+  (function () {
+    try {
+      var saved = localStorage.getItem("theme");
+      var theme = saved || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+      document.documentElement.setAttribute("data-theme", theme);
+    } catch (e) {
+      document.documentElement.setAttribute("data-theme", "light");
+    }
+  })();
+</script>

@@ -8,7 +8,7 @@
     --bg-tag: #EDEFF2;
     --ink: #1F2328;
     --ink-secondary: #52585F;
-    --ink-tertiary: #868D96;
+    --ink-tertiary: #5F6670;
     --border: #E1E4E8;
     --border-strong: #CBD1D7;
     --accent: #4A6FA0;
@@ -24,7 +24,7 @@
     --bg-tag: #22262C;
     --ink: #E7E9EC;
     --ink-secondary: #A3A9B2;
-    --ink-tertiary: #6E7580;
+    --ink-tertiary: #8F96A0;
     --border: #262A31;
     --border-strong: #343A42;
     --accent: #8FB0D9;
@@ -361,7 +361,6 @@
   .project-title { font-size: 1.02rem; font-weight: 700; margin-bottom: 0.2em; position: relative; padding-right: 76px; }
   .project-meta { font-size: 0.8rem; color: var(--ink-tertiary); margin-bottom: 0.7em; position: relative; }
   .project-desc { font-size: 0.9rem; color: var(--ink-secondary); margin-bottom: 0.9em; position: relative; max-width: 46ch; }
-  .project-tech-label { font-size: 0.78rem; color: var(--ink-tertiary); margin-bottom: 0.5em; position: relative; }
   .project-links { font-size: 0.85rem; position: relative; }
   .project-links a { margin-right: 1.3em; }
 
@@ -439,6 +438,11 @@
     opacity: 1;
     transform: translateY(0);
     pointer-events: auto;
+  }
+  /* 键盘焦点可见（WCAG 2.4.7）：outline:none 后必须提供替代焦点指示 */
+  .back-to-top:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
   }
   .back-to-top:hover {
     box-shadow: var(--shadow-hover);

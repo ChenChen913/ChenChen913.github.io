@@ -23,12 +23,6 @@ en:
 
 发表期刊：《新型工业化》2019 年第 1 期，87-90 页。
 
-<iframe src="{{ '/assets/pdf-viewer.html?file=' | relative_url }}{{ '/assets/publications/智能RGV的动态调度策略研究.pdf' | relative_url }}"
-  width="100%" height="850px"
-  style="border:1px solid var(--border); border-radius:8px;"
-  title="智能 RGV 的动态调度策略研究 PDF">
-</iframe>
-
 <!-- English -->
 ## Project Introduction
 
@@ -37,9 +31,3 @@ As automation and intelligent technologies continue to permeate various fields, 
 For single-process machining, a simulated annealing algorithm is employed to find the initial shortest path for RGV operations and a real-time dynamic model is constructed. For dual-process machining, a differential evolution-based multi-objective rescheduling periodic model applicable to general problems is established.
 
 Published in: *Journal of New Industrialization*, Vol. 2019, No. 1, pp. 87-90.
-
-<iframe src="{{ '/assets/pdf-viewer.html?file=' | relative_url }}{{ '/assets/publications/智能RGV的动态调度策略研究.pdf' | relative_url }}"
-  width="100%" height="850px"
-  style="border:1px solid var(--border); border-radius:8px;"
-  title="RGV Dynamic Scheduling Research PDF">
-</iframe>

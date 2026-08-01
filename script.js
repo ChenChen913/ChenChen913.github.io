@@ -303,7 +303,7 @@
           var offset = CIRCUMFERENCE * (1 - progress);
           bttProgress.setAttribute("stroke-dashoffset", offset);
 
-          if (scrollY > 300) {
+          if (scrollY > 300) { // 显示阈值：约一屏的 1/3（经验值，无精确来源）
             bttBtn.classList.add("visible");
           } else {
             bttBtn.classList.remove("visible");

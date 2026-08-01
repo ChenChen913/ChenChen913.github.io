@@ -10,20 +10,17 @@
 <meta name="robots" content="noindex">
 <meta name="theme-color" content="#F4F5F7" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#14161A" media="(prefers-color-scheme: dark)">
-<!-- 主题初始化 + 语言检测（与主站逻辑一致） -->
+<!-- 语言检测（与主站逻辑一致） -->
 <script>
   (function () {
-    try {
-      var saved = localStorage.getItem("theme");
-      var theme = saved || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
-      document.documentElement.setAttribute("data-theme", theme);
-    } catch (e) { document.documentElement.setAttribute("data-theme", "light"); }
     var m = location.search.match(/[?&]lang=(zh|en)/);
     var lang = m ? m[1] : ((navigator.language || "zh").indexOf("en") > -1 ? "en" : "zh");
     document.documentElement.setAttribute("lang", lang === "en" ? "en" : "zh-CN");
     document.documentElement.classList.add("lang-" + lang);
+    document.title = lang === "en" ? "404 — Page Not Found" : "404 — 页面未找到";
   })();
 </script>
+{% include theme-init.html %}
 <link rel="stylesheet" href="{{ '/style.css' | relative_url }}">
 <style>
   .nf-wrap { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; }

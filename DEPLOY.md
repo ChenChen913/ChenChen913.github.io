@@ -333,11 +333,11 @@ git push -u origin main
 3. 看到中文主页 → 成功！
 4. 英文版：`https://你的用户名.github.io/en.html`
 
-如果显示 404：再等 2 分钟。如果还不行：仓库 Settings → Pages，确认 Branch 选 `main`，目录选 `/ (root)`，点 Save。
+如果显示 404：再等 2 分钟。如果还不行：仓库 Settings → Pages，确认 Build and deployment 的 Source 选 **GitHub Actions**（本项目已配置 `.github/workflows/deploy.yml`，正常无需改动）。
 
 ### 4.4 GitHub 自动构建
 
-**不需要任何额外操作。** GitHub 检测到 `_config.yml` 后自动用 Jekyll 构建。以后每次改内容只需：
+**不需要任何额外操作。** push 后 GitHub Actions 自动运行 `.github/workflows/deploy.yml`：安装 Ruby → `jekyll build` → 上传产物 → 部署到 Pages。以后每次改内容只需：
 
 ```bash
 git add .

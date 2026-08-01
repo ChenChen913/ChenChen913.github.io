@@ -29,7 +29,7 @@
 │   └── detail.html      # 详情页布局（项目 / 论文）
 ├── _projects/           # 项目详情页（Markdown，中英文用 <!-- English --> 分隔）
 ├── _publications/       # 论文详情页（同上）
-├── assets/              # 头像、PDF 文件、PDF 查看器
+├── assets/              # 头像、PDF 文件、PDF 查看器、favicon
 ├── index.html           # 中文主页入口
 ├── en.html              # 英文主页入口
 ├── style.css / script.js# 全站样式与交互脚本

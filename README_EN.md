@@ -29,7 +29,7 @@ A personal homepage built with Jekyll, deployed on GitHub Pages.
 │   └── detail.html      # detail page layout (projects / publications)
 ├── _projects/           # project detail pages (Markdown, bilingual via <!-- English --> separator)
 ├── _publications/       # publication detail pages (same as above)
-├── assets/              # avatar, PDF files, PDF viewer
+├── assets/              # avatar, PDF files, PDF viewer, favicon
 ├── index.html           # Chinese homepage entry
 ├── en.html              # English homepage entry
 ├── style.css / script.js# site-wide styles and interaction scripts

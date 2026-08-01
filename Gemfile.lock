@@ -356,7 +356,7 @@ PLATFORMS
 
 DEPENDENCIES
   github-pages (~> 232)
-  html-proofer (~> 5.2)
+  html-proofer (~> 5.2.2)
   webrick (~> 1.8)
 
 BUNDLED WITH

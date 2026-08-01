@@ -10,7 +10,8 @@ now = datetime.now(BEIJING)
 
 # 中文格式：2026 年 07 月 05 日
 zh_date = f"{now.year} 年 {now.month:02d} 月 {now.day:02d} 日"
-# 英文格式：July 5, 2026（美式惯例不补零；若正文手写补零会被规范化为不补零，属预期行为）
+# 英文格式：July 5, 2026（美式惯例不补零；补零写法如 August 01 会被判定为格式不符并报错，
+# 而非静默改写）
 en_months = ['January','February','March','April','May','June',
              'July','August','September','October','November','December']
 en_date = f"{en_months[now.month-1]} {now.day}, {now.year}"
@@ -27,7 +28,7 @@ original = content
 
 # 替换中文日期（精确匹配日期格式，其余行尾内容原样保留，防止吞掉注释/空白）
 zh_pattern = re.compile(r"(footer_updated: 页面最后更新：)(\d{4} 年 \d{2} 月 \d{2} 日)(.*)$", re.M)
-en_pattern = re.compile(r'(footer_updated: "Last updated: )([A-Za-z]+ \d{1,2}, \d{4})(".*)$', re.M)
+en_pattern = re.compile(r'(footer_updated: "Last updated: )([A-Za-z]+ (?:[1-9]|[12][0-9]|3[01]), \d{4})(".*)$', re.M)
 zh_matched = bool(zh_pattern.search(content))
 en_matched = bool(en_pattern.search(content))
 content = re.sub(

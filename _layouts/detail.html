@@ -2,8 +2,9 @@
 {% assign meta_en = page.en | default: page.zh %}
 {% assign p = site.data.personal.zh %}
 {% assign p_en = site.data.personal.en %}
-{% assign has_math = false %}{% if page.content contains '$$' or page.content contains '\(' or page.content contains '\[' %}{% assign has_math = true %}{% endif %}
-{% comment %}注：围栏代码块内的 $$/\( 可能误触发 has_math（仅多加载 KaTeX，不会误渲染——
+{% assign has_math = false %}{% assign _math_in_code = false %}{% assign _math_chunks = page.content | split: '```' %}{% for _chunk in _math_chunks %}{% unless _math_in_code %}{% if _chunk contains '$$' or _chunk contains '\(' or _chunk contains '\[' %}{% assign has_math = true %}{% endif %}{% endunless %}{% if _math_in_code == false %}{% assign _math_in_code = true %}{% else %}{% assign _math_in_code = false %}{% endif %}{% endfor %}
+{% comment %}注：has_math 按 ``` 围栏剥离代码块后检测，代码块内的 $$/\( 不再误触发；
+行内反引号代码与 ~~~ 围栏仍可能误报（仅多加载 KaTeX，不会误渲染——
 renderMathInElement 默认忽略 pre/code 内容），此为已知取舍。{% endcomment %}
 {% assign has_code = false %}{% if content contains '<pre' or content contains '```' %}{% assign has_code = true %}{% endif %}
 <!DOCTYPE html>

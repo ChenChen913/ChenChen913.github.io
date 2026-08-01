@@ -3,6 +3,9 @@ name: Deploy Jekyll site
 on:
   push:
     branches: [main]
+  schedule:
+    - cron: '0 3 * * 1'   # 每周一 03:00 UTC 触发外部链接巡检
+  workflow_dispatch:       # 手动触发外部链接巡检
 
 # 同一时刻只允许一个 Pages 部署，防止旧构建后完成反而覆盖新构建的竞态。
 # cancel-in-progress 设为 false（GitHub Pages 官方模板配置）：
@@ -15,6 +18,7 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    if: github.event_name == 'push'   # 仅 push 触发部署；定时/手动只跑外链巡检
     permissions:
       contents: read
       pages: write
@@ -54,7 +58,7 @@ jobs:
       # 阻断式：任何死链或 alt 缺失都会让部署失败。
       # 注：html-proofer 5.x 移除了 --assume-extension（jekyll 目录型 permalink 默认即按 index.html 解析）。
       # 注：--disable-external 为有意取舍——外部站点（X/GitHub 等）的反爬策略会导致误报，
-      #     外链有效性由内容维护时人工确认（社交链接集中在 _data/social.yml）。
+      #     外链有效性由下方 check-external-links 定时/手动巡检（不阻断本部署）。
       - name: Check internal links (blocking)
         run: |
           bundle exec htmlproofer ./_site --disable-external --allow-missing-href --no-enforce-https
@@ -67,3 +71,22 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e
+
+  # 外部链接巡检：仅定时/手动触发，独立于部署（不阻断 Pages）。
+  # 部署流水线仍 --disable-external，避免外部站点反爬导致部署误失败。
+  check-external-links:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    if: github.event_name != 'push'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+      - uses: ruby/setup-ruby@95ef2b042f9d7a56d8268cba8559e2842e2ad01b
+        with:
+          ruby-version: '3.3.12'
+          bundler-cache: true
+      - name: Build site
+        run: bundle exec jekyll build
+      - name: Check external links (non-blocking for deploy)
+        run: bundle exec htmlproofer ./_site --allow-missing-href --no-enforce-https

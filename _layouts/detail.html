@@ -60,10 +60,10 @@
 {
   "@context": "https://schema.org",
   "@type": "{% if page.zh.pdf or page.en.pdf %}ScholarlyArticle{% else %}Article{% endif %}",
-  "headline": "{{ meta_zh.title | escape }}",
-  "description": "{{ meta_zh.seo_desc | default: meta_zh.desc | escape }}",
+  "headline": {{ meta_zh.title | jsonify | replace: '<', '\u003c' }},
+  "description": {{ meta_zh.seo_desc | default: meta_zh.desc | jsonify | replace: '<', '\u003c' }},
   "inLanguage": "zh-CN",
-  "author": { "@type": "Person", "name": "{{ p.name }}" }
+  "author": { "@type": "Person", "name": {{ p.name | jsonify | replace: '<', '\u003c' }} }
 }
 </script>
 <!-- 双语互指（尽力而为）：中英文共用同一 URL、以 ?lang= 参数区分，

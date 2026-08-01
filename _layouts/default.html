@@ -14,10 +14,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/svg+xml" href="{{ '/assets/favicon.svg' | relative_url }}">
 <title>{{ p.name }} · {% if l == 'zh' %}个人主页{% else %}Personal Homepage{% endif %}</title>
-<meta name="description" content="{{ page_desc }}">
+<meta name="description" content="{{ page_desc | escape }}">
 <meta property="og:title" content="{{ p.name }} · {% if l == 'zh' %}个人主页{% else %}Personal Homepage{% endif %}">
 <meta property="og:type" content="website">
-<meta property="og:description" content="{{ page_desc }}">
+<meta property="og:description" content="{{ page_desc | escape }}">
 <meta property="og:url" content="{{ page.url | absolute_url }}">
 <meta property="og:image" content="{{ '/assets/avatar.jpg' | absolute_url }}">
 <link rel="canonical" href="{{ page.url | absolute_url }}">
@@ -33,13 +33,13 @@
 {
   "@context": "https://schema.org",
   "@type": "Person",
-  "name": "{{ p.name }}",
+  "name": {{ p.name | jsonify | replace: '<', '\u003c' }},
   "url": "{{ site.url }}/",
   "image": "{{ '/assets/avatar.jpg' | absolute_url }}",
-  "jobTitle": "{{ p.job_title }}",
-  "alumniOf": "{{ site.data.education[l].school }}",
-  "knowsAbout": [{% for cat in site.data.skills[l] %}"{{ cat.category }}"{% unless forloop.last %}, {% endunless %}{% endfor %}],
-  "sameAs": ["{{ s.github }}", "{{ s.gitee }}", "{{ s.x }}"]
+  "jobTitle": {{ p.job_title | jsonify | replace: '<', '\u003c' }},
+  "alumniOf": {{ site.data.education[l].school | jsonify | replace: '<', '\u003c' }},
+  "knowsAbout": [{% for cat in site.data.skills[l] %}{{ cat.category | jsonify | replace: '<', '\u003c' }}{% unless forloop.last %}, {% endunless %}{% endfor %}],
+  "sameAs": [{{ s.github | jsonify | replace: '<', '\u003c' }}, {{ s.gitee | jsonify | replace: '<', '\u003c' }}, {{ s.x | jsonify | replace: '<', '\u003c' }}]
 }
 </script>
 

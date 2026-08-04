@@ -39,6 +39,9 @@ $CoreItems = @(
     "_projects",
     "_publications",
     "assets",
+    "docs",
+    ".github",
+    "robots.txt",
     "index.html",
     "en.html",
     "404.html",
@@ -122,6 +125,8 @@ try {
 
 # 保留策略：按名称倒序（YYYY-MM-DD 前缀自然排序）只保留最近 $Keep 份备份，
 # 其余（含"-旧-"套娃归档与测试残留）清理掉；逐目录校验绝对路径防越界。
+# 注意：pre-jekyll-2026-07-04 是迁移前里程碑备份，名称不含 YYYY-MM-DD- 前缀，
+# 不受保留策略影响，属有意保留。
 if ($Keep -gt 0) {
     $AllBackups = Get-ChildItem -LiteralPath $BackupRoot -Directory |
         Where-Object { $_.Name -match '^\d{4}-\d{2}-\d{2}-' } |

@@ -29,7 +29,13 @@
 │   └── detail.html      # 详情页布局（项目 / 论文）
 ├── _projects/           # 项目详情页（Markdown，中英文用 <!-- PAGE_ENGLISH_SPLIT_2026 --> 分隔）
 ├── _publications/       # 论文详情页（同上）
-├── assets/              # 头像、PDF 文件、PDF 查看器、favicon
+├── docs/                # 内部计划/审核文档（不发布）
+├── AUDIT-REPORT.md      # 第一轮审核报告（不发布）
+├── AUDIT-REPORT-2.md    # 第二轮审核报告（不发布）
+├── CONTENT-GUIDE.md     # 内容维护指南（不发布）
+├── DEPLOY.md            # 部署与维护指南（不发布）
+├── TROUBLESHOOTING.md   # 排障手册（不发布）
+├── assets/              # 头像、PDF 文件、PDF 查看器、自托管前端库（vendor/）、og-image.png、favicon
 ├── index.html           # 中文主页入口
 ├── en.html              # 英文主页入口
 ├── 404.html             # 404 页面
@@ -40,6 +46,10 @@
 ├── check_portfolio_sync.py     # 校验单文件备案页与数据内容级同步
 ├── generate_assets.py   # 生成 og 分享图与 PNG favicon（Pillow）
 ├── backup.ps1           # 本地备份脚本（保留最近 N 份）
+├── robots.txt           # 搜索引擎爬虫规则
+├── LICENSE              # 开源许可
+├── Gemfile / Gemfile.lock / .ruby-version  # Ruby 依赖
+├── .editorconfig / .gitattributes / .gitignore  # 编辑器/换行/忽略规则
 └── .github/workflows/   # GitHub Actions 自动部署配置
 ```
 

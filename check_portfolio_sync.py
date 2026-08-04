@@ -18,6 +18,10 @@ import yaml
 
 repo = os.path.dirname(os.path.abspath(__file__))
 portfolio = os.path.join(repo, "portfolio-single-file.html")
+EMAIL_ARRAY_FILES = (
+    os.path.join(repo, "_layouts", "default.html"),
+    os.path.join(repo, "index_empty.html"),
+)
 DATA_PATTERNS = ("_data/**/*.yml", "_data/**/*.yaml")
 CONTENT_PATTERNS = ("_projects/**/*.md", "_publications/**/*.md")
 
@@ -90,7 +94,47 @@ def verify_fragments(text, frags):
     return [f for f in frags if f not in text]
 
 
-def check_content():
+def extract_email_from_codes(text):
+    """提取 'var codes = [...]' 并用 String.fromCharCode 规则解码为邮箱；找不到返回 None。"""
+    matches = re.findall(r"var codes\s*=\s*\[([^\]]+)\]", text)
+    if not matches:
+        return None
+    try:
+        return "".join(chr(int(c)) for c in re.split(r"\s*,\s*", matches[0]))
+    except ValueError:
+        return None
+
+
+def check_email_arrays(data):
+    """防抓取 JS 字符码数组必须与 social.yml 的 email 一致。"""
+    expected = (data.get("social") or {}).get("email")
+    if not expected:
+        print("错误：_data/social.yml 缺少 email 字段。", file=sys.stderr)
+        return False
+    ok = True
+    for path in EMAIL_ARRAY_FILES:
+        try:
+            with open(path, encoding="utf-8") as f:
+                text = f.read()
+        except OSError as e:
+            print(f"错误：无法读取 {path}：{e}", file=sys.stderr)
+            return False
+        actual = extract_email_from_codes(text)
+        if actual is None:
+            print(f"错误：{path} 未找到 JS 字符码数组（var codes = [...]）。", file=sys.stderr)
+            ok = False
+        elif actual != expected:
+            print(
+                f"错误：{path} 的字符码数组解码为 {actual!r}，与 social.yml email {expected!r} 不一致。",
+                file=sys.stderr,
+            )
+            ok = False
+    if ok:
+        print(f"邮箱 JS 字符码数组校验通过（{len(EMAIL_ARRAY_FILES)} 处与 social.yml 一致）。")
+    return ok
+
+
+def check_content(data):
     """内容级校验：单文件页必须包含所有关键字段。"""
     try:
         with open(portfolio, encoding="utf-8") as f:
@@ -99,7 +143,6 @@ def check_content():
         print(f"错误：无法读取 {portfolio}：{e}", file=sys.stderr)
         return False
 
-    data = load_data()
     missing = verify_fragments(text, expected_fragments(data))
     if missing:
         print("错误：以下关键字段未在 portfolio-single-file.html 中找到（内容级同步失败）：",
@@ -161,7 +204,11 @@ def check_marker_freshness():
 
 
 def main():
-    ok = check_content()
+    data = load_data()
+    ok = check_content(data)
+    if not ok:
+        sys.exit(1)
+    ok = check_email_arrays(data)
     if not ok:
         sys.exit(1)
     ok = check_marker_freshness()

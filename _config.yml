@@ -50,6 +50,7 @@ exclude:
   - TROUBLESHOOTING.md
   - CONTENT-GUIDE.md
   - AUDIT-REPORT.md
+  - AUDIT-REPORT-2.md
   - docs/
   - update-date.py
   - generate_assets.py

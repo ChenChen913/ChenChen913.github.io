@@ -8,6 +8,7 @@
 """
 import os
 
+import yaml
 from PIL import Image, ImageDraw, ImageFont
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
@@ -65,9 +66,13 @@ def generate_og_image():
     d.rounded_rectangle(card, radius=24, fill=WHITE, outline=(220, 224, 228), width=2)
     d.rectangle([90, 90, 102, H - 90], fill=ACCENT)  # 左侧强调条
 
-    name = "王晨 · Chen Wang"
-    tagline = "信息与计算科学 · 2020 届本科毕业生 · AI 应用开发方向"
-    url = "chenchen913.github.io"
+    with open(os.path.join(ROOT, "_data", "personal.yml"), encoding="utf-8") as f:
+        personal = yaml.safe_load(f)
+    with open(os.path.join(ROOT, "_config.yml"), encoding="utf-8") as f:
+        config = yaml.safe_load(f)
+    name = personal["zh"]["name"] + " · " + personal["en"]["name"]
+    tagline = personal["zh"]["tagline"]
+    url = str(config["url"]).replace("https://", "").replace("http://", "")
 
     name_font = _fit_font(d, name, 860, 88, bold=True)
     tagline_font = _fit_font(d, tagline, 860, 40)

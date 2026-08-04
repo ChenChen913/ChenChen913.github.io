@@ -192,7 +192,16 @@ en:
 
 ### 3.2 改联系方式
 
-编辑 `_data/social.yml`，改对应字段即可。中英文页面同步生效。
+邮箱以外的联系方式（GitHub、Gitee、X、微信公众号等）：编辑 `_data/social.yml`，改对应字段即可，中英文页面同步生效。
+
+**改邮箱需同步 4 处**：
+
+1. `_data/social.yml` 的 `email` 字段（唯一权威值）
+2. `_layouts/default.html` 的 JS 字符码数组
+3. `index_empty.html` 的 JS 字符码数组
+4. `portfolio-single-file.html` 的明文邮箱（离线备案页）
+
+`check_portfolio_sync.py` 会自动校验后 3 处与第 1 处一致，漏改会在 CI 报错。
 
 > ⚠️ **网页底部的所有联系方式（邮箱、GitHub、Gitee、X、微信公众号）均为本人真实有效的账号**，是访客联系你的正式渠道。更新时只能改成你真实拥有并会使用的账号，**禁止**填入示例地址（如 `example.com`）、占位符、假账号或已停用的账号。
 
@@ -222,8 +231,8 @@ en:
 |---|---|
 | `_layouts/default.html` | 不要改 CSS/JS 引用、section 的 id 属性、主题切换逻辑 |
 | `_layouts/detail.html` | 不要改 `<!-- PAGE_ENGLISH_SPLIT_2026 -->` 分隔符逻辑；公式页在 front matter 加 `math: true` 加载 KaTeX |
-| `style.css` | 不要改第 4-35 行的 CSS 变量块、第 61 行的 `scroll-margin-top` |
-| `script.js` | 不要改 `NAV_OFFSET`（第 66 行，值 80）、核心函数 |
+| `style.css` | 不要改第 4-35 行的 CSS 变量块、`scroll-margin-top` 声明（用搜索定位，当前约在第 65 行） |
+| `script.js` | 不要改 `NAV_OFFSET` 常量（用搜索定位，当前约在第 88 行，值 80）、核心函数 |
 | `_config.yml` | 不要改 `collections` 配置、`exclude` 列表（除非你确定知道后果）|
 | `_data/navigation.yml` | 不要改 `id` 字段（可以改 `label`）|
 
@@ -248,7 +257,7 @@ en:
 | 我想... | 改哪个文件 | 怎么改 |
 |---|---|---|
 | 改名字 | `_data/personal.yml` | `zh.name` / `en.name` |
-| 改邮箱 | `_data/social.yml` | `email` 字段 |
+| 改邮箱 | `_data/social.yml` | `email` 字段 + 3 处防抓取副本（见 3.2） |
 | 换头像 | `assets/avatar.jpg` | 替换文件，不改名 |
 | 加项目 | `_projects/` 新建 `.md` | 参考 `campus-qa-bot.md` 格式 |
 | 加论文 | `_publications/` 新建 `.md` | 参考 `rgv-dynamic-scheduling.md` 格式 |

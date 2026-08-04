@@ -259,8 +259,9 @@
         <span class="contact-item">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>
           <!-- 邮箱 href 与显示文本均由 JS 用字符码拼装，源码中不出现明文邮箱（防简单抓取）。
-               邮箱唯一数据源为 _data/social.yml；下方字符码数组需与之一致，修改时两处同步。
-               portfolio-single-file.html 的明文邮箱由 check_portfolio_sync.py 内容级校验兜底。 -->
+               邮箱数据以 _data/social.yml 为准；下方字符码数组需与之一致。
+               修改邮箱时同步：social.yml、本文件 JS 数组、index_empty.html JS 数组、
+               portfolio-single-file.html 明文（check_portfolio_sync.py 自动校验）。 -->
           <a href="#" id="email-link" rel="nofollow"><noscript>邮箱需启用 JavaScript 查看 / Enable JavaScript to view email</noscript></a>
           <script>
             (function () {

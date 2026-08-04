@@ -29,7 +29,13 @@ A personal homepage built with Jekyll, deployed on GitHub Pages.
 │   └── detail.html      # detail page layout (projects / publications)
 ├── _projects/           # project detail pages (Markdown, bilingual via <!-- PAGE_ENGLISH_SPLIT_2026 --> separator)
 ├── _publications/       # publication detail pages (same as above)
-├── assets/              # avatar, PDF files, PDF viewer, favicon
+├── docs/                # internal plans / audit docs (not published)
+├── AUDIT-REPORT.md      # round-1 audit report (not published)
+├── AUDIT-REPORT-2.md    # round-2 audit report (not published)
+├── CONTENT-GUIDE.md     # content maintenance guide (not published)
+├── DEPLOY.md            # deployment guide (not published)
+├── TROUBLESHOOTING.md   # troubleshooting guide (not published)
+├── assets/              # avatar, PDFs, PDF viewer, vendored libs (vendor/), og-image.png, favicon
 ├── index.html           # Chinese homepage entry
 ├── en.html              # English homepage entry
 ├── 404.html             # 404 page
@@ -40,6 +46,10 @@ A personal homepage built with Jekyll, deployed on GitHub Pages.
 ├── check_portfolio_sync.py     # verifies single-file page stays content-synced with data
 ├── generate_assets.py   # generates og share image and PNG favicon (Pillow)
 ├── backup.ps1           # local backup script (keeps N most recent backups)
+├── robots.txt           # search-engine crawler rules
+├── LICENSE              # open-source license
+├── Gemfile / Gemfile.lock / .ruby-version  # Ruby dependencies
+├── .editorconfig / .gitattributes / .gitignore  # editor / line-ending / ignore rules
 └── .github/workflows/   # GitHub Actions deployment config
 ```
 

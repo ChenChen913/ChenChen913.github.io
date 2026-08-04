@@ -15,9 +15,9 @@
   此文件风格与主页一致，让访问者知道是主动关闭而非网站挂了。
 
   ⚠️ 注意：本文件带空 frontmatter，会被 Jekyll 处理（含共享语言初始化）。
-  邮箱 href 与 noscript 文本由 Liquid 从 _data/social.yml 注入；唯一硬编码副本
-  是下方 JS 字符码数组（防简单抓取）。如果你改了邮箱，请同步修改 _data/social.yml
-  与此数组，以及 _layouts/default.html 与 portfolio-single-file.html 中的对应位置。
+  邮箱 href 与显示文本均由 JS 用字符码拼装（防简单抓取），noscript 仅提示启用 JS。
+  邮箱数据以 _data/social.yml 为准；修改邮箱时同步本文件 JS 数组、
+  _layouts/default.html 的 JS 数组与 portfolio-single-file.html 明文（sync 校验兜底）。
   ============================================================
 -->
 <html lang="zh-CN">

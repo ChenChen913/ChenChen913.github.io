@@ -1,14 +1,14 @@
 # ============================================================
 # 联系方式
 # 以下账号均为本人真实有效、对外正式公开的联系方式（网页底部展示的全部联系方式），
-# 请勿替换为示例地址或占位符；修改邮箱时需同步 _layouts/default.html 与
-# index_empty.html 中的 JS 字符码数组（见下方说明）。
+# 请勿替换为示例地址或占位符；修改邮箱时需同步下方 4 处（见邮箱说明）。
 # ============================================================
 
 email: wcn913@gmail.com
-# 邮箱唯一数据源是本文件。防抓取副本（JS 字符码数组）位于 _layouts/default.html 与
-# index_empty.html；portfolio-single-file.html 为离线备案页保留明文（离线场景无需防抓取），
-# 其内容由 check_portfolio_sync.py 内容级校验兜底。修改邮箱时：改本文件 + 两处 JS 数组即可。
+# 邮箱以本文件为准。防抓取副本位于 _layouts/default.html 与 index_empty.html 的
+# JS 字符码数组；portfolio-single-file.html 为离线备案页保留明文（离线场景无需防抓取）。
+# 修改邮箱时同步这 4 处：本文件 + 两个 JS 数组 + portfolio 明文，
+# 一致性由 check_portfolio_sync.py 自动校验（漏改会在 CI 报错）。
 github: https://github.com/ChenChen913
 github_display: github.com/ChenChen913
 gitee: https://gitee.com/ChenChen913

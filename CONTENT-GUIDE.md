@@ -187,12 +187,14 @@ en:
   name: New Name
   tagline: New Tagline
   footer_copyright: © 2026 New Name
-  footer_updated: "Last updated: August 01, 2026"
+  footer_updated: "Last updated: August 1, 2026"
 ```
 
 ### 3.2 改联系方式
 
 编辑 `_data/social.yml`，改对应字段即可。中英文页面同步生效。
+
+> ⚠️ **网页底部的所有联系方式（邮箱、GitHub、Gitee、X、微信公众号）均为本人真实有效的账号**，是访客联系你的正式渠道。更新时只能改成你真实拥有并会使用的账号，**禁止**填入示例地址（如 `example.com`）、占位符、假账号或已停用的账号。
 
 ### 3.3 改头像
 

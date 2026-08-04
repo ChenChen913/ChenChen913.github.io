@@ -617,3 +617,23 @@ Get-ChildItem -Force | Select-Object Name
 git status --short; git log -1 --oneline; git push origin main
 ```
 预期：status 为空、log 显示新提交、push 成功。
+
+---
+
+## 追加修复记录（2026-08-04）
+
+### Task 26: 修复 X 账号显示文本丢失 + 联系方式真实性文档说明
+
+**发现：** Task 3 白名单改造时笔误，`_layouts/default.html` 中 X 链接的显示文本写成了不存在的变量 `{{ s_x_display }}`，导致链接存在但文字为空（用户反馈"X 账号被删除"的根因）。
+
+**文件:**
+- Modify: `_layouts/default.html`（`s_x_display` → `s.x_display`）
+- Modify: `CONTENT-GUIDE.md`（3.2 增加"联系方式均为真实有效"说明；修正 3.1 英文日期示例 `August 01` → `August 1`）
+- Modify: `_data/social.yml`（文件头注明所有联系方式为真实有效账号）
+
+**验证:**
+1. `Select-String _layouts/default.html -Pattern "s_\w+_display"` → 无输出；`s\.x_display` 存在。
+2. Python 断言：social.yml 中所有 `*_display` 键均被模板引用，且模板引用的 `s.*_display` 均存在于数据。
+3. `Select-String CONTENT-GUIDE.md -Pattern "真实有效"` 与 `August 1` → 有输出。
+
+- [x] Task 26: 修复 X 显示文本 + 联系方式真实性文档

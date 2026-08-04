@@ -31,7 +31,7 @@
 - [x] Task 12: L5a+复核补充 修正 portfolio 注释缩进与过期的"字符码数组/noscript 兜底"描述
 - [x] Task 13: L5b backup.ps1 注明 pre-jekyll 备份为有意保留
 - [x] Task 14: 清理无用文件（__pycache__/临时文件等）
-- [ ] Task 15: 提交（含 AUDIT-REPORT-2.md 与 _config.yml）并推送 GitHub
+- [x] Task 15: 提交（含 AUDIT-REPORT-2.md 与 _config.yml）并推送 GitHub
 
 > 明确不修：H2（`github.event.inputs.deploy == 'true'` 是 workflow_dispatch 布尔输入的正确写法，见 actions/runner#3571）、L5c（`_site` 当前不存在）。
 

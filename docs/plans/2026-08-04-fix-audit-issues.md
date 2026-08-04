@@ -39,7 +39,7 @@
 - [x] Task 22: 全仓库文档分隔符统一为 PAGE_ENGLISH_SPLIT_2026（复核发现 B）
 - [x] Task 23: 最终静态验证套件
 - [x] Task 24: 无用文件最终清点与确认
-- [ ] Task 25: git 提交并推送 GitHub
+- [x] Task 25: git 提交并推送 GitHub
 
 ---
 

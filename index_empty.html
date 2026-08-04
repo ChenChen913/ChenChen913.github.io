@@ -15,15 +15,17 @@
   此文件风格与主页一致，让访问者知道是主动关闭而非网站挂了。
 
   ⚠️ 注意：本文件带空 frontmatter，会被 Jekyll 处理（含共享语言初始化）。
-  邮箱地址是硬编码的，无法从 _data/social.yml 自动读取。如果你改了邮箱，
-  请同步修改下方字符码数组、两个 noscript 兜底、_data/social.yml、
-  _layouts/default.html 与 portfolio-single-file.html 中的对应位置。
+  邮箱 href 与 noscript 文本由 Liquid 从 _data/social.yml 注入；唯一硬编码副本
+  是下方 JS 字符码数组（防简单抓取）。如果你改了邮箱，请同步修改 _data/social.yml
+  与此数组，以及 _layouts/default.html 与 portfolio-single-file.html 中的对应位置。
   ============================================================
 -->
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" sizes="32x32" href="{{ '/assets/favicon-32x32.png' | relative_url }}">
+<link rel="icon" type="image/svg+xml" href="{{ '/assets/favicon.svg' | relative_url }}">
 <title>主页暂时关闭 / Homepage Temporarily Closed</title>
 <meta name="robots" content="noindex">
 <style>
@@ -95,17 +97,18 @@
     <p class="zh">我的个人主页目前暂时关闭，稍后会重新开放。</p>
     <p class="en">Hello, I'm Chen Wang.</p>
     <p class="en">My personal homepage is temporarily closed and will be back soon.</p>
-    <p class="zh">如有需要，可以通过邮箱联系我：<br><a href="mailto:{{ site.data.social.email }}" id="email-link" rel="nofollow"><noscript>{{ site.data.social.email }}</noscript></a></p>
-    <p class="en">If you need to reach me, please contact via email:<br><a href="mailto:{{ site.data.social.email }}" id="email-link-en" rel="nofollow"><noscript>{{ site.data.social.email }}</noscript></a></p>
+    <p class="zh">如有需要，可以通过邮箱联系我：<br><a href="#" id="email-link" rel="nofollow"><noscript>请启用 JavaScript 查看邮箱</noscript></a></p>
+    <p class="en">If you need to reach me, please contact via email:<br><a href="#" id="email-link-en" rel="nofollow"><noscript>Enable JavaScript to view email</noscript></a></p>
   </div>
   <script>
     (function () {
-      // 邮箱由字符码数组 JS 拼接，仅防简单抓取；改邮箱请同步 _data/social.yml 与此处数组
+      // 邮箱 href 与文本均由字符码数组 JS 拼装（防简单抓取）；改邮箱请同步 _data/social.yml 与此处数组
       var codes = [119, 99, 110, 57, 49, 51, 64, 103, 109, 97, 105, 108, 46, 99, 111, 109];
       var addr = codes.map(function (c) { return String.fromCharCode(c); }).join('');
       ['email-link', 'email-link-en'].forEach(function (id) {
         var a = document.getElementById(id);
         if (a) {
+          a.href = 'mailto:' + addr;
           a.textContent = addr;
         }
       });

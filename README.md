@@ -20,20 +20,26 @@
 ├── _data/               # 站点数据（改内容主要在这里）
 │   ├── personal.yml     #   姓名、简介、页脚日期等
 │   ├── education.yml    #   教育经历
-│   ├── experience.yml   #   实践经历
+│   ├── experience.yml   #   工作经历
 │   ├── skills.yml       #   技能清单
 │   ├── social.yml       #   邮箱、GitHub 等社交链接
 │   └── navigation.yml   #   导航栏文案
 ├── _layouts/
 │   ├── default.html     # 主页布局（index.html / en.html 共用）
 │   └── detail.html      # 详情页布局（项目 / 论文）
-├── _projects/           # 项目详情页（Markdown，中英文用 <!-- English --> 分隔）
+├── _projects/           # 项目详情页（Markdown，中英文用 <!-- PAGE_ENGLISH_SPLIT_2026 --> 分隔）
 ├── _publications/       # 论文详情页（同上）
 ├── assets/              # 头像、PDF 文件、PDF 查看器、favicon
 ├── index.html           # 中文主页入口
 ├── en.html              # 英文主页入口
+├── 404.html             # 404 页面
+├── index_empty.html     # 主页暂时关闭提示页（不发布）
+├── portfolio-single-file.html  # 单文件离线备案页（不发布，同步由 check_portfolio_sync.py 校验）
 ├── style.css / script.js# 全站样式与交互脚本
 ├── update-date.py       # 更新页脚“最后更新”日期的脚本
+├── check_portfolio_sync.py     # 校验单文件备案页与数据内容级同步
+├── generate_assets.py   # 生成 og 分享图与 PNG favicon（Pillow）
+├── backup.ps1           # 本地备份脚本（保留最近 N 份）
 └── .github/workflows/   # GitHub Actions 自动部署配置
 ```
 

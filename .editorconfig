@@ -23,6 +23,10 @@ indent_style = tab
 [*.{bat,cmd}]
 end_of_line = crlf
 
+# PowerShell 脚本使用 LF（现代 PowerShell 兼容 LF；与 .gitattributes 保持一致）
+[*.ps1]
+end_of_line = lf
+
 # Markdown / 补丁文件的行尾空白有语义，不能裁剪
 [*.{md,diff,patch}]
 trim_trailing_whitespace = false

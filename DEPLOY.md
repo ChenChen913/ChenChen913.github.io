@@ -1,10 +1,12 @@
-# 部署与维护指南（Jekyll 版）
+# 部署与维护指南
 
-本项目使用 Jekyll 构建，GitHub Pages 原生支持，push 即自动部署。
+本项目是 Jekyll 静态站，托管于 GitHub Pages（`chenchen913.github.io`），push 即自动构建部署。本文档合并了原 DEPLOY.md / DEPLOY-OPTIONS.md / RUBY-JEKYLL.md 三份文档的内容，是部署、内容维护、备份与安全限制的唯一参考。
+
+内容修改的详细增删改流程见 `CONTENT-GUIDE.md`；构建与部署踩坑记录见 `TROUBLESHOOTING.md`。
 
 ---
 
-## AI 操作禁区（AI Assistant Rules）
+## 一、AI 操作禁区（AI Assistant Rules）
 
 以下规则对 AI 助手具有强制约束力，违反会导致网站损坏。
 
@@ -12,24 +14,25 @@
 
 | 规则 | 说明 |
 |---|---|
-| **禁止删除或修改 `_layouts/default.html` 中的 CSS 引用** | `<link rel="stylesheet" href="{{ '/style.css' | relative_url }}">` 和 `<script src="script.js">` 不可删除 |
-| **禁止修改 `style.css` 中的 CSS 变量块** | 第 4-35 行的 `:root` / `html[data-theme="light"]` / `html[data-theme="dark"]` 变量定义 |
-| **禁止修改 `style.css` 中的 `scroll-margin-top`** | 第 61 行，值必须与 `script.js` 第 66 行的 `NAV_OFFSET` 相等 |
-| **禁止修改 `_layouts/default.html` 中 `<header>` 和 `<section>` 的 `id` 属性** | `about`/`education`/`experience`/`skills`/`projects`/`publications`/`contact` |
+| **禁止删除或修改 `_layouts/default.html` 中的 CSS/JS 引用** | `<link rel="stylesheet" href="{{ '/style.css' | relative_url }}">` 和 `<script src="{{ '/script.js' | relative_url }}">` 不可删除 |
+| **禁止修改 `style.css` 中的 CSS 变量块** | `:root` / `html[data-theme="light"]` / `html[data-theme="dark"]` 变量定义 |
+| **禁止修改 `style.css` 中的 `scroll-margin-top`** | 值必须与 `script.js` 中的 `NAV_OFFSET` 相等 |
+| **禁止修改 `_layouts/default.html` 中 `<header>`/`<section>` 的 `id`** | `about`/`education`/`experience`/`skills`/`projects`/`publications`/`contact` |
 | **禁止修改 `_data/navigation.yml` 中的 `id` 字段** | 必须与 HTML 中的 section id 严格对应 |
-| **禁止删除 `_layouts/` 中的 `{% if has_pubs %}` 等条件判断** | 这些控制栏目和导航项的自动显示/隐藏 |
-| **禁止修改 `script.js` 中的 `NAV_OFFSET`** | 第 66 行，值 80，必须与 CSS `scroll-margin-top` 一致 |
+| **禁止删除 `_layouts/` 中的 `{% if has_pubs %}` 等条件判断** | 控制栏目和导航项的自动显示/隐藏 |
+| **禁止修改 `script.js` 中的 `NAV_OFFSET`** | 值 80，必须与 CSS `scroll-margin-top` 一致 |
 | **禁止删除 `script.js` 中的 `computeActiveSection` / `createBackToTopButton` 函数** | 核心交互逻辑 |
 | **禁止修改 `_config.yml` 中的 `collections` 配置** | 控制论文/项目集合的输出 |
-| **禁止删除 `portfolio-single-file.html`** | 单文件备案页：GitHub Pages 不可用时的离线查看版本，需与主页内容保持同步（详见第七章备份与 README） |
+| **禁止删除 `portfolio-single-file.html`** | 单文件离线备案页，与数据内容级同步由 `check_portfolio_sync.py` 校验 |
 
 ### ⚠️ 谨慎操作
 
 | 规则 | 说明 |
 |---|---|
 | **修改 `_data/navigation.yml`** | 增删导航项需同步修改 `_layouts/default.html` 中对应的 `<section>` |
-| **修改 `style.css` 底部留白** | `footer.site-footer` 的 `padding-bottom: clamp(200px, 25vh, 300px)`（行号随维护会漂移，以选择器为准），减小可能导致联系方式导航不亮 |
-| **修改 `script.js` 第 66 行 `NAV_OFFSET`** | 必须同步修改 `style.css` 第 61 行 `scroll-margin-top` |
+| **修改 `style.css` 底部留白** | `footer.site-footer` 的 `padding-bottom` 减小可能导致联系方式导航不亮 |
+| **修改 `script.js` 的 `NAV_OFFSET`** | 必须同步修改 `style.css` 的 `scroll-margin-top` |
+| **修改 `_data/social.yml` 的邮箱** | 需同步 `_layouts/default.html` 与 `index_empty.html` 中的 JS 字符码数组（见"修改内容"一节） |
 
 ### ✅ 可以自由修改的内容
 
@@ -42,211 +45,155 @@
 | 技能 | `_data/skills.yml` | 增删分类和标签 |
 | 论文发表 | `_publications/*.md` | 新增/删除 `.md` 文件；删光则自动隐藏栏目 |
 | 项目经历 | `_projects/*.md` | 同上 |
-| Footer 文字 | `_data/personal.yml` | `footer_copyright` / `footer_updated` |
+| Footer 文字 | `_data/personal.yml` | `footer_copyright` / `footer_updated`（`update-date.py` 自动更新日期） |
 | 头像照片 | `assets/avatar.jpg` | 替换文件即可 |
 | 导航菜单文字 | `_data/navigation.yml` | 改 `label`，不改 `id` |
 
 ### 🔧 修改后验证清单
 
-1. `bundle exec jekyll serve` — 本地预览
-2. 检查布局 / 深浅色切换 / 导航高亮 / 返回顶部按钮
-3. 检查联系方式 Grid 布局（桌面 3 列 / 平板 2 列 / 手机 1 列）
+1. `python check_portfolio_sync.py` — 校验单文件备案页与数据内容同步
+2. `bundle exec jekyll serve` — 本地预览
+3. 检查布局 / 深浅色切换 / 导航高亮 / 返回顶部按钮
 4. 中英文切换后滚动位置是否一致
 5. 论文/项目标题点击能跳转到详情页
 
 ---
 
-## 一、项目目录结构
+## 二、Ruby 与 Jekyll 速查
 
+Ruby 是本项目的运行语言，但**你不需要学 Ruby**——只需两条命令：
+
+```bash
+bundle install             # 安装依赖（首次运行或 Gemfile 有变化时执行）
+bundle exec jekyll build   # 构建网站（生成 _site/）
+bundle exec jekyll serve   # 本地预览（浏览器打开 http://localhost:4000）
 ```
-/
-├── _config.yml                # Jekyll 站点配置
-├── Gemfile                    # Ruby 依赖（本地预览用）
-├── _layouts/
-│   ├── default.html           # 主页布局（中英文共用）
-│   └── detail.html            # 论文/项目详情页布局
-├── _data/
-│   ├── navigation.yml         # 导航菜单（中英文）
-│   ├── personal.yml           # 姓名 / 头衔 / Footer
-│   ├── social.yml             # 联系方式（邮箱/GitHub/...）
-│   ├── education.yml          # 教育背景
-│   ├── experience.yml         # 工作经历
-│   └── skills.yml             # 技能
-├── _publications/             # 论文 Markdown
-│   └── rgv-dynamic-scheduling.md
-├── _projects/                 # 项目 Markdown
-│   └── campus-qa-bot.md
-├── index.html                 # 中文主页（Jekyll frontmatter）
-├── en.html                    # 英文主页（Jekyll frontmatter）
-├── index_empty.html           # "主页暂时关闭"提示页
-├── style.css                  # 全局样式（不动）
-├── script.js                  # 全局脚本（不动）
-├── assets/
-│   └── avatar.jpg             # 头像
-├── backups/                   # 历史备份
-└── DEPLOY.md                  # 本文档
-```
+
+Jekyll 是静态站点生成器：把 Markdown + YAML 数据 + Liquid 模板编译成纯静态 HTML。没有数据库、没有服务端程序，因此几乎零攻击面，可以免费部署到任意静态托管平台。
+
+`bundle exec` 的作用是在本项目 `Gemfile.lock` 锁定的依赖环境中执行命令，类似 Python 的虚拟环境，确保本地与 CI 构建结果一致。
+
+常见问题：
+
+- **需要学 Ruby 吗？** 不需要，内容全部用 Markdown 和 YAML 写。
+- **本地没装 Ruby 怎么办？** 直接 `git push`，GitHub Actions 云端自动构建部署。
+- **为什么用 Jekyll 而不是 WordPress/Hexo/Hugo？** WordPress 需要数据库且有安全风险；Jekyll 是 GitHub Pages 原生支持，集成最紧密。
 
 ---
 
-## 二、如何修改内容
+## 三、目录结构
 
-### 个人信息
-
-编辑 `_data/personal.yml`：
-
-```yaml
-zh:
-  name: 王晨         # ← 改这里
-  tagline: ...       # ← 改这里
+```
+/
+├── _config.yml                # Jekyll 配置（url、collections、exclude 等）
+├── Gemfile / Gemfile.lock     # Ruby 依赖与版本锁定
+├── _data/                     # 站点数据（改内容主要在这里）
+│   ├── personal.yml           #   姓名 / 头衔 / Footer
+│   ├── social.yml             #   邮箱 / GitHub / Gitee / X / 微信
+│   ├── education.yml          #   教育背景
+│   ├── experience.yml         #   工作经历
+│   ├── skills.yml             #   技能
+│   └── navigation.yml         #   导航菜单
+├── _layouts/
+│   ├── default.html           # 主页布局（index.html / en.html 共用）
+│   └── detail.html            # 论文/项目详情页布局
+├── _projects/                 # 项目详情页（Markdown）
+├── _publications/             # 论文详情页（Markdown）
+├── assets/                    # 头像、PDF、PDF 查看器、自托管前端库、og 分享图、favicon
+├── index.html                 # 中文主页入口
+├── en.html                    # 英文主页入口
+├── 404.html                   # 404 页面
+├── index_empty.html           # 主页暂时关闭提示页（不发布）
+├── portfolio-single-file.html # 单文件离线备案页（不发布）
+├── style.css / script.js      # 全站样式与交互脚本
+├── update-date.py             # 更新页脚"最后更新"日期
+├── check_portfolio_sync.py    # 校验备案页与数据内容级同步（CI 会执行）
+├── generate_assets.py         # 生成 og 分享图与 PNG favicon
+├── backup.ps1                 # 本地备份脚本（保留最近 N 份）
+├── docs/                      # 内部计划/文档（不发布）
+└── .github/workflows/         # GitHub Actions 自动部署配置
 ```
 
-### 联系方式
+> `DEPLOY.md`、`CONTENT-GUIDE.md`、`TROUBLESHOOTING.md`、`AUDIT-REPORT.md`、`docs/`、`README*` 等内部文档已在 `_config.yml` 的 `exclude` 中，不会发布到线上。
 
-编辑 `_data/social.yml`：
+---
 
-```yaml
-email: your@email.com          # ← 改这里
-github: https://github.com/you # ← 改这里
-```
+## 四、如何修改内容
+
+### 个人信息 / 联系方式
+
+编辑 `_data/personal.yml` / `_data/social.yml` 对应字段即可。
+
+⚠️ **邮箱唯一数据源**是 `_data/social.yml`，但防抓取副本（JS 字符码数组）同时存在于 `_layouts/default.html` 与 `index_empty.html`。改邮箱必须同步这两处数组；`portfolio-single-file.html` 的明文邮箱由 `check_portfolio_sync.py` 内容级校验兜底（漏改会报错）。
 
 ### 新增一篇论文
 
-1. 在 `_publications/` 下新建 `.md` 文件：
+在 `_publications/` 下新建 `.md`：
 
 ```markdown
 ---
 zh:
   type: 期刊论文
-  title: 你的论文标题
+  title: 论文标题
   meta: 期刊名 · 2026
-  pdf: 论文文件名.pdf     # 可选：PDF 放入 assets/publications/，两处都填则详情页内嵌 PDF 查看器
+  seo_desc: 搜索摘要（可选）
+  pdf: 论文文件名.pdf     # 可选；PDF 放 assets/publications/，详情页自动内嵌查看器
 en:
   type: Journal Article
-  title: Your Paper Title
+  title: Paper Title
   meta: Journal Name · 2026
+  seo_desc: Search snippet (optional)
   pdf: 论文文件名.pdf     # 与 zh 保持一致
 ---
 
-中文摘要内容。
+中文正文。
 
-<!-- English -->
-English abstract content.
+<!-- PAGE_ENGLISH_SPLIT_2026 -->
+English body.
 ```
-
-2. Jekyll 自动生成详情页，主页自动出现新卡片。
-3. 不需要改 HTML、CSS、JS。
 
 ### 新增一个项目
 
-同上，在 `_projects/` 下新建 `.md`，额外可填 `github` 和 `demo` 链接。
-
-注意：这两个字段必须放在 front matter **顶层**（`zh:` / `en:` 之外），否则按钮不会显示：
+同上，在 `_projects/` 下新建 `.md`。`github` / `demo` 链接必须放在 front matter **顶层**（`zh:` / `en:` 之外）：
 
 ```markdown
 ---
-github: https://github.com/你的用户名/仓库名
+github: https://github.com/用户名/仓库名
 demo: https://demo-link.com
 zh:
   type: 个人项目
   title: 项目名称
   meta: 独立开发 · 2026.03 — 2026.06
-  desc: 一句话描述项目亮点
+  desc: 一句话描述
+  tech: [Python, FastAPI]
 en:
   type: Personal Project
   title: Project Name
   meta: Solo Developer · Mar 2026 — Jun 2026
   desc: One-sentence description
+  tech: [Python, FastAPI]
 ---
 ```
 
+### 详情页公式与代码
+
+- 正文含数学公式时，在 front matter 加 `math: true`，详情页会自动加载自托管的 KaTeX。
+- 正文含代码块时自动加载自托管 highlight.js，无需配置。
+
 ### 原理：Markdown 如何变成网页
-
-每篇论文和项目都是一个 Markdown 文件，Jekyll 自动把它转成独立的 HTML 页面。
-
-**文件映射关系：**
 
 ```
 _projects/campus-qa-bot.md
-  → 网址 /projects/campus-qa-bot/?lang=zh
-  → 网址 /projects/campus-qa-bot/?lang=en
-
-_publications/rgv-dynamic-scheduling.md
-  → 网址 /publications/rgv-dynamic-scheduling/?lang=zh
-  → 网址 /publications/rgv-dynamic-scheduling/?lang=en
+  → 网址 /projects/campus-qa-bot/?lang=zh 与 ?lang=en
 ```
 
-**转换流程：**
+Jekyll 读取 front matter 结构化数据（title/meta/desc），正文 Markdown 转 HTML，再按 `<!-- PAGE_ENGLISH_SPLIT_2026 -->` 分隔符切成中英文两段，套入 `_layouts/detail.html`；根据 `?lang=` 参数只显示对应语言。**不要改这个分隔符的名字**——模板只认它。
 
-```
-Markdown 文件                         Jekyll 构建
-┌─────────────────────┐              ┌──────────────────┐
-│ ---                 │              │                  │
-│ zh:                 │  frontmatter │ 读取 title/meta  │
-│   title: 论文标题    │ ──────────→ │ 等结构化数据     │
-│   desc: 摘要        │              │                  │
-│ en: ...             │              ├──────────────────┤
-│ ---                 │              │                  │
-│                     │   正文       │ 读取 Markdown    │
-│ 中文正文...          │ ──────────→ │ → 转 HTML        │
-│                     │              │                  │
-│ <!-- English -->    │   分隔符     │ 按分隔符切分     │
-│                     │ ──────────→ │ 中英文内容       │
-│ English content...  │              │                  │
-│                     │              ├──────────────────┤
-└─────────────────────┘              │                  │
-                                     │ _layouts/        │
-                                     │ detail.html      │
-                                     │ （详情页模板）    │
-                                     │ 套入数据+内容    │
-                                     │                  │
-                                     └──────────────────┘
-```
+### 删除栏目 / 更新推送
 
-**关键配置（`_config.yml` 中不需要改动）：**
-
-| 配置 | 作用 |
-|---|---|
-| `collections.publications.output: true` | 让每篇论文 `.md` 生成独立页面 |
-| `collections.projects.output: true` | 让每个项目 `.md` 生成独立页面 |
-| `defaults.type.publications.layout: detail` | 论文页面用 `_layouts/detail.html` 模板 |
-| `defaults.type.projects.layout: detail` | 项目页面用同一个模板 |
-
-**`<!-- English -->` 分隔符的作用：**
-
-每篇论文/项目的正文中，用 `<!-- English -->` 把中文和英文内容分开。模板（`_layouts/detail.html`）会按这个分隔符切成两段，分别放入中文区和英文区。根据来源页面语言（`?lang=zh` 或 `?lang=en`），只显示对应语言的内容。
-
-**新增内容无需改代码：**
-
-只需在 `_publications/` 或 `_projects/` 下新建 `.md` 文件，写好 frontmatter 和正文 → `git push` → 主页自动出现新卡片 → 点击跳转到自动生成的详情页。
-
-### 删除论文/项目栏目
-
-把 `_publications/` 或 `_projects/` 下所有 `.md` 文件删掉即可。栏目和导航项自动隐藏。
-
-### 删除工作经历栏目
-
-编辑 `_data/experience.yml`，把 `roles:` 下的内容清空为 `roles: []`。
-
-### 通用更新流程（改完内容后如何推送）
-
-无论修改了什么（数据文件、Markdown、样式），推送步骤都一样：
-
-```bash
-# 第一步：进入项目文件夹（改成你自己的项目路径）
-cd path/to/个人主页2
-
-# 第二步：把所有改动加入暂存区
-git add .
-
-# 第三步：提交（备注写清楚改了什么）
-git commit -m "更新了个人信息"
-
-# 第四步：推送到 GitHub
-git push
-```
-
-推送后，GitHub Actions 自动构建并部署，约 **1-2 分钟**后网站更新。不需要手动点任何按钮。
+- 删光 `_projects/` 或 `_publications/` 下所有 `.md` → 栏目和导航自动隐藏。
+- `_data/experience.yml` 的 `roles: []` → 工作经历栏目自动隐藏。
+- 推送通用流程：`git add .` → `git commit -m "说明"` → `git push`，约 1-2 分钟后线上更新。
 
 ### 常见修改速查
 
@@ -254,23 +201,22 @@ git push
 |---|---|---|
 | 姓名 | `_data/personal.yml` | `zh.name` / `en.name` |
 | 头衔/简介 | `_data/personal.yml` | `zh.tagline` / `en.tagline` |
-| 邮箱 | `_data/social.yml` | `email` |
-| GitHub / Gitee / X 链接 | `_data/social.yml` | `github` / `gitee` / `x` 等 |
+| 邮箱 | `_data/social.yml` + 两处 JS 数组 | `email` |
+| GitHub / Gitee / X | `_data/social.yml` | `github` / `gitee` / `x` |
 | 微信公众号 | `_data/social.yml` | `zh.wechat` / `en.wechat` |
-| Footer 版权/更新日期 | `_data/personal.yml` | `zh.footer_copyright` 等 |
-| 教育背景 | `_data/education.yml` | `zh` / `en` 下的对应字段 |
-| 工作经历 | `_data/experience.yml` | `roles` 下的条目 |
-| 技能 | `_data/skills.yml` | `zh` / `en` 下的分类和标签 |
-| 新增论文 | `_publications/` 下新建 `.md` | 参考已有文件的 frontmatter |
-| 新增项目 | `_projects/` 下新建 `.md` | 参考已有文件的 frontmatter |
+| Footer 版权/日期 | `_data/personal.yml` | `footer_copyright` / `footer_updated` |
+| 教育背景 | `_data/education.yml` | `zh` / `en` 对应字段 |
+| 工作经历 | `_data/experience.yml` | `roles` 条目 |
+| 技能 | `_data/skills.yml` | 分类和标签 |
+| 新增论文/项目 | `_projects/` / `_publications/` 新建 `.md` | 参考已有文件 |
 | 头像 | 替换 `assets/avatar.jpg` | 保持文件名不变 |
 
 ---
 
-## 三、本地预览
+## 五、本地预览
 
-1. 安装 Ruby（macOS 自带；Windows 去 [rubyinstaller.org](https://rubyinstaller.org) 下载）
-2. 在项目目录下运行：
+1. 安装 Ruby 3.3（Windows 去 [rubyinstaller.org](https://rubyinstaller.org) 下载）
+2. 项目目录运行：
 
 ```bash
 gem install bundler
@@ -282,255 +228,165 @@ bundle exec jekyll serve
 
 ---
 
-## 四、部署到 GitHub Pages（详细步骤）
+## 六、部署到 GitHub Pages（当前方案）
 
-### 4.1 创建 GitHub 仓库
+### 6.1 首次部署
 
-1. 浏览器打开 [github.com](https://github.com)，登录
-2. 点右上角 **+** → **New repository**
-3. 填写：
-
-| 字段 | 填什么 | 说明 |
-|---|---|---|
-| Repository name | `你的用户名.github.io` | **一个字都不能错**。这是 GitHub Pages 硬性要求，大小写严格一致 |
-| Description | 个人主页 | 可选 |
-| Public / Private | **选 Public** | Pages 免费版只支持公开仓库 |
-
-4. **其他选项全部不勾。** 不要勾 "Add a README"、"Add .gitignore"、"Choose a license"。因为我们要从本地 push 上去，勾了会导致冲突
-5. 点绿色的 **Create repository**
-
-### 4.2 本地推送代码
-
-打开终端（Windows 用 Git Bash），进入项目文件夹后**逐条**执行：
+1. 创建公开仓库，仓库名必须严格等于 `你的用户名.github.io`。
+2. 本地推送：
 
 ```bash
-# 进入项目文件夹
-cd 你的项目路径
-
-# 1. 初始化为 Git 仓库
 git init
-
-# 2. 添加所有文件
 git add .
-
-# 3. 提交
 git commit -m "首次提交：个人主页"
-
-# 4. 主分支命名为 main
 git branch -M main
-
-# 5. 关联远程仓库（把下面网址中的"你的用户名"改成你的）
 git remote add origin https://github.com/你的用户名/你的用户名.github.io.git
-
-# 6. 推送到 GitHub（会弹浏览器让你授权）
 git push -u origin main
 ```
 
-> 如果第 6 步要求输密码但 GitHub 密码无效：GitHub 从 2021 年起不支持密码登录命令行。需要创建 Personal Access Token：Settings → Developer settings → Personal access tokens → Tokens (classic) → Generate new token，勾选 `repo` 权限，生成后把 token 当作密码输入。
+3. 如果要求密码：GitHub 自 2021 年起不支持命令行密码，需用 Personal Access Token（Settings → Developer settings → Tokens (classic)，勾选 `repo` 权限，把 token 当密码粘贴）。
 
-### 4.3 确认部署成功
+### 6.2 自动构建流程
 
-1. push 完成后等 **1-2 分钟**
-2. 浏览器打开 `https://你的用户名.github.io`
-3. 看到中文主页 → 成功！
-4. 英文版：`https://你的用户名.github.io/en.html`
+每次 push 到 `main`，GitHub Actions（`.github/workflows/deploy.yml`）自动执行：静态检查（node/Python/YAML）→ `check_portfolio_sync.py` → `jekyll build` → 内部链接检查 → 上传产物 → 部署到 Pages。**不需要 gh-pages 分支，不需要手动点任何按钮。**
 
-如果显示 404：再等 2 分钟。如果还不行：仓库 Settings → Pages，确认 Build and deployment 的 Source 选 **GitHub Actions**（本项目已配置 `.github/workflows/deploy.yml`，正常无需改动）。
+手动触发：仓库 Actions 页面可手动运行该工作流；勾选 **deploy** 输入可强制重新部署（不勾则只跑外链巡检）。
 
-### 4.4 GitHub 自动构建
-
-**不需要任何额外操作。** push 后 GitHub Actions 自动运行 `.github/workflows/deploy.yml`：安装 Ruby → `jekyll build` → 上传产物 → 部署到 Pages。以后每次改内容只需：
+### 6.3 部署后验证（push ≠ 部署成功）
 
 ```bash
-git add .
-git commit -m "更新了xxx内容"
-git push
+gh run list --repo ChenChen913/ChenChen913.github.io --limit 3
+gh api repos/ChenChen913/ChenChen913.github.io/pages --jq '{status}'
+# 必须返回 "built"，返回 "errored" 则部署失败
+curl -sL "https://chenchen913.github.io/projects/campus-qa-bot/" | grep -c "项目介绍"
 ```
 
-约 1-2 分钟后网站自动更新。不需要手动点任何按钮。
+### 6.4 常见问题与限额
 
-### 4.5 如果 git push 要求输密码但 GitHub 密码无效
+| 问题 | 解决 |
+|---|---|
+| push 后页面不更新 | CDN 传播 5-10 分钟，等后再看或强刷 |
+| Pages 状态 `errored` | `gh api repos/.../pages/builds --method POST` 手动重触发 |
+| 构建失败 | 看 Actions 日志；常见原因是 YAML 语法错误或未排除的内部文档含 Liquid 代码 |
 
-GitHub 从 2021 年起不支持命令行直接使用账号密码。需要创建 Personal Access Token：
-
-1. 打开 GitHub → 右上角头像 → **Settings**
-2. 左侧菜单最底部 → **Developer settings**
-3. 左侧 **Personal access tokens** → **Tokens (classic)**
-4. 点 **Generate new token** → **Generate new token (classic)**
-5. Note 随便填（如 "个人主页部署"），勾选 **repo** 权限
-6. 拉到底部点 **Generate token**
-7. 复制生成的 token（只显示一次，别关页面！）
-8. 回到终端，用户名填你的 GitHub 用户名，**密码那一栏粘贴这个 token**
-
-### 4.6 GitHub Actions 部署是怎么工作的
-
-项目在 GitHub 上只有一个分支 `main`。部署完全由 GitHub Actions 自动完成，**不需要 `gh-pages` 分支**。
-
-**部署流程：**
-
-1. 你 `git push` → GitHub 发现 `.github/workflows/deploy.yml`
-2. Actions 自动运行：checkout 源码 → 装 Ruby → `jekyll build` 生成 `_site/`
-3. `actions/upload-pages-artifact@v3` 把 `_site/` 打包为部署构件
-4. `actions/deploy-pages@v4` 把构件直接部署到 GitHub Pages 服务器
-5. 约 1-2 分钟后，`https://用户名.github.io` 更新为新内容
-
-**不需要手动创建任何分支。** 整个过程你只做了一件事：`git push`。其余都是 `.github/workflows/deploy.yml` 驱动 GitHub 自动完成的。
+| 项目 | 限额 |
+|---|---|
+| 公开仓库 Pages | 无限站点、无限构建时长 |
+| 月带宽 | ~100 GB（软限制） |
+| 单文件/站点大小 | 1 GB（建议不超过 25 MB） |
+| 自定义域名 | ✅ 免费 HTTPS |
+| Actions 时长 | 公开仓库无限 |
 
 ---
 
-## 五、部署到 Gitee Pages（国内访问更快）
+## 七、备选部署方案
 
-### 5.1 与 GitHub Pages 的关键区别
+> 前提：所有平台都需要 `Gemfile.lock` 且**必须包含 Linux 平台**。本地在 macOS/Windows 上开发时先执行 `bundle lock --add-platform x86_64-linux` 并提交，否则 Cloudflare/Vercel/Netlify 构建可能因原生扩展编译失败。
 
-| | GitHub Pages | Gitee Pages |
-|---|---|---|
-| 自动 Jekyll 构建 | ✅ 支持 | ❌ 不支持 |
-| 部署方式 | push 源代码即可 | 需要先在本地 `jekyll build`，然后 push 生成的文件 |
-| 免费版更新 | 自动 | 每次 push 后需**手动点"更新"按钮** |
-| URL 格式 | `用户名.github.io` | `用户名.gitee.io/仓库名` |
-| 自定义域名 | ✅ 免费支持 | ❌ 免费版不支持 |
+### 7.1 Cloudflare Pages（推荐加速方案）
 
-### 5.2 部署步骤
+- 全球 330+ 边缘节点（含香港/东京），**免费无限带宽**，国内访问速度在免费方案中最快。
+- 步骤：注册（需绑卡验证身份，不扣费）→ Workers & Pages → Connect to Git → 选仓库 → 构建命令 `bundle exec jekyll build`、输出目录 `_site`、环境变量 `RUBY_VERSION=3.3` → Save and Deploy。
+- 每个分支/PR 自动生成预览链接；自定义域名免费自动 HTTPS。
+- 免费额度：月带宽无限、月构建 500 次、单文件 25 MB、站点不限。
 
-#### 第一步：本地构建
+### 7.2 Netlify
 
-```bash
-cd 你的项目路径
-bundle exec jekyll build
-```
+- 自动识别 Gemfile 为 Ruby 项目，预填构建命令 `bundle exec jekyll build`、发布目录 `_site`。
+- 推荐提交 `netlify.toml`（分支 `main`、环境 `RUBY_VERSION=3.3`；如需兼容旧链接可加 `/index-en.html` → `/en.html` 的 301 重定向）。
+- 特色：Deploy Previews、Forms、Functions、Analytics。
+- 免费额度：月带宽 100 GB、月构建 300 分钟、单文件 25 MB。
 
-这会在项目下生成一个 `_site/` 文件夹，里面是完整的静态 HTML 文件。
+### 7.3 Vercel
 
-#### 第二步：创建 Gitee 仓库
+- 自动检测 Jekyll，预填构建/安装命令；环境变量 `RUBY_VERSION=3.3`。
+- 可选提交 `vercel.json`（buildCommand / outputDirectory / installCommand）。
+- **最易踩坑**：构建环境是 Linux x86_64，必须先 `bundle lock --add-platform x86_64-linux`。
+- 免费额度：月带宽 100 GB、月构建 **6000 分钟**（Netlify 的 20 倍）。
 
-1. 打开 [gitee.com](https://gitee.com)，登录
-2. 点右上角 **+** → **新建仓库**
-3. 仓库名随便填（如 `homepage`），路径会自动生成
-4. 选 **公开**
-5. **不要勾** "使用 Readme 文件初始化这个仓库"
-6. 点 **创建**
+### 7.4 Gitee Pages（纯国内方案）
 
-#### 第三步：推送构建产物
+- 仓库名必须与用户名一致；**免费版每次 push 后需手动点"更新"按钮**，不会自动部署。
+- 支持 GitHub 镜像同步（管理 → 仓库镜像管理 → Pull），但代码同步后部署仍需手动更新。
+- 需要实名认证；自定义域名需 ICP 备案。
+- 免费额度：1 GB 存储、1 GB/月流量。
 
-```bash
-# 进入 _site 目录
-cd _site
+### 7.5 对比与推荐
 
-# 初始化并推送
-git init
-git add .
-git commit -m "部署 Gitee Pages"
-git remote add origin https://gitee.com/你的Gitee用户名/仓库名.git
-git push -u origin master --force
-```
+| 平台 | 自动部署 | 国内速度 | 免费带宽 | 自定义域名 | 实名 | 构建配额 |
+|---|:--:|:--:|:--:|:--:|:--:|:--:|
+| GitHub Pages | ✅ | 慢 | 100 GB/月 | ✅ | 无 | 不限 |
+| Cloudflare Pages | ✅ | 快 | **无限** | ✅ | 绑卡 | 500 次/月 |
+| Netlify | ✅ | 一般 | 100 GB/月 | ✅ | 无 | 300 分钟/月 |
+| Vercel | ✅ | 一般 | 100 GB/月 | ✅ | 无 | 6000 分钟/月 |
+| Gitee Pages | ❌ 手动 | 最快 | 1 GB/月 | 需备案 | 必须 | 不限 |
 
-> Gitee 默认分支名是 `master`（不是 `main`），注意区别。
-
-#### 第四步：开启 Gitee Pages
-
-1. 进入 Gitee 仓库页面
-2. 顶部菜单找到 **服务** → **Gitee Pages**
-3. 部署分支选 `master`，部署目录填 `/`（根目录）
-4. 点 **启动**
-5. **首次使用需要实名认证**（手机号验证，Gitee 强制要求）
-6. 部署成功后，页面显示访问地址
-
-#### 第五步：以后更新
-
-```bash
-# 1. 在项目根目录重新构建
-cd 你的项目路径
-bundle exec jekyll build
-
-# 2. 进入 _site 推送
-cd _site
-git add .
-git commit -m "更新"
-git push
-
-# 3. ⚠️ 回到 Gitee 网页 → 服务 → Gitee Pages → 点"更新"按钮
-```
-
-> **免费版不会自动更新。** 每次 push 之后必须手动去网页点"更新"按钮，否则网站内容不变。这是 Gitee 免费版的限制。
+推荐组合：GitHub Pages 保持主站；国内加速加 Cloudflare Pages（一条 push 双平台部署）；纯国内则用 Gitee。
 
 ---
 
-## 六、如何撤回访问
+## 八、如何撤回访问
 
-1. 用 `index_empty.html` 的内容覆盖 `index.html`（把 `index_empty.html` 复制一份并重命名为 `index.html`）
-2. Push，GitHub 自动构建
-3. 访问者看到"主页暂时关闭"提示页
-4. 恢复：从 `backups/` 或 Git 历史恢复原始 `index.html`，重新 push
+1. 用 `index_empty.html` 的内容覆盖 `index.html`（复制并重命名）。
+2. Push，GitHub 自动构建；访问者看到"主页暂时关闭"。
+3. 恢复：从 `backups/` 或 Git 历史恢复原始 `index.html`，重新 push。
 
 ---
 
-## 七、备份机制
+## 九、备份机制
 
-`backups/` 文件夹存放历史版本。每次大改前备份。
-
-### 方式一：用备份脚本（推荐）
-
-项目根目录下有 `backup.ps1` 脚本，双击或在终端运行：
+### 方式一：备份脚本（推荐）
 
 ```powershell
-# PowerShell（Windows）
-.\backup.ps1
-# 或带备注
-.\backup.ps1 -Note "新增实习经历"
+.\backup.ps1                          # 默认保留最近 3 份
+.\backup.ps1 -Note "新增实习经历" -Keep 5
+.\backup.ps1 -CreateTag               # 同时创建并推送 Git tag
 ```
 
-脚本会自动：
-1. 在 `backups/` 下创建 `YYYY-MM-DD-备注` 文件夹
-2. 复制所有核心文件（`_data/`、`_layouts/`、`_projects/`、`_publications/`、`assets/`、`index.html`、`en.html`、`404.html`、`index_empty.html`、`style.css`、`script.js`、`_config.yml`）
-3. 打包 Git tag 供远程追溯（可选）
+脚本自动：
+1. 在 `backups/` 下创建 `YYYY-MM-DD-备注` 文件夹；
+2. 复制核心文件（`_data/`、`_layouts/`、`_projects/`、`_publications/`、`assets/`、全部根 HTML、`style.css`、`script.js`、`_config.yml`、`portfolio-single-file.html`、`check_portfolio_sync.py`、`update-date.py`、`generate_assets.py`、`backup.ps1`、Gemfile/Gemfile.lock）；
+3. 按 `-Keep N` 清理旧备份（默认 3），只保留最近 N 份；
+4. 可选创建 Git tag 推送到远程。
 
-### 方式二：手动备份
-
-```powershell
-# PowerShell（Windows）
-$date = Get-Date -Format "yyyy-MM-dd"
-New-Item -ItemType Directory -Path "backups\$date-stable" -Force
-Copy-Item -Recurse _data, _layouts, _projects, _publications, assets, index.html, en.html, 404.html, index_empty.html, style.css, script.js, _config.yml "backups\$date-stable\"
-```
+### 方式二：Git Tag 远程快照
 
 ```bash
-# Bash（macOS/Linux）
-mkdir -p backups/$(date +%Y-%m-%d)-stable
-cp -r _data _layouts _projects _publications assets index.html en.html 404.html index_empty.html style.css script.js _config.yml backups/$(date +%Y-%m-%d)-stable/
-```
-
-### 方式三：用 Git Tag 做版本快照（远程备份）
-
-```bash
-# 打标签（每月或每次大改后）
-git tag -a v2026-07 -m "7月版本：包含校园问答机器人和论文"
+git tag -a v2026-07 -m "7月版本"
 git push origin v2026-07
-
-# 查看所有历史版本
 git tag -l
-
-# 回到某个历史版本查看
-git checkout v2026-07
 ```
 
-> 💡 **建议组合使用**：本地 `backups/` 文件夹方便随时查看，Git tag 提供远程备份不怕丢。
+> 💡 建议组合：本地 `backups/` 随时查看，Git tag 提供远程备份不怕丢。
 
 ---
 
-## 八、常见问题
+## 十、安全与平台限制
+
+- **CSP**：GitHub Pages 不支持自定义响应头，无法设置 Content-Security-Policy；属平台限制，仅记录。部署到支持响应头的平台时可另行配置。
+- **前端依赖**：KaTeX、highlight.js、pdf.js 均已本地自托管（`assets/vendor/`、`assets/pdfjs/`），无 CDN 供应链依赖。
+- **邮箱**：线上页面源码不含明文邮箱（JS 字符码拼装，仅防简单抓取）；离线备案页保留明文。
+- **链接**：模板对 github/demo/社交链接使用 http/https 白名单，`javascript:` 等变体一律输出 `#`。
+
+---
+
+## 十一、常见问题
 
 **Q：push 后网站没更新？**
-A：GitHub Pages 构建通常需要 1-2 分钟。如果超过 3 分钟没变化，去仓库 Settings → Pages 看构建状态。红色表示构建失败（通常是 YAML 语法错误）。
+A：等 1-2 分钟（CDN 传播最多 5-10 分钟）；超过 3 分钟去仓库 Settings → Pages 看构建状态，红色表示构建失败（通常是 YAML 语法错误）。
 
 **Q：本地 `bundle exec jekyll serve` 报错？**
-A：确保 `bundle install` 成功。如果 Windows 上安装 `github-pages` gem 失败，尝试 `gem install jekyll` 后用 `jekyll serve`（功能相同）。
+A：确认 `bundle install` 成功。Windows 上 github-pages gem 安装失败时，可 `gem install jekyll` 后临时用 `jekyll serve`。
 
 **Q：样式丢失？**
 A：检查 `style.css` 是否在根目录，`_config.yml` 中没有被 exclude。
 
 **Q：想新增一个栏目（如"获奖经历"）？**
-A：(1) 在 `_data/navigation.yml` 加导航项；(2) 在 `_data/` 新建数据文件；(3) 在 `_layouts/default.html` 中复制一个 `<section>` 块改 id 和内容。
+A：(1) `_data/navigation.yml` 加导航项；(2) `_data/` 新建数据文件；(3) `_layouts/default.html` 复制一个 `<section>` 块改 id 和内容。
+
+**Q：GitHub Actions 构建失败且日志提示 Liquid 语法错误？**
+A：多半是新增的内部文档（Markdown）被 Jekyll 当作页面解析。确认文件已加入 `_config.yml` 的 `exclude`，或去掉 front matter。
 
 ---
 
-最后更新：2026 年 07 月 31 日
+最后更新：2026 年 08 月 04 日

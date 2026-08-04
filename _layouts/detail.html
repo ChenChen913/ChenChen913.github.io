@@ -2,16 +2,16 @@
 {% assign meta_en = page.en | default: page.zh %}
 {% assign p = site.data.personal.zh %}
 {% assign p_en = site.data.personal.en %}
-{% assign has_math = false %}{% assign _math_in_code = false %}{% assign _math_chunks = page.content | split: '```' %}{% for _chunk in _math_chunks %}{% unless _math_in_code %}{% if _chunk contains '$$' or _chunk contains '\(' or _chunk contains '\[' %}{% assign has_math = true %}{% endif %}{% endunless %}{% if _math_in_code == false %}{% assign _math_in_code = true %}{% else %}{% assign _math_in_code = false %}{% endif %}{% endfor %}
-{% comment %}注：has_math 按 ``` 围栏剥离代码块后检测，代码块内的 $$/\( 不再误触发；
-行内反引号代码与 ~~~ 围栏仍可能误报（仅多加载 KaTeX，不会误渲染——
-renderMathInElement 默认忽略 pre/code 内容），此为已知取舍。{% endcomment %}
-{% assign has_code = false %}{% if content contains '<pre' or content contains '```' %}{% assign has_code = true %}{% endif %}
+{% assign has_math = page.math | default: false %}
+{% comment %}注：正文是否含公式改由 front matter 的 math: true 开关控制，不再猜测正文，
+彻底消除 ```/~~~ 围栏与行内反引号造成的误报；需要 KaTeX 的页面在 front matter 加 math: true。{% endcomment %}
+{% assign has_code = false %}{% if content contains '<pre' %}{% assign has_code = true %}{% endif %}
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" sizes="32x32" href="{{ '/assets/favicon-32x32.png' | relative_url }}">
 <link rel="icon" type="image/svg+xml" href="{{ '/assets/favicon.svg' | relative_url }}">
 
 <!-- 语言修正尽早执行：根据 ?lang= 参数在解析正文前修正 <html lang>，避免屏幕阅读器以错误语言朗读。
@@ -60,7 +60,9 @@ renderMathInElement 默认忽略 pre/code 内容），此为已知取舍。{% en
     }
   })();
 </script>
-<meta property="og:image" content="{{ '/assets/avatar.jpg' | absolute_url }}">
+<meta property="og:image" content="{{ '/assets/og-image.png' | absolute_url }}">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
 <meta property="og:url" content="{{ page.url | absolute_url }}">
 <link rel="canonical" href="{{ page.url | absolute_url }}">
 <script type="application/ld+json" id="ld-json">
@@ -74,7 +76,10 @@ renderMathInElement 默认忽略 pre/code 内容），此为已知取舍。{% en
 }
 </script>
 <!-- 双语互指（尽力而为）：中英文共用同一 URL、以 ?lang= 参数区分，
-     搜索引擎对带查询参数的 hreflang 支持有限，此处仅作声明，不承诺索引效果 -->
+     搜索引擎对带查询参数的 hreflang 支持有限，此处仅作声明，不承诺索引效果。
+     评估结论：GitHub Pages 无插件环境下实现 /en/ 真静态路径需要为每篇内容维护
+     双份源文件（单一 front matter 无法生成两个输出），与"单一数据源"原则冲突，
+     故保留 query 方案并持续文档化。 -->
 <link rel="alternate" hreflang="zh-CN" href="{{ page.url | absolute_url }}?lang=zh">
 <link rel="alternate" hreflang="en" href="{{ page.url | absolute_url }}?lang=en">
 <meta name="theme-color" content="#F4F5F7" media="(prefers-color-scheme: light)">
@@ -92,13 +97,14 @@ renderMathInElement 默认忽略 pre/code 内容），此为已知取舍。{% en
 
 {% if has_math %}
 <!-- KaTeX: 数学公式（仅在正文含公式时加载）。
-     注：cdnjs 在部分地区访问慢/不可达，无降级方案为已知取舍——加载失败时公式显示为原始文本，不影响页面其余内容。 -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+     已本地自托管（assets/vendor/katex，版本 0.16.9），无 CDN 供应链依赖。 -->
+<link rel="stylesheet" href="{{ '/assets/vendor/katex/katex.min.css' | relative_url }}">
 {% endif %}
 
 {% if has_code %}
-<!-- highlight.js: 代码高亮（仅在正文含代码块时加载）。加载失败时代码以 <pre> 原始样式显示，不影响其余内容。 -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css" integrity="sha384-eFTL69TLRZTkNfYZOLM+G04821K1qZao/4QLJbet1pP4tcF+fdXq/9CdqAbWRl/L" crossorigin="anonymous" id="hljs-light">
+<!-- highlight.js: 代码高亮（仅在正文含代码块时加载）。
+     已本地自托管（assets/vendor/highlight，版本 11.9.0），无 CDN 供应链依赖。 -->
+<link rel="stylesheet" href="{{ '/assets/vendor/highlight/github.min.css' | relative_url }}" id="hljs-light">
 <style id="hljs-dark" disabled>
   .hljs { color: #e1e4e8; background: #161b22; }
   .hljs-keyword, .hljs-selector-tag, .hljs-literal, .hljs-section, .hljs-link { color: #ff7b72; }
@@ -182,10 +188,12 @@ renderMathInElement 默认忽略 pre/code 内容），此为已知取舍。{% en
 
       <!-- PDF 查看器：单实例放在语言区块之外，中英文共用，避免同一 PDF 被加载两次。
            初始不写 src，由脚本按语言从 data-zh/data-en 赋值，避免两种 PDF 都被下载；
-           无 JS 时 iframe 为空为文档化取舍。 -->
+           无 JS 时 iframe 为空为文档化取舍。
+           pdf 字段约定为裸文件名（如 foo.pdf）；构造路径前 remove_first '/' 防误写绝对路径，
+           含 '..' 的值直接跳过，避免拼接出越界路径。 -->
       {% if page.zh.pdf or page.en.pdf %}
       <div style="margin-top:2em;">
-        <iframe id="pdf-frame"{% if page.zh.pdf %} data-zh="{{ '/assets/pdf-viewer.html?file=' | relative_url }}{{ page.zh.pdf | prepend: '/assets/publications/' | relative_url }}"{% endif %}{% if page.en.pdf %} data-en="{{ '/assets/pdf-viewer.html?file=' | relative_url }}{{ page.en.pdf | prepend: '/assets/publications/' | relative_url }}"{% endif %} style="width:100%; height:850px; border:1px solid var(--border); border-radius:8px;" title="PDF 文档 / PDF Document"></iframe>
+        <iframe id="pdf-frame"{% if page.zh.pdf %}{% assign pdf_zh = page.zh.pdf | remove_first: '/' %}{% if pdf_zh != '' and pdf_zh != '#' %}{% unless pdf_zh contains '..' %} data-zh="{{ '/assets/pdf-viewer.html?file=' | relative_url }}{{ pdf_zh | prepend: '/assets/publications/' | relative_url }}"{% endunless %}{% endif %}{% endif %}{% if page.en.pdf %}{% assign pdf_en = page.en.pdf | remove_first: '/' %}{% if pdf_en != '' and pdf_en != '#' %}{% unless pdf_en contains '..' %} data-en="{{ '/assets/pdf-viewer.html?file=' | relative_url }}{{ pdf_en | prepend: '/assets/publications/' | relative_url }}"{% endunless %}{% endif %}{% endif %} style="width:100%; height:850px; border:1px solid var(--border); border-radius:8px;" title="PDF 文档 / PDF Document"></iframe>
         <script>
           (function () {
             var f = document.getElementById('pdf-frame');
@@ -206,14 +214,14 @@ renderMathInElement 默认忽略 pre/code 内容），此为已知取舍。{% en
   </main>
 
   <footer class="site-footer container" style="padding-bottom:60px;">
-    <span>&copy; 2026 <span class="detail-zh">{{ p.name | escape }}</span><span class="detail-en">{{ p_en.name | escape }}</span></span>
+    <span class="detail-zh">{{ p.footer_copyright | escape }}</span><span class="detail-en">{{ p_en.footer_copyright | escape }}</span>
   </footer>
 
   <script src="{{ '/script.js' | relative_url }}"></script>
 
   {% if has_code %}
   <!-- highlight.js: 代码高亮 -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" integrity="sha384-F/bZzf7p3Joyp5psL90p/p89AZJsndkSoGwRpXcZhleCWhd8SnRuoYo4d0yirjJp" crossorigin="anonymous"></script>
+  <script src="{{ '/assets/vendor/highlight/highlight.min.js' | relative_url }}"></script>
   <script>hljs.highlightAll();</script>
 
   <!-- 深色模式同步高亮主题 -->
@@ -234,8 +242,8 @@ renderMathInElement 默认忽略 pre/code 内容），此为已知取舍。{% en
 
   {% if has_math %}
   <!-- KaTeX: 数学公式渲染 -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js" integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"></script>
+  <script src="{{ '/assets/vendor/katex/katex.min.js' | relative_url }}"></script>
+  <script src="{{ '/assets/vendor/katex/auto-render.min.js' | relative_url }}"></script>
   <script>
   (function() {
     // 仅渲染当前可见语言区域的公式，避免浪费性能

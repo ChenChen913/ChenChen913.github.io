@@ -5,20 +5,26 @@ on:
     branches: [main]
   schedule:
     - cron: '0 3 * * 1'   # 每周一 03:00 UTC 触发外部链接巡检
-  workflow_dispatch:       # 手动触发外部链接巡检
-
-# 同一时刻只允许一个 Pages 部署，防止旧构建后完成反而覆盖新构建的竞态。
-# cancel-in-progress 设为 false（GitHub Pages 官方模板配置）：
-# 不取消进行中的生产部署，让其跑完，新触发的部署排队等待。
-concurrency:
-  group: "pages"
-  cancel-in-progress: false
+  workflow_dispatch:       # 手动触发：默认只跑外链巡检；勾选 deploy 则强制重新部署
+    inputs:
+      deploy:
+        description: 强制重新部署站点（勾选后跳过外链巡检）
+        type: boolean
+        required: false
+        default: false
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    if: github.event_name == 'push'   # 仅 push 触发部署；定时/手动只跑外链巡检
+    # push 或手动勾选 deploy 时部署；定时/默认手动只跑外链巡检
+    if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && github.event.inputs.deploy == 'true')
+    # 同一时刻只允许一个 Pages 部署，防止旧构建后完成反而覆盖新构建的竞态。
+    # cancel-in-progress 设为 false（GitHub Pages 官方模板配置）：
+    # 不取消进行中的生产部署，让其跑完，新触发的部署排队等待。
+    concurrency:
+      group: "pages-deploy"
+      cancel-in-progress: false
     permissions:
       contents: read
       pages: write
@@ -77,7 +83,11 @@ jobs:
   check-external-links:
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    if: github.event_name != 'push'
+    if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && github.event.inputs.deploy != 'true')
+    # 巡检与部署互不排队：只读任务独立 concurrency group
+    concurrency:
+      group: "pages-links"
+      cancel-in-progress: false
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:

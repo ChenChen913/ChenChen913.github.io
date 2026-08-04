@@ -1,10 +1,12 @@
 ﻿# 个人主页备份脚本
-# 用法：.\backup.ps1 [-Note "备注信息"] [-CreateTag]
+# 用法：.\backup.ps1 [-Note "备注信息"] [-Keep N] [-CreateTag]
 # 示例：.\backup.ps1 -Note "新增实习经历"
+#       .\backup.ps1 -Note "新增实习经历" -Keep 5      # 保留最近 5 份备份
 #       .\backup.ps1 -Note "新增实习经历" -CreateTag   # 非交互环境强制创建 Git tag
 
 param(
     [string]$Note = "stable",
+    [int]$Keep = 3,
     [switch]$CreateTag
 )
 
@@ -43,7 +45,14 @@ $CoreItems = @(
     "index_empty.html",
     "style.css",
     "script.js",
-    "_config.yml"
+    "_config.yml",
+    "portfolio-single-file.html",
+    "check_portfolio_sync.py",
+    "update-date.py",
+    "generate_assets.py",
+    "backup.ps1",
+    "Gemfile",
+    "Gemfile.lock"
 )
 
 # 先复制到暂存目录，全部成功后再替换正式备份：
@@ -109,6 +118,24 @@ try {
 } catch {
     Write-Error "正式化备份目录失败，已中止: $($_.Exception.Message)"
     exit 1
+}
+
+# 保留策略：按名称倒序（YYYY-MM-DD 前缀自然排序）只保留最近 $Keep 份备份，
+# 其余（含"-旧-"套娃归档与测试残留）清理掉；逐目录校验绝对路径防越界。
+if ($Keep -gt 0) {
+    $AllBackups = Get-ChildItem -LiteralPath $BackupRoot -Directory |
+        Where-Object { $_.Name -match '^\d{4}-\d{2}-\d{2}-' } |
+        Sort-Object Name -Descending
+    $ToRemove = $AllBackups | Select-Object -Skip $Keep
+    foreach ($Old in $ToRemove) {
+        $OldPath = [System.IO.Path]::GetFullPath($Old.FullName)
+        if (-not $OldPath.StartsWith($BackupRoot + [System.IO.Path]::DirectorySeparatorChar, [System.StringComparison]::OrdinalIgnoreCase)) {
+            Write-Warning "跳过越界路径（不应发生）: $OldPath"
+            continue
+        }
+        Write-Host "清理旧备份: $OldPath" -ForegroundColor Yellow
+        Remove-Item -LiteralPath $OldPath -Recurse -Force -ErrorAction SilentlyContinue
+    }
 }
 
 Write-Host ""

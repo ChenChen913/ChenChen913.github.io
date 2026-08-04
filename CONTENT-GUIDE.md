@@ -58,7 +58,7 @@ en:
 如果需要展示 PDF，用 iframe：
 <iframe src="{{ '/assets/pdf-viewer.html?file=/assets/your-file.pdf' | relative_url }}" width="100%" height="500" style="border:1px solid var(--border); border-radius:8px;"></iframe>
 
-<!-- English -->
+<!-- PAGE_ENGLISH_SPLIT_2026 -->
 
 ## Project Introduction
 
@@ -219,7 +219,7 @@ en:
 | 文件 | 不能改什么 |
 |---|---|
 | `_layouts/default.html` | 不要改 CSS/JS 引用、section 的 id 属性、主题切换逻辑 |
-| `_layouts/detail.html` | 不要改 `<!-- English -->` 分隔符逻辑、KaTeX 加载逻辑 |
+| `_layouts/detail.html` | 不要改 `<!-- PAGE_ENGLISH_SPLIT_2026 -->` 分隔符逻辑；公式页在 front matter 加 `math: true` 加载 KaTeX |
 | `style.css` | 不要改第 4-35 行的 CSS 变量块、第 61 行的 `scroll-margin-top` |
 | `script.js` | 不要改 `NAV_OFFSET`（第 66 行，值 80）、核心函数 |
 | `_config.yml` | 不要改 `collections` 配置、`exclude` 列表（除非你确定知道后果）|
@@ -261,9 +261,9 @@ en:
 ## 七、双语维护要点
 
 1. **中文和英文必须同步修改**：改了中文的姓名，英文也要改
-2. **`<!-- English -->` 是分隔符**：详情页正文中，分隔符上面是中文，下面是英文
+2. **`<!-- PAGE_ENGLISH_SPLIT_2026 -->` 是分隔符**：详情页正文中，分隔符上面是中文，下面是英文
 3. **YAML 中的 `zh:` 和 `en:`**：每个字段都有中英文两个版本，缺一不可
-4. **`footer_updated` 格式**：中文用"页面最后更新：2026 年 08 月 01 日"，英文用"Last updated: August 01, 2026"（前缀不能少，否则 `update-date.py` 无法自动更新）
+4. **`footer_updated` 格式**：中文用"页面最后更新：2026 年 08 月 01 日"，英文用"Last updated: August 1, 2026"（日期不补零；前缀不能少，否则 `update-date.py` 无法自动更新）
 
 ---
 

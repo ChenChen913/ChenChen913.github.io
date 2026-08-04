@@ -48,10 +48,11 @@ exclude:
   - .ruby-version
   - DEPLOY.md
   - TROUBLESHOOTING.md
-  - DEPLOY-OPTIONS.md
-  - RUBY-JEKYLL.md
   - CONTENT-GUIDE.md
+  - AUDIT-REPORT.md
+  - docs/
   - update-date.py
+  - generate_assets.py
   - backup.ps1
   - README.md
   - README_EN.md

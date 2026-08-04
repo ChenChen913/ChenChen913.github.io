@@ -27,6 +27,9 @@
 *.bat text eol=crlf
 *.cmd text eol=crlf
 
+# PowerShell 脚本统一 LF（现代 PowerShell 兼容 LF；与 .editorconfig 保持一致）
+*.ps1 text eol=lf
+
 # 其他依赖 CRLF 的 Windows 文本格式（与 .editorconfig 保持同步）
 *.reg text eol=crlf
 *.rc text eol=crlf

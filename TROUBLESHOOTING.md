@@ -182,7 +182,7 @@ Jekyll 的 `excerpt` 取的是 Markdown 正文**第一个段落**。每个 Markd
 ```markdown
 中文摘要内容。
 
-<!-- English -->
+<!-- PAGE_ENGLISH_SPLIT_2026 -->
 English abstract content.
 ```
 
@@ -610,8 +610,8 @@ Liquid Exception: Liquid syntax error (line 538): 'if' tag was never closed in A
 exclude:
   - AUDIT-REPORT.md        # 本次故障根源（含 {% if %} 示例）
   - INDEPENDENT-AUDIT.md   # 同类隐患
-  - DEPLOY-OPTIONS.md      # 含 ${{ ... }} workflow 示例，同类隐患
-  - RUBY-JEKYLL.md         # 内部文档，预防性排除
+  - DEPLOY.md              # 含 Liquid 示例，同类隐患
+  - docs/                  # 内部计划文档，预防性排除
   - update-date.py         # 工具脚本，不应发布到站点
 ```
 

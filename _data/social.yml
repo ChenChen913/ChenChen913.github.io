@@ -3,8 +3,9 @@
 # ============================================================
 
 email: wcn913@gmail.com
-# 注意：邮箱同时在 _layouts/default.html、index_empty.html 与 portfolio-single-file.html
-# 中以字符码数组/noscript 硬编码（防简单抓取）。修改邮箱时，请同步更新这四处。
+# 邮箱唯一数据源是本文件。防抓取副本（JS 字符码数组）位于 _layouts/default.html 与
+# index_empty.html；portfolio-single-file.html 为离线备案页保留明文（离线场景无需防抓取），
+# 其内容由 check_portfolio_sync.py 内容级校验兜底。修改邮箱时：改本文件 + 两处 JS 数组即可。
 github: https://github.com/ChenChen913
 github_display: github.com/ChenChen913
 gitee: https://gitee.com/ChenChen913

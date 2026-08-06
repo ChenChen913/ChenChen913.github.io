@@ -32,6 +32,7 @@ A personal homepage built with Jekyll, deployed on GitHub Pages.
 ├── docs/                # internal plans / audit docs (not published)
 ├── AUDIT-REPORT.md      # round-1 audit report (not published)
 ├── AUDIT-REPORT-2.md    # round-2 audit report (not published)
+├── AUDIT-REPORT-3.md    # round-3 security scan report (not published)
 ├── CONTENT-GUIDE.md     # content maintenance guide (not published)
 ├── DEPLOY.md            # deployment guide (not published)
 ├── TROUBLESHOOTING.md   # troubleshooting guide (not published)
@@ -49,6 +50,7 @@ A personal homepage built with Jekyll, deployed on GitHub Pages.
 ├── robots.txt           # search-engine crawler rules
 ├── LICENSE              # open-source license
 ├── Gemfile / Gemfile.lock / .ruby-version  # Ruby dependencies
+├── requirements-ci.txt  # CI Python deps (pinned + hash-verified)
 ├── .editorconfig / .gitattributes / .gitignore  # editor / line-ending / ignore rules
 └── .github/workflows/   # GitHub Actions deployment config
 ```

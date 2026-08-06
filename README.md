@@ -32,6 +32,7 @@
 ├── docs/                # 内部计划/审核文档（不发布）
 ├── AUDIT-REPORT.md      # 第一轮审核报告（不发布）
 ├── AUDIT-REPORT-2.md    # 第二轮审核报告（不发布）
+├── AUDIT-REPORT-3.md    # 第三轮安全扫描报告（不发布）
 ├── CONTENT-GUIDE.md     # 内容维护指南（不发布）
 ├── DEPLOY.md            # 部署与维护指南（不发布）
 ├── TROUBLESHOOTING.md   # 排障手册（不发布）
@@ -49,6 +50,7 @@
 ├── robots.txt           # 搜索引擎爬虫规则
 ├── LICENSE              # 开源许可
 ├── Gemfile / Gemfile.lock / .ruby-version  # Ruby 依赖
+├── requirements-ci.txt  # CI Python 依赖（固定版本 + 哈希校验）
 ├── .editorconfig / .gitattributes / .gitignore  # 编辑器/换行/忽略规则
 └── .github/workflows/   # GitHub Actions 自动部署配置
 ```

@@ -5,10 +5,10 @@ on:
     branches: [main]
   schedule:
     - cron: '0 3 * * 1'   # 每周一 03:00 UTC 触发外部链接巡检
-  workflow_dispatch:       # 手动触发：默认只跑外链巡检；勾选 deploy 则强制重新部署
+  workflow_dispatch:       # 手动触发：默认只跑只读链接检查；勾选 deploy 则强制重新部署
     inputs:
       deploy:
-        description: 强制重新部署站点（勾选后跳过外链巡检）
+        description: 强制重新部署站点（不勾选则只跑只读链接检查）
         type: boolean
         required: false
         default: false
@@ -50,7 +50,8 @@ jobs:
 
       - name: Check portfolio sync freshness
         run: |
-          python -m pip install pyyaml --quiet
+          # pyyaml 固定版本并哈希校验，避免部署任务从 PyPI 拉到未审计的新版本
+          python -m pip install --require-hashes -r requirements-ci.txt --quiet
           python check_portfolio_sync.py
 
       # 本站为用户名级站点（chenchen913.github.io），baseurl 为空，
@@ -80,9 +81,9 @@ jobs:
         id: deployment
         uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e
 
-  # 外部链接巡检：仅定时/手动触发，独立于部署（不阻断 Pages）。
-  # 部署流水线仍 --disable-external，避免外部站点反爬导致部署误失败。
-  check-external-links:
+  # 只读链接巡检：仅定时/手动触发，独立于部署（不阻断 Pages）。
+  # 所有 htmlproofer 调用统一 --disable-external，CI 不向外部站点发起未验证请求。
+  check-internal-links:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && github.event.inputs.deploy != 'true')
@@ -100,5 +101,5 @@ jobs:
           bundler-cache: true
       - name: Build site
         run: bundle exec jekyll build
-      - name: Check external links (non-blocking for deploy)
-        run: bundle exec htmlproofer ./_site --allow-missing-href --no-enforce-https
+      - name: Check internal links (non-blocking for deploy)
+        run: bundle exec htmlproofer ./_site --disable-external --allow-missing-href --no-enforce-https

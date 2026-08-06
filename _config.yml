@@ -51,6 +51,7 @@ exclude:
   - CONTENT-GUIDE.md
   - AUDIT-REPORT.md
   - AUDIT-REPORT-2.md
+  - AUDIT-REPORT-3.md
   - docs/
   - update-date.py
   - generate_assets.py

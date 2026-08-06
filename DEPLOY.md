@@ -248,9 +248,9 @@ git push -u origin main
 
 ### 6.2 自动构建流程
 
-每次 push 到 `main`，GitHub Actions（`.github/workflows/deploy.yml`）自动执行：静态检查（node/Python/YAML）→ `check_portfolio_sync.py` → `jekyll build` → 内部链接检查 → 上传产物 → 部署到 Pages。**不需要 gh-pages 分支，不需要手动点任何按钮。**
+每次 push 到 `main`，GitHub Actions（`.github/workflows/deploy.yml`）自动执行：静态检查（node/Python/YAML）→ `check_portfolio_sync.py`（Python 依赖按 `requirements-ci.txt` 固定版本 + 哈希安装）→ `jekyll build` → 内部链接检查 → 上传产物 → 部署到 Pages。**不需要 gh-pages 分支，不需要手动点任何按钮。**
 
-手动触发：仓库 Actions 页面可手动运行该工作流；勾选 **deploy** 输入可强制重新部署（不勾则只跑外链巡检）。
+手动触发：仓库 Actions 页面可手动运行该工作流；勾选 **deploy** 输入可强制重新部署（不勾则只跑只读链接检查）。
 
 ### 6.3 部署后验证（push ≠ 部署成功）
 
@@ -366,7 +366,8 @@ git tag -l
 - **CSP**：GitHub Pages 不支持自定义响应头，无法设置 Content-Security-Policy；属平台限制，仅记录。部署到支持响应头的平台时可另行配置。
 - **前端依赖**：KaTeX、highlight.js、pdf.js 均已本地自托管（`assets/vendor/`、`assets/pdfjs/`），无 CDN 供应链依赖。
 - **邮箱**：线上页面源码不含明文邮箱（JS 字符码拼装，仅防简单抓取）；离线备案页保留明文。
-- **链接**：模板对 github/demo/社交链接使用 http/https 白名单，`javascript:` 等变体一律输出 `#`。
+- **链接**：模板对 github/demo/社交链接只放行 `http`/`https` 协议（按 `://` 前的协议段锚定判断），其余协议一律输出 `#`。
+- **CI 依赖**：Python 依赖在 `requirements-ci.txt` 固定版本并做 sha256 哈希校验（`pip --require-hashes`），Actions 全部固定到完整 commit SHA；htmlproofer 统一 `--disable-external`，CI 不向外部站点发起未验证请求。
 
 ---
 
@@ -389,4 +390,4 @@ A：多半是新增的内部文档（Markdown）被 Jekyll 当作页面解析。
 
 ---
 
-最后更新：2026 年 08 月 04 日
+最后更新：2026 年 08 月 06 日

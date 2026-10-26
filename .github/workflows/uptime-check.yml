@@ -1,0 +1,88 @@
+name: Site uptime check
+
+# 只做探活，不改任何文件，失败时通过 Actions 失败邮件通知。
+#
+# ⚠️ 已知限制：GitHub 会在仓库连续约 60 天无提交活动后自动禁用定时工作流
+#    （disabled_inactivity），本工作流也会被一起禁用，届时探活会静默停止。
+#    排查命令：gh api repos/ChenChen913/ChenChen913.github.io/actions/workflows \
+#             --jq '.workflows[] | "\(.name) \(.state)"'
+#    恢复：gh workflow enable uptime-check.yml
+#    长期无内容更新的时期，请每月手动执行一次 workflow_dispatch 确认它仍然启用。
+
+on:
+  schedule:
+    # UTC 01:00 / 13:00 = 北京时间 09:00 / 21:00
+    - cron: '0 1,13 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: "site-uptime"
+  cancel-in-progress: true
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: 探测主站与备用站
+        run: |
+          set -u
+          FAILED=0
+          PASSED=0
+          SUMMARY=""
+
+          # check <描述> <URL> <必须出现的字符串> [期望状态码]
+          check() {
+            local name="$1" url="$2" needle="$3" want="${4:-200}"
+            local code="" i=0
+            for i in 1 2 3; do
+              code=$(curl -s -o /tmp/probe_body -w '%{http_code}' \
+                     --compressed --max-time 30 "$url" 2>/dev/null || echo 000)
+              if [ "$code" = "$want" ] && grep -qF "$needle" /tmp/probe_body 2>/dev/null; then
+                echo "✅ $name  HTTP $code  内容匹配"
+                SUMMARY="${SUMMARY}| $name | $code | ✅ |"$'\n'
+                PASSED=$((PASSED + 1))
+                return 0
+              fi
+              sleep 5
+            done
+            echo "❌ $name  HTTP $code  缺失内容: $needle"
+            SUMMARY="${SUMMARY}| $name | $code | ❌ 缺 \"$needle\" |"$'\n'
+            FAILED=$((FAILED + 1))
+            return 1
+          }
+
+          echo "=== 主站 chenchen913.pages.dev ==="
+          check "主站首页"        "https://chenchen913.pages.dev/"                        "王晨"
+          check "主站首页 canonical" "https://chenchen913.pages.dev/"                     'canonical" href="https://chenchen913.pages.dev/"'
+          check "主站项目详情"     "https://chenchen913.pages.dev/projects/campus-qa-bot/" "校园知识库"
+          check "主站论文详情"     "https://chenchen913.pages.dev/publications/rgv-dynamic-scheduling/" "智能 RGV"
+          check "主站 sitemap"    "https://chenchen913.pages.dev/sitemap.xml"             "chenchen913.pages.dev"
+          check "主站 404 行为"   "https://chenchen913.pages.dev/uptime-probe-404-check"  "404" 404
+
+          echo
+          echo "=== 备用站 chenchen913.github.io ==="
+          check "备用站首页"       "https://chenchen913.github.io/"                        "王晨"
+          check "备用站首页 canonical" "https://chenchen913.github.io/"                    'canonical" href="https://chenchen913.github.io/"'
+          check "备用站项目详情"    "https://chenchen913.github.io/projects/campus-qa-bot/" "校园知识库"
+
+          echo
+          echo "=== 结果：通过 $PASSED 项，失败 $FAILED 项 ==="
+
+          {
+            echo "## 站点探活结果"
+            echo
+            echo "| 检查项 | HTTP | 结果 |"
+            echo "|---|---|---|"
+            printf '%s' "$SUMMARY"
+            echo
+            echo "通过 **$PASSED** 项，失败 **$FAILED** 项。"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          if [ "$FAILED" -gt 0 ]; then
+            echo "::error::有 $FAILED 项探活失败，详见上方输出"
+            exit 1
+          fi

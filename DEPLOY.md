@@ -277,6 +277,43 @@ curl -sL "https://chenchen913.github.io/projects/campus-qa-bot/" | grep -c "项�
 | 自定义域名 | ✅ 免费 HTTPS |
 | Actions 时长 | 公开仓库无限 |
 
+### 6.5 Cloudflare Pages（主站，2026-10-27 起）
+
+Cloudflare Pages 为主站，GitHub Pages 转为备用入口与回滚退路。
+
+| 项 | 值 |
+|---|---|
+| 项目名 | `chenchen913` |
+| 主站地址 | `https://chenchen913.pages.dev` |
+| 账户 ID | `5faf320f21b4210fbcc337d95aa2bdb3` |
+| 部署模式 | **Direct Upload**（Cloudflare 不自行构建，产物由 Actions 上传） |
+| 凭据 | GitHub Secrets：`CLOUDFLARE_API_TOKEN`、`CLOUDFLARE_ACCOUNT_ID` |
+
+**双站机制**：`deploy.yml` 的 `build-and-deploy` 会构建两次并连续发布。
+
+1. `bundle exec jekyll build` → `_site`，canonical / og:url / hreflang / sitemap 指向 `github.io`，发布到 GitHub Pages；
+2. `bundle exec jekyll build --config _config.yml,_config.cloudflare.yml --destination _site_cf`，`url` 被覆盖为 `pages.dev`，由 wrangler 上传到 Cloudflare。
+
+两站产物同源同版本，页面字节数应当一致（实测均为 15695 字节的主页 HTML）。只想本地构建 Cloudflare 那一份时：
+
+```bash
+bundle exec jekyll build --config _config.yml,_config.cloudflare.yml --destination _site_cf
+```
+
+**为什么没开 Git 集成**：通过 API 创建的项目只能是 Direct Upload，Git 集成必须在 Dashboard 手动开启，且两者无法事后切换（要换得重建项目）。选 Direct Upload 是为了让两站产物完全一致——交给 Cloudflare 自行构建会用另一套 Ruby 环境，而本项目 `.ruby-version` 是 3.3.12，现场安装有构建超时风险。
+
+**已知差异（预期行为，不是 bug）**
+
+| 现象 | 说明 |
+|---|---|
+| `/xxx.html` 返回 308 跳到 `/xxx` | Cloudflare Pages 的干净 URL 规则。站内仍保留 `.html` 链接，因为 GitHub Pages 不认无扩展名路径。多出的一跳由 CDN 承担，`?lang=` 等查询参数在跳转中会保留（实测 `/en.html?v=1` → `/en?v=1`） |
+| `_headers` 不生效 | 检查 `_config.yml` 的 `include:` 是否包含 `_headers`。Jekyll 默认忽略下划线文件，不 include 就永远进不了 `_site` |
+| 站内链接多一跳 | 同上，属双站并存的既定代价 |
+
+**限额（免费版）**：500 次构建/月、20,000 文件、单文件 25 MiB、`_headers` 最多 100 条规则。
+
+**token 过期后**：Dashboard → My Profile → API Tokens 重新生成（权限需含 `Account / Cloudflare Pages / Edit` 与 `Account / Account Settings / Read`），再执行 `gh secret set CLOUDFLARE_API_TOKEN`。
+
 ---
 
 ## 七、备选部署方案

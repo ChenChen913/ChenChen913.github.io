@@ -2,14 +2,16 @@
 
 [English](README_EN.md)
 
-基于 Jekyll 构建的个人主页，部署于 GitHub Pages。 
+基于 Jekyll 构建的个人主页，双站部署：**Cloudflare Pages 为主站**，GitHub Pages 保留作备用入口与回滚退路。
 
-🔗 在线访问：**[chenchen913.github.io](https://chenchen913.github.io)**
+🔗 主站：**[chenchen913.pages.dev](https://chenchen913.pages.dev)**
+🔗 备用：**[chenchen913.github.io](https://chenchen913.github.io)**
 
 ## 技术栈
 
 - Jekyll 静态站点生成
-- GitHub Pages 托管 + GitHub Actions 自动部署
+- Cloudflare Pages（主站）+ GitHub Pages（备用）双站部署
+- GitHub Actions 统一构建，同一份产物分别发布到两个平台
 - 中英文双语独立页面
 - 响应式设计（PC / 平板 / 手机）
 
@@ -17,6 +19,8 @@
 
 ```
 ├── _config.yml          # Jekyll 全局配置（url、collections、exclude 等）
+├── _config.cloudflare.yml # Cloudflare 专用覆盖：只把 url 指向 pages.dev（含构建说明）
+├── _headers             # Cloudflare Pages 响应头；必须写进 _config.yml 的 include，否则不会进产物
 ├── _data/               # 站点数据（改内容主要在这里）
 │   ├── personal.yml     #   姓名、简介、页脚日期等
 │   ├── education.yml    #   教育经历
@@ -86,8 +90,10 @@ bundle exec jekyll serve
    git commit -m "更新说明"
    git push origin main
    ```
-5. **验证部署**：GitHub 仓库 Actions 页面确认构建成功（约 1 分钟），
-   刷新 [chenchen913.github.io](https://chenchen913.github.io) 查看效果。
+5. **验证部署**：GitHub 仓库 Actions 页面确认 `build-and-deploy` 全绿（约 1 分钟）。
+   该 job 会连续发布两个站点，刷新 [chenchen913.pages.dev](https://chenchen913.pages.dev)
+   （主站）与 [chenchen913.github.io](https://chenchen913.github.io)（备用）确认效果。
+   两边产物由同一套流程生成，页面字节数应当一致。
 
 ## 许可证
 

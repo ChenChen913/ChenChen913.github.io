@@ -127,7 +127,9 @@
           lastActiveId = id;
           scrollActiveLinkIntoView(activeLink);
           // 更新语言切换链接的 hash，使切换到另一语言后保持相同板块位置
-          const langBtn = document.querySelector(".lang-btn");
+          // 用 id 而非 .lang-btn 选择器：详情页也有 .lang-btn（用于 ?lang= 切换），
+          // 但那里没有 hash 锚点语义，不能参与本逻辑
+          const langBtn = document.getElementById("lang-switch");
           if (langBtn) {
             const href = langBtn.getAttribute("href");
             if (href) { // 元素存在但无 href 时跳过，避免 TypeError 冻结 scroll-spy
@@ -376,8 +378,10 @@
          语言切换前保存滚动比例，用于目标页恢复精确位置。
          仅在点击语言切换按钮时保存——若对所有页面跳转（beforeunload）
          都保存，从详情页返回主页时会用详情页的滚动比例污染主页位置。
+         绑定 #lang-switch（仅主页存在）；详情页的语言按钮是 ?lang= 参数切换，
+         不做位置记忆，也不应写入该键。
          ------------------------------------------------------------ */
-      const langToggleBtn = document.querySelector(".lang-btn");
+      const langToggleBtn = document.getElementById("lang-switch");
       if (langToggleBtn) {
         langToggleBtn.addEventListener("click", function () {
           try {

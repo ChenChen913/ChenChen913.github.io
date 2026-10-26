@@ -151,8 +151,43 @@
           <a href="{{ '/en.html' | relative_url }}" class="detail-en">← Back to Home</a>
         </nav>
       </div>
+      <!-- 控件区与主页保持一致（此前详情页缺失，进入后无法切语言/深浅色，只能退回主页）。
+           详情页中英共存于同一 URL、以 ?lang= 区分，构建期无法得知实际语言，
+           故按钮文案与目标地址由下方脚本按当前语言写入。
+           注：语言按钮刻意不命名为 #lang-switch —— script.js 只对主页那个 id 记录
+           滚动比例；若此处复用，会在 sessionStorage 留下比例值，导致之后返回主页时
+           被详情页的位置污染（这正是 script.js 注释里记录过的历史问题）。 -->
+      <div class="nav-controls">
+        <a href="#" id="detail-lang-btn" class="lang-btn" aria-label="EN - English version">EN</a>
+        <button id="theme-toggle" class="theme-btn" type="button" aria-label="切换深浅色模式">
+          <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.3"/><path d="M12 2.5v3M12 18.5v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2.5 12h3M18.5 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg>
+          <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" style="display:none;" aria-hidden="true"><path d="M20 14.2A8.2 8.2 0 1 1 9.8 4a6.6 6.6 0 0 0 10.2 10.2z"/></svg>
+        </button>
+      </div>
     </div>
   </div>
+  <script>
+    // 语言/主题控件的语言相关文案：lang-init 已在 head 同步写入 lang-zh/lang-en，此处可直接判定
+    (function () {
+      var isEn = document.documentElement.classList.contains('lang-en');
+      var langBtn = document.getElementById('detail-lang-btn');
+      if (langBtn) {
+        langBtn.textContent = isEn ? '中文' : 'EN';
+        langBtn.setAttribute('aria-label', isEn ? '中文 - Switch to Chinese' : 'EN - English version');
+        // 目标语言取当前语言的反面；用 URL API 保留其他查询参数，避免丢弃外部带进来的参数
+        try {
+          var url = new URL(window.location.href);
+          url.searchParams.set('lang', isEn ? 'zh' : 'en');
+          url.hash = '';
+          langBtn.setAttribute('href', url.pathname + url.search);
+        } catch (e) {}
+      }
+      var themeBtn = document.getElementById('theme-toggle');
+      if (themeBtn) {
+        themeBtn.setAttribute('aria-label', isEn ? 'Toggle dark/light mode' : '切换深浅色模式');
+      }
+    })();
+  </script>
 
   <main class="container" id="main-content">
     <article class="section" style="border-top:none; padding-top:40px;">

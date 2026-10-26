@@ -65,6 +65,26 @@ if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && 
 if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.deploy != 'true')
 ```
 
+> **⚠️ 2026-10-27 更正：本条结论有误，已撤销，代码不应按上方建议修改。**
+>
+> 上面把「`github.event.inputs` 里是真正的布尔值 `true`」当作问题依据，方向搞反了。GitHub 官方文档
+> 「Events that trigger workflows → `workflow_dispatch` → Providing inputs」原文：
+>
+> > The workflow will also receive the inputs in the `github.event.inputs` context. The information
+> > in the `inputs` context and `github.event.inputs` context is identical except that the `inputs`
+> > context preserves Boolean values as Booleans instead of converting them to strings.
+>
+> 也就是说：**`inputs` 保留布尔类型，`github.event.inputs` 才被转成字符串 `'true'`。** 因此仓库里现有
+> 的 `github.event.inputs.deploy == 'true'` 是**正确**的，手动勾选 deploy 能正常部署，并不存在本条
+> 声称的"勾选了反而不部署"。
+>
+> 反过来，本条给出的"修复"（`inputs.deploy == 'true'`）才是错的：Actions 表达式对 `true == 'true'`
+> 做松散比较（两侧类型不同时向数字强制转换），结果为 `false`，照此修改会让手动部署**真的失效**。
+> **结论：本条撤销，`deploy.yml` 的条件判断保持原样。**
+>
+> 教训：`inputs` 与 `github.event.inputs` 的布尔处理差异是固定踩坑点，判定前应核对官方文档原文，
+> 而不是按上下文名字推断类型。
+
 ### 🔴 H3. 邮箱"唯一数据源"名不副实，且出现检查盲区
 
 `social.yml` 新注释写"邮箱唯一数据源是本文件"，但实际上**模板里已经没有任何地方读 `social.email`**（全仓 grep 为零）——线上页面显示的邮箱来自 `_layouts/default.html` 和 `index_empty.html` 里两处**手工维护的 JS 字符码数组**。social.yml 现在只是 sync 脚本的参照物。

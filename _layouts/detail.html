@@ -97,7 +97,8 @@
 
 {% if has_math %}
 <!-- KaTeX: 数学公式（仅在正文含公式时加载）。
-     已本地自托管（assets/vendor/katex，版本 0.16.9），无 CDN 供应链依赖。 -->
+     已本地自托管（assets/vendor/katex，0.16.47），无 CDN 供应链依赖。
+     注：升级时连同本注释一起更新，避免文档与实物版本脱节（曾长期误写为 0.16.9）。 -->
 <link rel="stylesheet" href="{{ '/assets/vendor/katex/katex.min.css' | relative_url }}">
 {% endif %}
 

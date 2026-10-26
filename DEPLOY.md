@@ -314,6 +314,15 @@ bundle exec jekyll build --config _config.yml,_config.cloudflare.yml --destinati
 
 **token 过期后**：Dashboard → My Profile → API Tokens 重新生成（权限需含 `Account / Cloudflare Pages / Edit` 与 `Account / Account Settings / Read`），再执行 `gh secret set CLOUDFLARE_API_TOKEN`。
 
+**站点探活**：`.github/workflows/uptime-check.yml` 每天 UTC 01:00 / 13:00（北京时间 09:00 / 21:00）探测两站共 9 项——主站首页内容、首页 canonical 域名、项目详情、论文详情、sitemap 域名、不存在路径是否返回真 404，以及备用站的三项。
+
+每个检查**同时校验状态码与关键内容**，不只看 200：Cloudflare 在部署过程中可能返回 200 的错误页，纯状态码检查会漏报。单次失败自动重试 3 次（间隔 5 秒）避免瞬时抖动误报，结果写入 Actions Summary，失败则 workflow 失败并触发邮件。
+
+手动跑一次：`gh workflow run uptime-check.yml`
+
+> ⚠️ 该工作流与其他定时任务一样，**仓库连续约 60 天无提交会被 GitHub 自动禁用**（`disabled_inactivity`），届时探活会静默停止。长期没有内容更新的时期，每月手动跑一次确认它还活着：
+> `gh api repos/ChenChen913/ChenChen913.github.io/actions/workflows --jq '.workflows[] | "\(.name) \(.state)"'`
+
 ---
 
 ## 七、备选部署方案

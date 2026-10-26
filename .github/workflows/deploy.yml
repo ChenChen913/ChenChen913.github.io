@@ -81,6 +81,33 @@ jobs:
         id: deployment
         uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e
 
+      # ============================================================
+      # Cloudflare Pages（主站 chenchen913.pages.dev）
+      # ------------------------------------------------------------
+      # 刻意再构建一次，而不是复用 _site：_site 里的 canonical / og:url /
+      # hreflang / sitemap 都指向 github.io，直接传上去会让 pages.dev 自称
+      # 是 github.io 的副本。用 --config 追加 _config.cloudflare.yml 覆盖 url，
+      # 两站各自拥有正确的绝对地址，互不抢权重。
+      #
+      # 位置在 GitHub Pages 部署之后：主站优先保证，Cloudflare 侧出问题不会
+      # 回溯影响已经完成的 Pages 部署。
+      # ============================================================
+      - name: Build for Cloudflare Pages
+        run: |
+          bundle exec jekyll build --config _config.yml,_config.cloudflare.yml --destination _site_cf
+          # 同 _site 的处理：移除 github-pages 主题自动生成的未引用样式表
+          rm -f _site_cf/assets/css/style.css
+
+      # wrangler 版本写死为具体版本号，避免浮动主版本被替换
+      # （与上方 action 固定完整 commit SHA 是同一思路）。
+      # --commit-dirty=true：runner 上存在未跟踪的 _site_cf，不加会被判为脏仓库报错。
+      # 本项目为 Direct Upload 模式：Cloudflare 不自行构建，产物由本步骤上传。
+      - name: Deploy to Cloudflare Pages
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: npx --yes wrangler@4.152.0 pages deploy _site_cf --project-name=chenchen913 --branch=main --commit-dirty=true
+
   # 只读链接巡检：仅定时/手动触发，独立于部署（不阻断 Pages）。
   # 所有 htmlproofer 调用统一 --disable-external，CI 不向外部站点发起未验证请求。
   check-internal-links:

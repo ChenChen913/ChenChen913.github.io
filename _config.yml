@@ -47,6 +47,7 @@ include:
 # 排除
 exclude:
   - backups/
+  - _site_cf
   - index_empty.html
   - portfolio-single-file.html
   - vendor/

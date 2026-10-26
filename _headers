@@ -1,0 +1,24 @@
+# Cloudflare Pages 响应头配置
+#
+# 生效前提：本文件必须出现在构建产物 _site/ 根目录下。
+# Jekyll 默认忽略所有以 _ 开头的文件，所以 _config.yml 的 include 列表里必须包含
+# _headers，否则它永远不会被复制进 _site，Cloudflare 也就读不到——配了等于没配。
+#
+# 刻意不配 Cache-Control：
+#   Cloudflare Pages 默认对可缓存资源返回 `public, max-age=0, must-revalidate` 并带 Etag，
+#   已能走 304 协商缓存；本站静态资源文件名不带内容哈希，自己加长缓存会导致改版后
+#   用户长时间看到旧样式/旧脚本。官方文档也建议多数情况下不要自定义缓存。
+#
+# 刻意不加 Content-Security-Policy：
+#   全站有大量内联 <script>（主题初始化、语言修正、邮箱字符码拼装）与内联 style，
+#   落地 CSP 必须放行 'unsafe-inline'，防护收益有限却极易打断页面。留作后续单独评估，
+#   不在本次迁移中引入。
+
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  X-Frame-Options: SAMEORIGIN
+  Permissions-Policy: geolocation=(), microphone=(), camera=(), payment=(), usb=()
+
+# 详情页用 iframe 内嵌同源的 /assets/pdf-viewer.html，SAMEORIGIN 已足够。
+# 若将来需要把本站嵌入他站，或把 pdf-viewer 换成跨域地址，再单独调整该项。

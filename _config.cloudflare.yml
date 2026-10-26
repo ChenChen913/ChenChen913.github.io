@@ -1,0 +1,18 @@
+# Cloudflare Pages 专用配置覆盖
+#
+# 用法：在 Cloudflare Pages 项目里把 Build command 设为
+#   bundle exec jekyll build --config _config.yml,_config.cloudflare.yml
+# Output directory 设为 _site
+#
+# 本文件只覆盖与「站点绝对地址」相关的字段，让 Cloudflare 站生成自己的
+# canonical / og:url / hreflang / sitemap 地址，同时不影响 GitHub Pages 侧
+# 继续使用 github.io。
+#
+# 为什么不直接把 _config.yml 的 url 改成 pages.dev：
+#   双站并存期间两边都需要各自正确的绝对地址。若直接改 _config.yml，GitHub Pages
+#   的 canonical 会全部指向 pages.dev，等于主动把旧站权重交出去；而一旦 Cloudflare
+#   站在某些网络下访问质量不佳，会连累已经被搜索引擎收录的 github.io。
+#
+# 将来换成自定义域名时，只改这里的 url 一行，模板与 GitHub Pages 侧都不用动。
+
+url: "https://chenchen913.pages.dev"

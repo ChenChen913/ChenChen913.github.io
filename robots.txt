@@ -1,4 +1,9 @@
+---
+---
 User-agent: *
 Allow: /
 
-Sitemap: https://chenchen913.github.io/sitemap.xml
+# Sitemap 地址跟随构建时的 site.url 生成：GitHub Pages 构建输出 github.io，
+# Cloudflare Pages 构建（--config _config.cloudflare.yml）输出 pages.dev。
+# 写死域名的版本在双站并存时会互相指错，故改用 absolute_url。
+Sitemap: {{ '/sitemap.xml' | absolute_url }}

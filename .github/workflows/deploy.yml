@@ -46,7 +46,7 @@ jobs:
       - name: Static checks
         run: |
           node --check script.js
-          ruby -e 'require "yaml"; Dir["_data/**/*.yml", "_data/**/*.yaml", "_config.yml"].each { |f| YAML.safe_load_file(f, permitted_classes: [], aliases: false) }; puts "YAML OK"'
+          ruby -e 'require "yaml"; Dir["_data/**/*.yml", "_data/**/*.yaml", "_config*.yml"].each { |f| YAML.safe_load_file(f, permitted_classes: [], aliases: false) }; puts "YAML OK"'
 
       - name: Check portfolio sync freshness
         run: |

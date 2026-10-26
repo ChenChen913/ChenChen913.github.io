@@ -37,6 +37,13 @@ markdown_ext: "markdown,mkdown,mkdn,mkd,md"
 kramdown:
   input: GFM
 
+# 需要强制复制的下划线文件。
+# Jekyll 默认忽略所有以 _ 开头的文件，不写在这里的 _headers / _redirects
+# 永远不会进入 _site，Cloudflare Pages 也就读不到——这是"配了却不生效"的典型原因。
+# 注：GitHub Pages 会忽略这两个文件，不影响现有部署。
+include:
+  - _headers
+
 # 排除
 exclude:
   - backups/
@@ -52,6 +59,7 @@ exclude:
   - AUDIT-REPORT.md
   - AUDIT-REPORT-2.md
   - AUDIT-REPORT-3.md
+  - CLOUDFLARE_MIGRATION_GUIDE.md
   - docs/
   - update-date.py
   - generate_assets.py

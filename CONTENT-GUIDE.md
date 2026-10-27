@@ -1,6 +1,6 @@
 # 内容维护指南（增 · 删 · 改）
 
-> 本文档教你如何日常更新个人主页内容。所有操作只需改数据文件和 Markdown，**不需要碰 HTML/CSS/JS**。
+> 本文档教你如何日常更新个人主页内容。主站日常更新主要改数据文件和 Markdown，不需要改模板、CSS 或 JS；主页展示内容发生变化时，还要同步 `portfolio-single-file.html` 中对应的中英文内容。
 
 ---
 
@@ -20,7 +20,11 @@ _publications/*.md    →      论文卡片 + 详情页
 assets/avatar.jpg     →      头像照片
 ```
 
-**核心原理**：Jekyll 读取数据文件，自动生成网页。你只管改数据，网页自动更新。
+**核心原理**：Jekyll 读取数据文件，自动生成网页。你只管改数据，主站网页自动更新。
+
+> `portfolio-single-file.html` 是独立维护的离线备案页，不会由 Jekyll 自动生成。
+> 修改主页展示字段后，要同步其中的中英文内容；`update-date.py` 只自动同步日期，不能代替内容同步。
+> 推送前运行 `python check_portfolio_sync.py`，检查遗漏。
 
 ---
 
@@ -221,9 +225,9 @@ en:
 
 编辑 `_data/navigation.yml`，改 `label` 字段。**不要改 `id` 字段**。
 
-### 3.6 更新页脚日期
+### 3.6 更新日期
 
-每次改完内容后，顺手更新 `_data/personal.yml` 中的 `footer_updated` 字段。
+每次改完内容后运行 `python update-date.py`。脚本会同步更新 `_data/personal.yml` 与 `portfolio-single-file.html` 的中英文页脚、备案页顶部日期和最后同步标记，不要再手工只改其中一处。
 
 ---
 
@@ -247,12 +251,12 @@ en:
 每次改完内容推送前，检查：
 
 1. **本地预览**（如果装了 Ruby）：`bundle exec jekyll serve` → 打开 `http://localhost:4000`
-2. **中英文一致性**：中文改了什么，英文也要对应改什么
-3. **页脚日期**：`footer_updated` 是否更新了
+2. **中英文一致性**：中文改了什么，英文也要对应改什么，备案页同步检查不能遗漏
+3. **日期与同步**：运行 `python update-date.py`，再运行 `python check_portfolio_sync.py`
 4. **YAML 语法**：缩进用空格不要用 Tab，冒号后面有空格
 5. **文件名**：新建的项目/论文文件名用英文和短横线（如 `my-project.md`），不要用中文
 
-推送后等 1-2 分钟，访问 `https://用户名.github.io` 确认更新。
+推送后等 1-2 分钟，访问 `https://chenchen913.pages.dev`（主站）与 `https://chenchen913.github.io`（备用站）确认更新。
 
 ---
 
@@ -268,7 +272,7 @@ en:
 | 加实习 | `_data/experience.yml` | `roles` 下追加条目 |
 | 加技能 | `_data/skills.yml` | 追加分类或标签 |
 | 删项目 | 删 `_projects/xxx.md` | 直接删除文件 |
-| 改页脚日期 | `_data/personal.yml` | `footer_updated` |
+| 更新日期 | 运行 `python update-date.py` | 同步主页与备案页日期和标记 |
 | 改导航文字 | `_data/navigation.yml` | `label` 字段（不改 `id`）|
 
 ---
@@ -282,4 +286,4 @@ en:
 
 ---
 
-> 更新日期：2026 年 08 月 06 日
+> 更新日期：2026 年 10 月 27 日

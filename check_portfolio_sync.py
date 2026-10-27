@@ -44,15 +44,26 @@ def expected_fragments(data):
     personal = data.get("personal", {})
     for lang in ("zh", "en"):
         p = personal.get(lang, {})
-        frags.extend([p.get("name"), p.get("tagline")])
+        frags.extend([
+            p.get("name"), p.get("tagline"),
+            p.get("footer_copyright"), p.get("footer_updated"),
+        ])
 
     social = data.get("social", {})
-    frags.append(social.get("email"))
+    frags.extend([
+        social.get("email"),
+        social.get("github"), social.get("github_display"),
+        social.get("gitee"), social.get("gitee_display"),
+        social.get("x"), social.get("x_display"),
+    ])
+    for lang in ("zh", "en"):
+        frags.append((social.get(lang) or {}).get("wechat"))
 
     education = data.get("education", {})
     for lang in ("zh", "en"):
         edu = education.get(lang, {})
         frags.extend([edu.get("school"), edu.get("detail"), edu.get("period")])
+        frags.append(edu.get("courses_label"))
         frags.extend(edu.get("honors", []))
         frags.extend(edu.get("courses", []))
 
@@ -66,6 +77,7 @@ def expected_fragments(data):
     skills = data.get("skills", {})
     for lang in ("zh", "en"):
         for cat in skills.get(lang, []):
+            frags.append(cat.get("category"))
             frags.extend(cat.get("items", []))
 
     for pattern in CONTENT_PATTERNS:
@@ -152,11 +164,27 @@ def check_content(data):
         if len(missing) > 30:
             print(f"  …（共 {len(missing)} 项缺失）", file=sys.stderr)
         return False
+
+    # 顶部展示日期必须与“最后同步”标记一致，防止只更新页脚或标记的一处。
+    sync_match = re.search(r"最后同步：(\d{4})-(\d{2})-(\d{2})", text)
+    banner_match = re.search(r"离线备案页 · 内容同步于 (\d{4} 年 \d{2} 月 \d{2} 日)", text)
+    if not banner_match:
+        print("错误：备案页顶部缺少‘内容同步于 YYYY 年 MM 月 DD 日’日期。", file=sys.stderr)
+        return False
+    if sync_match:
+        expected_banner = f"{sync_match.group(1)} 年 {sync_match.group(2)} 月 {sync_match.group(3)} 日"
+        if banner_match.group(1) != expected_banner:
+            print(
+                f"错误：备案页顶部日期（{banner_match.group(1)}）与最后同步标记"
+                f"（{expected_banner}）不一致。",
+                file=sys.stderr,
+            )
+            return False
     return True
 
 
 def check_marker_freshness():
-    """新鲜度校验：'最后同步'标记不得晚于相关文件的最后提交日期。"""
+    """新鲜度校验：'最后同步'标记不得早于相关文件的最后提交日期。"""
     try:
         with open(portfolio, encoding="utf-8") as f:
             text = f.read()

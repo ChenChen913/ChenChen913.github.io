@@ -1,6 +1,6 @@
 # 部署与维护指南
 
-本项目是 Jekyll 静态站，托管于 GitHub Pages（`chenchen913.github.io`），push 即自动构建部署。本文档合并了原 DEPLOY.md / DEPLOY-OPTIONS.md / RUBY-JEKYLL.md 三份文档的内容，是部署、内容维护、备份与安全限制的唯一参考。
+本项目是 Jekyll 静态站，Cloudflare Pages（`chenchen913.pages.dev`）为主站，GitHub Pages（`chenchen913.github.io`）保留为备用入口与回滚退路。push 后由 GitHub Actions 分别构建并部署两站。本文档合并了原 DEPLOY.md / DEPLOY-OPTIONS.md / RUBY-JEKYLL.md 三份文档的内容，是部署、内容维护、备份与安全限制的唯一参考。
 
 内容修改的详细增删改流程见 `CONTENT-GUIDE.md`；构建与部署踩坑记录见 `TROUBLESHOOTING.md`。
 
@@ -45,7 +45,7 @@
 | 技能 | `_data/skills.yml` | 增删分类和标签 |
 | 论文发表 | `_publications/*.md` | 新增/删除 `.md` 文件；删光则自动隐藏栏目 |
 | 项目经历 | `_projects/*.md` | 同上 |
-| Footer 文字 | `_data/personal.yml` | `footer_copyright` / `footer_updated`（`update-date.py` 自动更新日期） |
+| Footer 文字 | `_data/personal.yml` | `footer_copyright` / `footer_updated`（`update-date.py` 同步更新主页与备案页日期） |
 | 头像照片 | `assets/avatar.jpg` | 替换文件即可 |
 | 导航菜单文字 | `_data/navigation.yml` | 改 `label`，不改 `id` |
 
@@ -106,7 +106,7 @@ Jekyll 是静态站点生成器：把 Markdown + YAML 数据 + Liquid 模板编�
 ├── index_empty.html           # 主页暂时关闭提示页（不发布）
 ├── portfolio-single-file.html # 单文件离线备案页（不发布）
 ├── style.css / script.js      # 全站样式与交互脚本
-├── update-date.py             # 更新页脚"最后更新"日期
+├── update-date.py             # 同步主页与备案页日期和最后同步标记
 ├── check_portfolio_sync.py    # 校验备案页与数据内容级同步（CI 会执行）
 ├── generate_assets.py         # 生成 og 分享图与 PNG favicon
 ├── backup.ps1                 # 本地备份脚本（保留最近 N 份）
@@ -228,7 +228,7 @@ bundle exec jekyll serve
 
 ---
 
-## 六、部署到 GitHub Pages（当前方案）
+## 六、双站部署（当前方案）
 
 ### 6.1 首次部署
 
@@ -294,7 +294,7 @@ Cloudflare Pages 为主站，GitHub Pages 转为备用入口与回滚退路。
 1. `bundle exec jekyll build` → `_site`，canonical / og:url / hreflang / sitemap 指向 `github.io`，发布到 GitHub Pages；
 2. `bundle exec jekyll build --config _config.yml,_config.cloudflare.yml --destination _site_cf`，`url` 被覆盖为 `pages.dev`，由 wrangler 上传到 Cloudflare。
 
-两站产物同源同版本，页面字节数应当一致（实测均为 15695 字节的主页 HTML）。只想本地构建 Cloudflare 那一份时：
+两站产物同源同版本，同一路径的 HTML 字节数应当一致，内容差异只应来自绝对 URL 的域名部分。只想本地构建 Cloudflare 那一份时：
 
 ```bash
 bundle exec jekyll build --config _config.yml,_config.cloudflare.yml --destination _site_cf
@@ -329,7 +329,7 @@ bundle exec jekyll build --config _config.yml,_config.cloudflare.yml --destinati
 
 > 前提：所有平台都需要 `Gemfile.lock` 且**必须包含 Linux 平台**。本地在 macOS/Windows 上开发时先执行 `bundle lock --add-platform x86_64-linux` 并提交，否则 Cloudflare/Vercel/Netlify 构建可能因原生扩展编译失败。
 
-### 7.1 Cloudflare Pages（推荐加速方案）
+### 7.1 Cloudflare Pages（Git 集成备选方案）
 
 - 全球 330+ 边缘节点（含香港/东京），**免费无限带宽**，国内访问速度在免费方案中最快。
 - 步骤：注册（需绑卡验证身份，不扣费）→ Workers & Pages → Connect to Git → 选仓库 → 构建命令 `bundle exec jekyll build`、输出目录 `_site`、环境变量 `RUBY_VERSION=3.3` → Save and Deploy。
@@ -367,7 +367,7 @@ bundle exec jekyll build --config _config.yml,_config.cloudflare.yml --destinati
 | Vercel | ✅ | 一般 | 100 GB/月 | ✅ | 无 | 6000 分钟/月 |
 | Gitee Pages | ❌ 手动 | 最快 | 1 GB/月 | 需备案 | 必须 | 不限 |
 
-推荐组合：GitHub Pages 保持主站；国内加速加 Cloudflare Pages（一条 push 双平台部署）；纯国内则用 Gitee。
+推荐组合：Cloudflare Pages 保持主站，GitHub Pages 保留备用（一条 push 双平台部署）；纯国内则用 Gitee。
 
 ---
 
@@ -391,7 +391,7 @@ bundle exec jekyll build --config _config.yml,_config.cloudflare.yml --destinati
 
 脚本自动：
 1. 在 `backups/` 下创建 `YYYY-MM-DD-备注` 文件夹；
-2. 复制核心文件（`_data/`、`_layouts/`、`_projects/`、`_publications/`、`assets/`、全部根 HTML、`style.css`、`script.js`、`_config.yml`、`portfolio-single-file.html`、`check_portfolio_sync.py`、`update-date.py`、`generate_assets.py`、`backup.ps1`、Gemfile/Gemfile.lock）；
+2. 按 `backup.ps1` 的 `CoreItems` 复制核心文件（内容、布局、共享 includes、资产、双站配置、工作流与全部维护脚本）；
 3. 按 `-Keep N` 清理旧备份（默认 3），只保留最近 N 份；
 4. 可选创建 Git tag 推送到远程。
 
@@ -436,4 +436,4 @@ A：多半是新增的内部文档（Markdown）被 Jekyll 当作页面解析。
 
 ---
 
-最后更新：2026 年 08 月 06 日
+最后更新：2026 年 10 月 27 日

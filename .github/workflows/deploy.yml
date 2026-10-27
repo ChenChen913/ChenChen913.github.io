@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]
   schedule:
-    - cron: '0 3 * * 1'   # 每周一 03:00 UTC 触发外部链接巡检
+    - cron: '0 3 * * 1'   # 每周一 03:00 UTC 触发只读内部链接巡检
   workflow_dispatch:       # 手动触发：默认只跑只读链接检查；勾选 deploy 则强制重新部署
     inputs:
       deploy:
@@ -67,7 +67,7 @@ jobs:
       # 阻断式：任何死链或 alt 缺失都会让部署失败。
       # 注：html-proofer 5.x 移除了 --assume-extension（jekyll 目录型 permalink 默认即按 index.html 解析）。
       # 注：--disable-external 为有意取舍——外部站点（X/GitHub 等）的反爬策略会导致误报，
-      #     外链有效性由下方 check-external-links 定时/手动巡检（不阻断本部署）。
+      #     定时/手动巡检同样只检查内部链接；CI 不向外部站点发起未验证请求。
       - name: Check internal links (blocking)
         run: |
           bundle exec htmlproofer ./_site --disable-external --allow-missing-href --no-enforce-https

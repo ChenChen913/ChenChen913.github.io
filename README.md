@@ -46,8 +46,8 @@
 ├── 404.html             # 404 页面
 ├── index_empty.html     # 主页暂时关闭提示页（不发布）
 ├── portfolio-single-file.html  # 单文件离线备案页（不发布，同步由 check_portfolio_sync.py 校验）
-├── style.css / script.js# 全站样式与交互脚本
-├── update-date.py       # 更新页脚“最后更新”日期的脚本
+├── style.css / script.js # 全站样式与交互脚本
+├── update-date.py       # 同步主页与备案页的中英文日期、顶部日期和同步标记
 ├── check_portfolio_sync.py     # 校验单文件备案页与数据内容级同步
 ├── generate_assets.py   # 生成 og 分享图与 PNG favicon（Pillow）
 ├── backup.ps1           # 本地备份脚本（保留最近 N 份）
@@ -63,7 +63,7 @@
 > `_config.yml` 的 `exclude` 中排除，不会发布到线上。`backups/` 为本地历史
 > 快照，已加入 `.gitignore` 不入库。
 >
-> `portfolio-single-file.html` 是受维护的单文件备案页（GitHub Pages 不可用时的
+> `portfolio-single-file.html` 是受维护的单文件备案页（线上站点不可用时的
 > 离线查看版本），同样被 exclude 不发布，请勿删除。
 
 ## 本地预览
@@ -81,9 +81,10 @@ bundle exec jekyll serve
 ## 修改流程
 
 1. **改内容**：编辑 `_data/` 下对应的 YAML 文件（中英文字段都要改）；
-   项目 / 论文正文改 `_projects/`、`_publications/` 下的 Markdown。
-2. **更新页脚日期**：运行 `python update-date.py`。
-3. **本地校验**（可选）：本地预览确认无误，注意 YAML 缩进和 Liquid 标签配对。
+   项目 / 论文正文改 `_projects/`、`_publications/` 下的 Markdown；主页展示内容变化时，
+   同步 `portfolio-single-file.html` 中对应的中英文内容。
+2. **更新日期**：运行 `python update-date.py`，同步主页与备案页页脚、备案页顶部日期和最后同步标记。
+3. **本地校验**：运行 `python check_portfolio_sync.py`；本地预览确认无误，注意 YAML 缩进和 Liquid 标签配对。
 4. **提交推送**：
    ```bash
    git add -A

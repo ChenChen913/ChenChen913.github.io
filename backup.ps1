@@ -33,9 +33,13 @@ if (-not $BackupPath.StartsWith($BackupRoot + [System.IO.Path]::DirectorySeparat
 }
 
 # 核心文件和目录列表
+# 注意：_includes 是模板必需的共享片段（theme-init / lang-init），缺了它
+# 恢复后 _layouts 会直接构建失败；_config.cloudflare.yml 与 _headers 是
+# Cloudflare 双站部署的关键配置，同样不能漏。
 $CoreItems = @(
     "_data",
     "_layouts",
+    "_includes",
     "_projects",
     "_publications",
     "assets",
@@ -49,13 +53,20 @@ $CoreItems = @(
     "style.css",
     "script.js",
     "_config.yml",
+    "_config.cloudflare.yml",
+    "_headers",
     "portfolio-single-file.html",
     "check_portfolio_sync.py",
+    "requirements-ci.txt",
     "update-date.py",
     "generate_assets.py",
     "backup.ps1",
     "Gemfile",
-    "Gemfile.lock"
+    "Gemfile.lock",
+    ".ruby-version",
+    ".gitignore",
+    ".gitattributes",
+    ".editorconfig"
 )
 
 # 先复制到暂存目录，全部成功后再替换正式备份：

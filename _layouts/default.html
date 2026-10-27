@@ -62,7 +62,13 @@
   (function () {
     var saved = null;
     try { saved = sessionStorage.getItem("_scrollRatio"); } catch (e) {}
-    if (!saved || window.location.hash) return;
+    if (!saved) return;
+    // hash 由浏览器负责定位；此时必须丢弃已保存的比例，避免下次无 hash
+    // 访问主页时又被这次遗留的状态拉回旧位置。
+    if (window.location.hash) {
+      try { sessionStorage.removeItem("_scrollRatio"); } catch (e) {}
+      return;
+    }
     document.documentElement.style.scrollBehavior = "auto";
     window.addEventListener("load", function () {
       requestAnimationFrame(function () {

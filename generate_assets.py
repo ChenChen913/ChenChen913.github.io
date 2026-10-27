@@ -68,7 +68,8 @@ def generate_og_image():
 
     with open(os.path.join(ROOT, "_data", "personal.yml"), encoding="utf-8") as f:
         personal = yaml.safe_load(f)
-    with open(os.path.join(ROOT, "_config.yml"), encoding="utf-8") as f:
+    # 分享图展示主站地址；Cloudflare 配置中的 url 是当前主站唯一覆盖项。
+    with open(os.path.join(ROOT, "_config.cloudflare.yml"), encoding="utf-8") as f:
         config = yaml.safe_load(f)
     name = personal["zh"]["name"] + " · " + personal["en"]["name"]
     tagline = personal["zh"]["tagline"]

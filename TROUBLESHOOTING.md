@@ -561,11 +561,11 @@ Chrome 和 Edge 安装了 GitHub 翻译插件（浏览器扩展），会自动�
 
 ### 解决方案
 
-创建 `update-date.py`，自动获取北京时间（UTC+8），写入中英文日期格式。每次推送前运行：
+创建 `update-date.py`，自动获取北京时间（UTC+8），同步更新 `_data/personal.yml` 与 `portfolio-single-file.html` 的中英文页脚、备案页顶部日期和最后同步标记。每次推送前运行：
 
 ```bash
 python update-date.py
-git add _data/personal.yml
+git add _data/personal.yml portfolio-single-file.html
 git commit -m "更新日期"
 git push origin main
 ```
@@ -628,4 +628,4 @@ exclude:
 
 ---
 
-> 最后更新：2026-08-01（第十八章为 2026-07-28 新增；2026-08-01 同步修复清单）
+> 最后更新：2026-10-27（第十七章已扩展为主页与备案页的日期同步）

@@ -2,14 +2,16 @@
 
 [中文](README.md)
 
-A personal homepage built with Jekyll, deployed on GitHub Pages.
+A personal homepage built with Jekyll. **Cloudflare Pages is the primary site**, with GitHub Pages retained as a backup and rollback entry.
 
-🔗 Live: **[chenchen913.github.io](https://chenchen913.github.io)**
+🔗 Primary: **[chenchen913.pages.dev](https://chenchen913.pages.dev)**
+🔗 Backup: **[chenchen913.github.io](https://chenchen913.github.io)**
 
 ## Tech Stack
 
 - Jekyll static site generator
-- GitHub Pages hosting + GitHub Actions CI/CD
+- Cloudflare Pages (primary) + GitHub Pages (backup)
+- GitHub Actions builds and deploys both sites
 - Bilingual standalone pages (Chinese / English)
 - Responsive design (desktop / tablet / mobile)
 
@@ -17,6 +19,8 @@ A personal homepage built with Jekyll, deployed on GitHub Pages.
 
 ```
 ├── _config.yml          # Jekyll global config (url, collections, exclude, etc.)
+├── _config.cloudflare.yml # Cloudflare override: points url to pages.dev
+├── _headers             # Cloudflare Pages response headers
 ├── _data/               # Site data (edit content mostly here)
 │   ├── personal.yml     #   name, intro, footer date, etc.
 │   ├── education.yml    #   education history
@@ -42,8 +46,8 @@ A personal homepage built with Jekyll, deployed on GitHub Pages.
 ├── 404.html             # 404 page
 ├── index_empty.html     # homepage temporarily-closed page (not published)
 ├── portfolio-single-file.html  # offline single-file fallback (not published; content checked by check_portfolio_sync.py)
-├── style.css / script.js# site-wide styles and interaction scripts
-├── update-date.py       # script to refresh the footer "last updated" date
+├── style.css / script.js # site-wide styles and interaction scripts
+├── update-date.py       # syncs homepage and fallback footer/banner dates and the sync marker
 ├── check_portfolio_sync.py     # verifies single-file page stays content-synced with data
 ├── generate_assets.py   # generates og share image and PNG favicon (Pillow)
 ├── backup.ps1           # local backup script (keeps N most recent backups)
@@ -59,9 +63,9 @@ A personal homepage built with Jekyll, deployed on GitHub Pages.
 > listed in `exclude` in `_config.yml` and never published. `backups/` holds local
 > snapshots and is git-ignored.
 >
-> `portfolio-single-file.html` is a maintained single-file fallback page (offline
-> view when GitHub Pages is unavailable). It is also excluded from the build —
-> please do not delete it.
+> `portfolio-single-file.html` is a maintained single-file fallback page for
+> offline viewing when the hosted sites are unavailable. It is also excluded
+> from the build — please do not delete it.
 
 ## Local Preview
 
@@ -79,18 +83,21 @@ If installing Ruby is inconvenient, just push to GitHub and let Actions build it
 
 1. **Edit content**: update the corresponding YAML files under `_data/`
    (remember to update both Chinese and English fields); edit project /
-   publication bodies in `_projects/` and `_publications/`.
-2. **Refresh footer date**: run `python update-date.py`.
-3. **Local check** (optional): preview locally; watch YAML indentation and
-   Liquid tag pairing.
+   publication bodies in `_projects/` and `_publications/`. When homepage
+   content changes, mirror it in `portfolio-single-file.html`.
+2. **Refresh dates**: run `python update-date.py` to sync both homepage and
+   fallback footers, the fallback banner, and the sync marker.
+3. **Local check**: run `python check_portfolio_sync.py` and preview locally;
+   watch YAML indentation and Liquid tag pairing.
 4. **Commit & push**:
    ```bash
    git add -A
    git commit -m "update notes"
    git push origin main
    ```
-5. **Verify deployment**: confirm the Actions build succeeds (~1 min), then
-   refresh [chenchen913.github.io](https://chenchen913.github.io).
+5. **Verify deployment**: confirm the Actions build succeeds, then refresh both
+   [chenchen913.pages.dev](https://chenchen913.pages.dev) (primary) and
+   [chenchen913.github.io](https://chenchen913.github.io) (backup).
 
 ## License
 

@@ -13,8 +13,11 @@
 #   全站有大量内联 <script>（主题初始化、语言修正、邮箱字符码拼装）与内联 style，
 #   落地 CSP 必须放行 'unsafe-inline'，防护收益有限却极易打断页面。留作后续单独评估，
 #   不在本次迁移中引入。
+#
+# HSTS 只约束当前主机；不贸然加 includeSubDomains / preload，避免影响未审计的子域名。
 
 /*
+  Strict-Transport-Security: max-age=31536000
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
   X-Frame-Options: SAMEORIGIN

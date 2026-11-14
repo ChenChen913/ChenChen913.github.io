@@ -10,7 +10,7 @@
 | `acceptance-2026-10-27-cloudflare.md` | Cloudflare 迁移验收记录（P0/P1/P2 缺陷清单与决策依据） | 想确认「为什么两站各自 canonical」「为什么不做 CSP」「为什么接受 308」时 |
 | `history/AUDIT-LOG.md` | 四轮审核的结论汇总 + 贯穿多轮的教训 | 想知道某个设计怎么定下来的、之前踩过什么坑 |
 | `history/plans/` | 已完成的实施计划（施工记录，含每步验证命令） | 想回溯某次修复的具体操作步骤 |
-| `reference/cloudflare-migration-guide.md` | 通用迁移方法论（约 1300 行，**非本项目专属**） | 将来迁到别的平台、或重新评估部署方案时 |
+| `reference/cloudflare-migration-guide.md` | Cloudflare 迁移指南：1–16 章通用方法论，**17 章是本项目的实战记录**（架构、实测数据、踩过的坑） | 要迁到别的平台、重新评估部署方案、或想知道「当初为什么这么配」时 |
 | `push-via-api.py` | 本机 `git push` 被代理拦截时的提交兜底脚本 | 要推送代码时（用法见 `DEPLOY.md` 与脚本头部注释） |
 
 ## 根目录那五份是日常要用的
@@ -35,6 +35,6 @@
 三份 `AUDIT-REPORT*.md` 合并成 `history/AUDIT-LOG.md`（原文保留在更早的提交里），
 `CLOUDFLARE_MIGRATION_GUIDE.md` 移入 `reference/`。
 
-> 提醒：`reference/` 里的那份指南是通用方法论，里面的示例（后端数据库、Workers、SPA 等）
-> 与本项目无关。本项目的实际配置只有一处权威来源 —— `_config.cloudflare.yml` 和
-> `.github/workflows/deploy.yml`，别拿通用指南当现状。
+> 提醒：`reference/` 那份指南的前 16 章是**通用方法论**，里面的示例（后端数据库、Workers、SPA 等）
+> 与本项目无关，别拿它当现状；**第 17 章才是本项目自己的记录**。
+> 本项目的实际配置只有一处权威来源 —— `_config.cloudflare.yml` 和 `.github/workflows/deploy.yml`。

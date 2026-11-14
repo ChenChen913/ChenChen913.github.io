@@ -1,28 +1,54 @@
 # 从 GitHub 迁移到 Cloudflare · 详细指南
 
 > 适用对象：已经把项目放在 GitHub，部分项目使用 GitHub Pages 部署，希望迁移到 Cloudflare Pages / Workers 的项目所有者。  
-> 目标：**迁移后 Cloudflare 成为主站，GitHub Pages 继续作为可访问的备用入口；后端数据有明确的迁移、验证和回滚方案。**  
-> 更新日期：2026-10-27
+> 目标：**迁移后 Cloudflare 成为主站，GitHub Pages 继续作为可访问的备用入口；后端数据有明确的迁移、验证和回滚方案。**
+>
+> **本文分两部分**：第 1–16 章是**通用方法论**（任何项目都能照着做）；
+> 第 17 章是**本项目的实战记录**（Jekyll 双站部署的真实配置、实测数据与踩过的坑）。
+>
+> - 官方文档核实与线上实测：**2026-11-14**
+> - 配套文档：部署操作看 `DEPLOY.md`；排障看 `TROUBLESHOOTING.md`；验收数据看 `docs/acceptance-2026-10-27-cloudflare.md`
+
+## ⚠️ 先读这段：2026 年的 Pages 已不是「新建项目的默认选择」
+
+Cloudflare 现在把新项目的推荐路径指向 **Workers + Static Assets**，Pages 进入「继续支持、只修 bug、不再加新功能」的状态：
+
+| | Cloudflare Pages | Workers + Static Assets |
+|---|---|---|
+| 定位 | Git 连接的静态站托管 | 静态资源 + 服务端逻辑合一 |
+| 新功能 | 基本停止 | Durable Objects、Cron、Queues、渐进部署、完整可观测性、Vite 插件 |
+| 纯静态站 | **仍是最省事的选择**（git push 即部署） | 可以，但要自己维护 `wrangler` 配置 |
+| 已有项目 | **没有强制迁移期限** | 有具体需求时再迁 |
+
+**结论**
+
+- 新建**纯静态**站 → Pages 依然好用，零配置；
+- 新建**带后端或需要边缘逻辑**的 → 直接用 Workers，别从 Pages 起步；
+- **已经在 Pages 上跑得好、没遇到限制的 → 不要为了追新而迁移。** 迁移最差的理由是新鲜感。
+
+本文以 Pages 为主线（本项目用的就是它），涉及 Workers 的差异会单独标注。
 
 ## 目录
 
 1. 先看结论
 2. 迁移前评估
 3. GitHub → Cloudflare 对应关系
-4. 保留 GitHub 部署入口
-5. 后端数据怎么处理
-6. 完整迁移步骤
-7. 域名与访问入口策略
-8. 测试清单
-9. 回滚方案
-10. 安全注意事项
-11. 费用与限制
-12. 不同项目类型的迁移示例
-13. 单项目迁移记录模板
-14. 常见迁移陷阱与检查表
-15. 迁移验收标准
-16. 可选扩展：SEO 与 GEO
-17. 参考资料
+4. **Pages 的运行机制与硬限制**（默认行为、URL 处理、`_headers` / `_redirects`、额度）
+5. 保留 GitHub 部署入口
+6. 后端数据怎么处理
+7. 完整迁移步骤
+8. 域名与访问入口策略
+9. 测试清单
+10. 回滚方案
+11. 安全注意事项
+12. 费用与限制
+13. 不同项目类型的迁移示例
+14. 单项目迁移记录模板
+15. 常见迁移陷阱与检查表
+16. 迁移验收标准
+17. **实战记录：本项目的双站迁移**（架构、实测数据、踩过的坑）
+18. 可选扩展：SEO 与 GEO
+19. 参考资料
 
 ## 一、先看结论
 
@@ -100,7 +126,180 @@
 | 登录认证 | 保留原认证或 Cloudflare Access | 管理后台可先用 Access |
 | GitHub Secrets | Cloudflare Secrets / 环境变量 | 不要把密钥写进前端 |
 
-## 四、保留 GitHub 部署入口
+## 四、Pages 的运行机制与硬限制
+
+> 这一章是**动手前必须知道的**。Pages 有很多隐式行为：配错了不报错，只表现成「页面不对劲」。
+
+### 1. 它会自动加这些响应头
+
+不用写 `_headers` 就自带：
+
+| Header | 值 |
+|---|---|
+| `Access-Control-Allow-Origin` | `*` |
+| `Referrer-Policy` | `strict-origin-when-cross-origin` |
+| `X-Content-Type-Options` | `nosniff` |
+| `Etag` | 每个 200 响应 |
+| `Server` | `cloudflare` |
+| `Cf-Ray` | 请求 ID |
+
+条件性添加：
+
+- 资源被压缩时：`Cache-Control: no-transform` + `Content-Encoding`
+- 请求可缓存（不带 `Authorization` / `Range`）：`Cache-Control: public, max-age=0, must-revalidate`
+- 预览 URL：`X-Robots-Tag: noindex`
+
+**这意味着**：在 `_headers` 里重复配 `Referrer-Policy` 或 `X-Content-Type-Options` 属于冗余（无害）；而 `HSTS`、`X-Frame-Options`、`Permissions-Policy`、`CSP` 确实要自己配。
+
+### 2. URL 处理：`.html` 会被重定向掉
+
+- `/contact.html` → 重定向到 `/contact`
+- `/about/index.html` → 重定向到 `/about/`
+- 官方文档只写 "redirect"；**实测返回 308**，且 **query 参数保留**（`/en.html?v=1` → `/en?v=1`）
+
+后果：站内链接如果写死 `.html`，每次点击都多一跳。
+
+| 做法 | 结果 |
+|---|---|
+| 内链保留 `.html` | 兼容 GitHub Pages（它不认无扩展名路径），CF 上多一跳 308 |
+| 内链改无扩展名 | CF 直连，GitHub Pages 上 404 |
+| 双站并存 | **只能选第一种**，把 308 当作 CDN 开销接受 |
+
+本项目选了第一种，理由见第 17 章。
+
+### 3. 404 与「被当成 SPA」的陷阱
+
+- Pages 从请求路径开始**向上逐级查找最近的 `404.html`**（`/blog/404.html` 与 `/404.html` 可以共存）
+- **没有顶层 `404.html` 时，Pages 认为你是 SPA**，把所有未匹配路径都返回 `/` 的内容
+
+第二条是隐形炸弹：**产物里少一个 `404.html`，整站就变成「任何路径都返回首页」**，不报任何错，但搜索引擎会认为你有无限多个重复页面。
+
+> 真实案例：Jekyll 项目把 `404.html` 误加进 `exclude`，构建成功、CI 全绿，线上却所有不存在的 URL 都返回 200 + 首页内容，直到用 `curl` 探 404 才发现。
+
+**自查**：
+
+```bash
+curl -s -o /dev/null -w '%{http_code}\n' https://你的站/一个不存在的路径
+# 必须是 404，不能是 200
+```
+
+### 4. 缓存：默认够用，别乱加
+
+- 可缓存资源默认 `max-age=0, must-revalidate` + `Etag`，走 304 协商缓存
+- 每次部署后，资产在 CDN 上保持缓存**直到下次部署**
+- 单个数据中心内 TTL 约一周，也可能提前消失
+- 官方明确建议：**多数情况下不要自定义缓存**。尤其在自定义域名那层再加 Cache Rule，会和 Pages 的 redirect / Functions 打架，出现「部署完了还是旧内容」
+
+**唯一值得加长缓存的情况**：文件名带内容哈希的资产（`app.a1b2c3.js`），可设 `max-age=31556952, immutable`。
+
+本站的 `style.css` / `script.js` **不带哈希**，所以刻意不配长缓存——否则改版后用户会长时间看到旧样式。
+
+### 5. `_headers` 的规则叠加机制（最容易搞错的地方）
+
+**规则不是「首个匹配」，而是「全部叠加」。** 一个请求命中多条规则时，所有规则的 header 都会应用。
+
+```text
+/*
+  X-Frame-Options: SAMEORIGIN
+
+/assets/*
+  Cache-Control: public, max-age=31536000
+```
+
+请求 `/assets/a.png` 会**同时**拿到 `X-Frame-Options` 和 `Cache-Control`。
+
+**同一个 header 被应用两次 → 值用逗号连接**：
+
+```text
+Cache-Control: public, max-age=604800, public, max-age=0, s-maxage=86400
+```
+
+这对 `Cache-Control` 是灾难：按 RFC 9111，重复指令时缓存要么取第一个值、要么判定为过期，**结果不可控且不报错**。
+
+**要覆盖而不是叠加，用 `!` 先 detach**：
+
+```text
+/assets/*
+  Cache-Control: public, max-age=0, s-maxage=86400
+
+/assets/model.bin
+  ! Cache-Control
+  Cache-Control: public, max-age=604800
+```
+
+顺序有讲究：`!` 只能删掉**它之前**规则加的东西，所以**窄规则必须写在宽规则后面**。
+
+其他约束：
+
+- 最多 **100 条规则**，单行最多 **2,000 字符**（含空格）
+- `*` splat 只能有一个
+- `:placeholder` 每个只能引用一次
+- `_headers` 本身**不会被当作静态文件提供**（不会泄露）
+- **对 Pages Functions 的响应无效**——有 Functions 时要写在代码里
+
+### 6. `_redirects`：与 `_headers` 相反的匹配逻辑
+
+**`_headers` 是全部叠加，`_redirects` 是首个命中。** 同一个 source 有多条规则时，**最上面的生效**。
+
+```text
+# 静态重定向（默认 302，可显式写 301/303/307/308）
+/old-page            /new-page                301
+
+# 占位符
+/blog/:year/:slug    /posts/:year/:slug       301
+
+# splat
+/legacy/*            /archive/:splat          301
+
+# proxy / rewrite（地址栏不变，返回 200）
+/app/*               /app/index.html          200
+```
+
+**约束与陷阱**
+
+- 最多 **2,000 条静态 + 100 条动态**，每行限 **1,000 字符**
+- **静态规则必须写在动态规则之前**，否则会被前面的通配规则抢先命中
+- 默认状态码是 **302**，不是 301——做永久迁移要显式写
+- 支持 301 / 302 / 303 / 307 / 308；**不支持**按国家、语言、Cookie 做条件重定向
+- **proxy（200）只有第一条生效**：`/a /b 200` 配 `/b /c 200`，请求 `/a` 只渲染 `/b`，不会继续到 `/c`
+- **proxy 会制造重复内容**，搜索引擎会惩罚。真要用，记得在 `_headers` 里补 `Link: <规范地址>; rel="canonical"`
+- `_redirects` **不作用于 Pages Functions** 的响应
+
+> **本项目为什么没有配 `_redirects`**：双站的核心矛盾是「`.html` vs 无扩展名路径」。用 200 rewrite 把它抹平，等于让同一内容在两个地址上都返回 200——那正是我们想避免的重复内容。**308 收敛到单一规范地址，反而是对的。**
+
+### 7. 硬限制一览（Free 计划）
+
+| 项 | 限制 | 备注 |
+|---|---|---|
+| 构建 | **1 并发 / 500 次每月** | 单次 20 分钟超时 |
+| 文件数 | **20,000** | 付费 100,000，需设环境变量 `PAGES_WRANGLER_MAJOR_VERSION=4` |
+| 单文件大小 | **25 MiB** | 更大的放 R2 |
+| 自定义域名 | 100 个/项目 | |
+| 项目数 | 100 个/账号 | 不常批准上调 |
+| `_headers` 规则 | 100 条 | 单行 2,000 字符 |
+| `_redirects` | 2,100 条 | 2,000 静态 + 100 动态 |
+| 预览部署 | 无限 | |
+| 静态请求 / 带宽 | 不计费 | |
+| 上传（Wrangler） | 20,000 文件 / 25 MiB | 拖拽式只有 1,000 文件 |
+
+> **500 次构建/月**算的是**部署到 Cloudflare 的次数**，不是 CI 里的构建次数。同一个 job 内构建两次、只上传一次，仍只计 1 次。真正翻倍的场景是给两个 Cloudflare 项目各配一次上传。
+
+### 8. Direct Upload 与 Git 集成的取舍
+
+| | Git 集成 | Direct Upload |
+|---|---|---|
+| 触发 | push 自动构建 | 自己构建后上传 |
+| 构建环境 | Cloudflare 提供 | 你的 CI |
+| **能否互转** | — | **不能。选了 Direct Upload 就永远不能切到 Git 集成**，要换只能重建项目 |
+| 生产分支 | 界面可改 | **没有界面**，只能调 API `PATCH /accounts/{id}/pages/projects/{name}` |
+| 预览部署 | 每分支/PR 自动 | `wrangler pages deploy --branch=<名>` |
+| 构建产物 | Cloudflare 决定 | 完全由你控制 |
+
+**本项目为什么选 Direct Upload**：需要在 GitHub Actions 里构建两次（一次给 GitHub Pages、一次给 Cloudflare），两次产物的绝对地址不同。交给 Cloudflare 构建会用另一套 Ruby 环境，无法保证两站产物一致。
+
+**代价**：失去 Git 集成的便利，全靠自己的 workflow；而且这个决定**不可逆**。
+
+## 五、保留 GitHub 部署入口
 
 ### 1. 保留 GitHub Pages 本身
 
@@ -204,7 +403,7 @@ GitHub Pages 对 SPA 通常需要 `404.html` 回退；Cloudflare Pages 可以用
 - 旧 API 在切换后保留只读一段时间，方便回滚；
 - 前端 API 地址放在环境变量里，不要写死在源码中。
 
-## 五、后端数据怎么处理
+## 六、后端数据怎么处理
 
 ### 1. 先确认数据到底在哪
 
@@ -368,7 +567,7 @@ npx wrangler r2 object put my-project-assets/path/example.jpg --file=./example.j
 - 没验证就改 DNS；
 - 迁移中途同时改业务逻辑和部署平台。
 
-## 六、完整迁移步骤
+## 七、完整迁移步骤
 
 ### 阶段 1：准备
 
@@ -465,7 +664,7 @@ Git 集成方式：
 - [ ] 确认稳定后，再处理旧后端/旧数据库；
 - [ ] 保留最后一次旧备份。
 
-## 七、域名与访问入口策略
+## 八、域名与访问入口策略
 
 ### 1. 三个入口并存
 
@@ -499,7 +698,7 @@ Git 集成方式：
 - 旧自定义域名切到 Cloudflare 后，GitHub Pages 的 `github.io` 地址仍可作为备用入口；
 - 不要急着删除旧 DNS 记录，至少保留一个回滚窗口。
 
-## 八、测试清单
+## 九、测试清单
 
 ### 页面与路由
 
@@ -536,7 +735,7 @@ Git 集成方式：
 - [ ] 移动端布局
 - [ ] 分享卡片/SEO（如需要）
 
-## 九、回滚方案
+## 十、回滚方案
 
 回滚前必须准备好：
 
@@ -561,7 +760,7 @@ Git 集成方式：
 - 不要把回滚当成“删掉新站”，保留新站用于排查；
 - 旧后端至少保留到新站稳定运行后。
 
-## 十、安全注意事项
+## 十一、安全注意事项
 
 - 不要把 GitHub Token、Cloudflare API Token、数据库密码写进前端或仓库；
 - 使用 GitHub Secrets 和 Cloudflare Secrets；
@@ -572,25 +771,31 @@ Git 集成方式：
 - 公开备份文件要确认是否包含敏感数据；
 - 对管理接口加认证、限流和日志。
 
-## 十一、费用与限制
+## 十二、费用与限制
 
-| 产品 | 免费额度要点 | 备注 |
+> 数据核实于 **2026-11-14**，来源为各产品官方 Pricing 页面。额度会调整，以官方为准。
+
+| 产品 | Free 计划额度 | 备注 |
 |------|--------------|------|
-| Pages | 静态托管；500 次构建/月、20,000 文件、单文件 25MiB | 静态请求不单独计费 |
-| Pages Functions | 100,000 请求/天、10ms CPU/次 | 按 Workers 计 |
-| KV | 100,000 读取/天、1,000 写入/天、1GB | 适合低频 JSON |
-| D1 | 有免费额度，适合中小型关系数据 | 以官方当前额度为准 |
-| R2 | 有免费存储/操作额度，出站流量免费 | 适合文件 |
-| Workers Paid | 5 美元/月起 | 更高请求/CPU、Durable Objects 等 |
+| **Pages** | 500 次部署/月、20,000 文件、单文件 25 MiB、100 自定义域名 | 静态请求与带宽**不计费** |
+| **Workers / Pages Functions** | 100,000 请求/天、10 ms CPU/次 | Pages Functions 计入 Workers 配额 |
+| **KV** | 100,000 读取/天、1,000 写入/天、1 GB | 最终一致，不适合强一致场景 |
+| **D1** | 500 万行读取/天、10 万行写入/天、5 GB、10 个库 | 超限后**查询直接报错**，不会扣费 |
+| **R2** | 10 GB-month 存储、Class A 100 万次/月、Class B 1,000 万次/月 | **出站流量免费**；免费额度只对 Standard 存储类生效 |
+| **Workers Paid** | $5/月起 | 提高请求/CPU 上限，解锁 Durable Objects |
 
-注意：
+**几个容易踩的计费细节**
 
-- 免费计划超额通常是失败/限流，不会自动扣款；
-- 迁移前按实际流量估算；
-- 如果项目有大量文件/数据库，先看 R2/D1 的额度；
-- 域名年费另计。
+- **D1 超限是硬失败**：日读写额度用完后，D1 API 直接返回错误，站点功能会中断，不是"降级"。缓存命中率低的查询特别容易把 rows read 打满（全表扫描 = 几千行）。
+- **R2 的免费额度不覆盖 Infrequent Access**：那个存储类有 30 天最短存储期，删了也照收。
+- **计费单位向上取整**：1,000,001 次操作按 200 万次算，1.1 GB-month 按 2 GB-month 算。
+- **Pages 的 500 次/月是"部署次数"**，不是 CI 构建次数。同一 job 内构建多次、只上传一次，仍只计 1 次。
+- 免费计划超额通常是**失败 / 限流**，不会自动扣款（这一点比按量计费的平台安全）。
+- **域名年费另计**，Cloudflare 不包含注册费。
 
-## 十二、不同项目类型的迁移示例
+**估算方法**：先按现有流量跑两周，看 Cloudflare 控制台的请求量曲线，再判断是否需要付费计划。个人静态站基本一辈子用不到付费档。
+
+## 十三、不同项目类型的迁移示例
 
 ### 1. 纯静态站点
 
@@ -640,7 +845,7 @@ Git 集成方式：
 - 迁移评论、搜索、统计等第三方脚本；
 - GitHub Pages 保留旧文章 URL 兼容。
 
-## 十三、单项目迁移记录模板
+## 十四、单项目迁移记录模板
 
 ```
 项目名：
@@ -664,7 +869,7 @@ DNS 所在：
 备注：
 ```
 
-## 十四、常见迁移陷阱与检查表
+## 十五、常见迁移陷阱与检查表
 
 > 下面按通用场景整理，不绑定某一个具体项目。迁移任何静态站、SPA、带后端项目时都可以逐项检查。
 
@@ -840,7 +1045,7 @@ GitHub Pages 项目页经常带子路径，而 Cloudflare Pages 通常部署在�
 
 **一句话原则**：迁移不是“把文件传上去”，而是“URL、缓存、数据、认证、域名、回滚”六条线同时验证。
 
-## 十五、迁移验收标准（通用）
+## 十六、迁移验收标准（通用）
 
 > 这一节是通用的迁移验收标准，不针对某个具体项目。  
 > 目标：把“迁移完成”从主观感觉变成可检查、可记录、可回滚的验收结果。
@@ -1138,7 +1343,218 @@ PWA/移动端：
 
 > 验收的核心不是“页面能打开”，而是：**关键路径能走通、旧入口不丢失、数据不出错、出错能回滚。**
 
-## 十六、可选扩展：SEO 与 GEO
+## 十七、实战记录：本项目的双站迁移
+
+> 前 16 章是通用方法论。这一章记录**本项目（Jekyll 个人主页）实际怎么做的、踩过什么、修了什么**。
+> 逐条操作命令见 `DEPLOY.md`；故障现象与排查见 `TROUBLESHOOTING.md`；完整验收数据见 `docs/acceptance-2026-10-27-cloudflare.md`。
+
+### 1. 最终架构
+
+**Cloudflare Pages 是主站，GitHub Pages 保留为备用。**
+
+```
+push 到 main
+   │
+   ├─ 构建 A（_site）────────────────→ GitHub Pages
+   │     url = https://chenchen913.github.io
+   │
+   └─ 构建 B（_site_cf，追加 CF 配置）──→ wrangler 上传 → Cloudflare Pages
+         url = https://chenchen913.pages.dev
+```
+
+**为什么构建两次，而不是构建一次传两个地方**
+
+站点的 canonical / og:url / hreflang / sitemap 全部来自 `site.url`。只构建一次再复制，Cloudflare 上的页面会声明自己是 `github.io` 的副本——那是错的，等于主动把权重交给旧站。
+
+用 Jekyll 的多配置机制解决：
+
+```bash
+# GitHub Pages
+bundle exec jekyll build                                   # → _site
+
+# Cloudflare
+bundle exec jekyll build \
+  --config _config.yml,_config.cloudflare.yml \
+  --destination _site_cf                                   # → _site_cf
+```
+
+`_config.cloudflare.yml` 只覆盖两件事：`url` 和 `include: [_headers]`。
+
+**踩过的坑**：`--destination` 不能省。两个构建输出到同一目录会互相覆盖，而且是**静默覆盖**——后构建的把先构建的盖掉，CI 全绿，但其中一站内容是错的。
+
+### 1.5 关键决策与理由（防止后来者重复讨论）
+
+| 决策 | 理由 | 代价 |
+|---|---|---|
+| **两站各自 canonical 指自己** | 备用站不能退出索引，否则「CF 挂了还能访问」就失去意义 | 两份索引并存，可能分散少量权重 |
+| **不给 GitHub Pages 加 `noindex`** | 同上。加了之后搜索引擎完全找不到备用入口 | — |
+| **不做 CSP** | 全站大量内联 `<script>` 与内联 style，落地必须放行 `unsafe-inline`，防护收益有限却极易打断页面 | 无 CSP 防护 |
+| **安全响应头只在 CF 生效** | GitHub Pages 不支持自定义响应头（平台限制）。用 `<meta>` 只能等效 `Referrer-Policy`，`X-Frame-Options` 无法替代 | 备用站无点击劫持防护（纯静态展示页，无攻击价值） |
+| **接受 `.html` 的 308** | 内链要兼容 GitHub Pages | CF 上每次内链多一跳 308 |
+| **配了 `_headers` 但不配缓存** | 文件名不带内容哈希，长缓存会让用户长期看到旧版 | 每次都走 304 协商 |
+
+> 这几条都是**权衡后的选择，不是遗漏**。将来要改，先读 `docs/acceptance-2026-10-27-cloudflare.md` 第五节——那里记录了每个方案的后果对比。
+
+### 2. 目录归属：`_headers` 到底该写在哪
+
+`_headers` 必须被复制进产物根目录，Cloudflare 才读得到。Jekyll 默认忽略 `_` 开头的文件，所以要靠 `include`。
+
+**但 `include` 写错地方会出事**：
+
+| `include` 写在 | GitHub Pages 侧 | Cloudflare 侧 |
+|---|---|---|
+| `_config.yml` | ❌ `_headers` 被复制进 `_site`，`github.io/_headers` **可被公开下载**（实测 200、1554 字节） | ✅ 生效 |
+| `_config.cloudflare.yml` | ✅ 默认忽略，返回 404 | ✅ 生效 |
+
+**为什么第二个可行**：Jekyll 合并多配置时，**数组是整体替换而不是追加**。所以只有追加了 `_config.cloudflare.yml` 的那次构建才包含 `_headers`。
+
+**验证必须查两件事，缺一不可**：
+
+```bash
+# ① GitHub 侧必须 404
+curl -s -o /dev/null -w '%{http_code}\n' https://chenchen913.github.io/_headers
+
+# ② Cloudflare 侧安全头必须还在
+curl -sI https://chenchen913.pages.dev/ | grep -iE "strict-transport|x-frame|permissions-policy"
+```
+
+只查 ① 很可能把 Cloudflare 的安全头一起弄没了。
+
+### 3. 实测数据（2026-10-27 验收）
+
+#### 跳转行为
+
+| 请求 | 结果 | 判定 |
+|---|---|---|
+| `/` | 200 | 正常 |
+| `/index.html` | 308 → `/` | 正常，参数保留 |
+| `/en.html` | 308 → `/en` | 正常，参数保留 |
+| `/en/` | 308 → `/en` | 尾斜杠统一 |
+| `/projects/xxx` | 308 → `/projects/xxx/` | 尾斜杠统一 |
+| `/projects/xxx/?lang=en` | 200 | 参数未丢 |
+| 不存在的路径 | 404 | 真 404，不是 200 首页 |
+
+#### 两站产物一致性
+
+| 页面 | 首页 | 英文页 | 项目详情 | 论文详情 |
+|---|---|---|---|---|
+| 字节数 | 17732 | 17764 | 14289 | 15695 |
+| 归一域名后 diff | 空 | 空 | 空 | 空 |
+
+差异只出现在 `canonical`、`og:url`、`og:image`、`hreflang` 四类标签上——正是两次构建刻意要区分的地方。
+
+> **判断一致性的可靠方法是「同一路径分别取回、域名归一后 diff」**，不是比字节数（本机代理会截断大响应，详见踩坑 4）。
+
+#### 性能
+
+| 页面 | TTFB | FCP | 传输 |
+|---|---|---|---|
+| 首页 | 208ms | 432ms | 6.2KB（br） |
+| 论文页 | 243ms | 472ms | 6.7KB |
+
+#### 外部依赖
+
+**零**。KaTeX、highlight.js、pdf.js 全部自托管在 `assets/vendor/`，浏览器请求的域名只有本站自己。
+
+### 4. 踩过的坑（按代价排序）
+
+#### 坑 1 · `_headers` 在备用站明文可下载
+
+见上一节。代价：内部配置注释（缓存策略、CSP 取舍）全部外泄。根因是把 `include` 放进了 `_config.yml`。
+
+#### 坑 2 · `.html` 链接的双站矛盾
+
+GitHub Pages 不认无扩展名路径，Cloudflare 又把 `.html` 308 掉。
+
+| 尝试的方案 | 结果 |
+|---|---|
+| 用 `_redirects` 让 `/en.html` 直接返回 200 | ❌ 同一内容出现两个 200 地址，制造真正的重复内容 |
+| 内链改无扩展名 | ❌ GitHub Pages 上 404 |
+| 保留 `.html`，接受多一跳 | ✅ 采用 |
+
+**结论**：308 是正确行为（把非规范地址收敛到规范地址），多出的一跳由 CDN 承担，不值得为它让两站产物分叉。
+
+#### 坑 3 · sitemap 里含 `/en.html`
+
+`sitemap.xml` 列的是文件路径 `/en.html`，在 Cloudflare 上它会 308 到 `/en`。
+
+Google 会跟随后索引最终地址，属轻微问题。**没有强行修改**——改它需要给 `en.html` 设特定 permalink，会破坏 GitHub Pages 侧。
+
+#### 坑 4 · curl 验证会假阴性
+
+本机出口经过代理，大响应被截断：同一页面多次能拿到 5846B / 17732B / 空。
+
+**正确做法**：
+
+- 只用 `curl` 判**状态码和跳转链**
+- 判**内容**用浏览器（Playwright 取 `response.body()`）
+- 判**两站一致性**用「归一域名后 diff」
+
+#### 坑 5 · 部署链路断了，两周没人知道
+
+**现象**：推送成功、HEAD 变了、线上不动、没有任何报错。
+
+**根因**：两件事撞在一起——
+
+1. `ubuntu-latest` 的默认 Python 升到 **3.14**，PyYAML 6.0.2 只有到 cp313 的 wheel，pip 只能回退源码包；
+2. PyPI 把这个版本的 sdist **重新打包过**（文件名大小写和 hash 都变了），而 `requirements-ci.txt` 里登记的是旧 hash。
+
+`--require-hashes` 找不到匹配，安装阶段直接中断，后面的构建、部署全部 skipped。
+
+**为什么持续两周**：定时任务只跑链接检查，而真正会构建部署的 job 在 `schedule` 触发时是 skip 的。静态站又长期没有 push——故障永远不会自己冒出来。
+
+**修法**：
+
+- 补上真实 sdist hash（两个都保留）；
+- 两个 job 都固定 `actions/setup-python` 到 3.13，命中官方 wheel，不再受 runner 默认版本漂移影响；
+- **让定时巡检也跑一遍依赖安装 + 数据校验**，把它变成部署链路的哨兵。
+
+**通用教训**：**监控必须覆盖真实部署路径。** 只检查「站点可达」会漏掉「根本推不上去」。
+
+#### 坑 6 · Jekyll 项目特有的三个坑
+
+| 现象 | 原因 | 修法 |
+|---|---|---|
+| 构建报 `Liquid syntax error` | 根目录的 `.md` 里有 Liquid 示例代码，被当模板解析 | 加进 `_config.yml` 的 `exclude` |
+| 反向：从 exclude 移除但文件还在 | 中间态文件仍在根目录，Jekyll 照样解析它 | **exclude 的增删必须与文件增删在同一个提交里完成** |
+| 不存在的路径返回 200 | `404.html` 被误 exclude，Pages 把整站当成 SPA | 确认产物根目录有 `404.html` |
+
+> 第二条是真踩过的：先改 exclude、打算下个提交再删文件，结果中间那次构建直接失败（`'unless' tag was never closed`）。
+
+### 5. 监控
+
+| 手段 | 频率 | 覆盖内容 |
+|---|---|---|
+| `deploy.yml` 的巡检 job | 每周一 03:00 UTC | 依赖安装 + 数据校验 + 构建 + 内部链接 |
+| `uptime-check.yml` | 每天 09:00 / 21:00（北京时间） | 两站共 9 项：状态码 + 页面关键字符串 |
+
+**两种告警含义不同，别混**：
+
+- `deploy.yml` 红 → 这次改动**没上线**，线上还是旧的
+- `uptime-check.yml` 红 → 线上**现在就是坏的**，跟有没有人部署无关
+
+> ⚠️ 两者都受 GitHub「仓库 60 天无活动 → 自动禁用 workflow」影响。长期静默期最隐蔽的失效**不是站点挂了，而是连告警都停了**。
+
+### 6. 回滚
+
+| 方式 | 范围 | 持续性 |
+|---|---|---|
+| Cloudflare 控制台 Rollback | **只回滚 CF 一侧**，GitHub Pages 不动 | 下次 push 会被覆盖，属临时止血 |
+| 回滚 git commit（`PATCH /git/refs/heads/main`） | 两站一起退 | 持久，且会重新触发 CI |
+
+**怎么选**：主站刚推上去就坏了 → 控制台回滚止血；要长期回到旧版本 → 回滚 commit。
+
+### 7. 成本核算
+
+免费额度 500 次构建/月，算的是**部署到 Cloudflare 的次数**。
+
+- 本项目每次 push 只做 **1 次** Cloudflare 部署（两次 `jekyll build` 都在同一个 CI job 内，只有一次 `wrangler pages deploy`），所以计 1 次
+- 按每天 2–3 次 push 算：约 60–90 次/月
+- 加上手动触发与定时巡检，远低于上限
+
+**注意**：如果给两个站点各配一个独立 workflow、各自上传一次，消耗才会翻倍。本项目把两次构建放进同一个 job，正是为了省这个额度。
+
+## 十八、可选扩展：SEO 与 GEO
 
 > **这一节是可选扩展，不是迁移必须完成的步骤。**  
 > 不继续做 SEO/GEO，不影响站点正常使用、数据迁移和验收结论。  
@@ -1295,7 +1711,19 @@ AI 引用往往来自“多处都提到你”：
 - 先做技术 SEO 和内容，再考虑 GEO；
 - SEO/GEO 是长期工作，不是迁移完成后的必填项。
 
-## 十七、参考资料
+## 十九、参考资料
+
+**本指南第 4 章的事实来源（建议收藏这几个）**
+
+- Pages 限额：https://developers.cloudflare.com/pages/platform/limits/
+- Pages 的服务行为（URL/404/SPA/缓存/默认响应头）：https://developers.cloudflare.com/pages/configuration/serving-pages/
+- `_headers` 语法与规则叠加：https://developers.cloudflare.com/pages/configuration/headers/
+- `_redirects` 语法：https://developers.cloudflare.com/pages/configuration/redirects/
+- Direct Upload 及其不可逆限制：https://developers.cloudflare.com/pages/get-started/direct-upload/
+- 回滚到历史部署：https://developers.cloudflare.com/pages/configuration/rollbacks/
+- 从 Pages 迁移到 Workers（含 `assets` 配置对照）：https://developers.cloudflare.com/workers/static-assets/compatibility-matrix/
+
+**产品入口**
 
 - Cloudflare Pages：https://developers.cloudflare.com/pages/
 - Pages 自定义域名：https://developers.cloudflare.com/pages/configuration/custom-domains/
@@ -1303,12 +1731,26 @@ AI 引用往往来自“多处都提到你”：
 - Workers：https://developers.cloudflare.com/workers/
 - Workers 定价：https://developers.cloudflare.com/workers/platform/pricing/
 - KV：https://developers.cloudflare.com/kv/
-- D1：https://developers.cloudflare.com/d1/
-- R2：https://developers.cloudflare.com/r2/
+- D1（含定价）：https://developers.cloudflare.com/d1/platform/pricing/
+- R2（含定价与免费额度）：https://developers.cloudflare.com/r2/pricing/
 - Hyperdrive：https://developers.cloudflare.com/hyperdrive/
 - Cloudflare Access：https://developers.cloudflare.com/cloudflare-one/access/
+
+**GitHub 侧**
+
 - GitHub Pages 自定义域名：https://docs.github.com/en/pages/configuring-a-custom-domain-for-your-github-pages-site
+- GitHub Actions 输入上下文（`inputs` vs `github.event.inputs` 的布尔差异）：https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#providing-inputs
 
 ---
 
-**一句话总结**：先备份、先建新站、先保留 GitHub Pages；前端先迁，后端数据按类型选择 KV/D1/R2/Hyperdrive；验证后再切域名，旧入口至少保留到新站稳定。
+**一句话总结**
+
+迁移不是「把文件传上去」，而是 **URL、缓存、数据、认证、域名、回滚** 六条线同时验证。
+
+对一个纯静态站（比如本项目），真正需要花心思的只有三件事：
+
+1. **绝对地址**——两站各自的 canonical / sitemap 必须指向自己（否则等于把权重送出去）；
+2. **`.html` 与尾斜杠**——两个平台的规范不一致，只能选一边兼容、接受另一边的跳转；
+3. **监控**——静态站最危险的失效不是「挂了」，而是「部署链路断了但你不知道」。
+
+后端、认证、数据库那些章节，纯静态站可以直接跳过。

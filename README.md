@@ -34,10 +34,11 @@
 │   └── detail.html      # 详情页布局（项目 / 论文）
 ├── _projects/           # 项目详情页（Markdown，中英文用 <!-- PAGE_ENGLISH_SPLIT_2026 --> 分隔）
 ├── _publications/       # 论文详情页（同上）
-├── docs/                # 内部计划/审核文档（不发布）
-├── AUDIT-REPORT.md      # 第一轮审核报告（不发布）
-├── AUDIT-REPORT-2.md    # 第二轮审核报告（不发布）
-├── AUDIT-REPORT-3.md    # 第三轮安全扫描报告（不发布）
+├── docs/                # 内部文档（不发布），详见 docs/README.md
+│   ├── acceptance-*.md  #   迁移验收记录与决策依据
+│   ├── history/         #   历次审核结论、已完成的历史实施计划
+│   ├── reference/       #   通用参考资料（如 Cloudflare 迁移方法论）
+│   └── push-via-api.py  #   本机 git 推不上去时的 Git Data API 兜底脚本
 ├── CONTENT-GUIDE.md     # 内容维护指南（不发布）
 ├── DEPLOY.md            # 部署与维护指南（不发布）
 ├── TROUBLESHOOTING.md   # 排障手册（不发布）

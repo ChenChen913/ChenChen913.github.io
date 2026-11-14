@@ -1,6 +1,6 @@
 # Cloudflare 迁移验收记录
 
-> 按 `CLOUDFLARE_MIGRATION_GUIDE.md` 第十五章的验收标准执行。
+> 按 `docs/reference/cloudflare-migration-guide.md` 第十五章的验收标准执行。
 > 本文件为内部档案，已在 `_config.yml` 的 `exclude` 中（`docs/`），不发布到线上。
 
 ## 一、基本信息

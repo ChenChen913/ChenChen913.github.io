@@ -34,6 +34,11 @@ FILES = [
     # "_config.yml",
 ]
 
+# 要删除的文件（Git Data API 里是在 tree 中把 sha 设为 null）
+DELETE = [
+    # "旧文档.md",
+]
+
 MESSAGE = """提交说明"""
 # =======================================================
 
@@ -51,8 +56,8 @@ def gh(args, input_path=None):
 
 
 def main():
-    if not FILES:
-        print("错误：FILES 为空，先填要提交的文件（相对仓库根）。", file=sys.stderr)
+    if not FILES and not DELETE:
+        print("错误：FILES 和 DELETE 都是空的，没有可提交的内容。", file=sys.stderr)
         return 1
     if MESSAGE.strip() == "提交说明":
         print("错误：MESSAGE 还是默认值，请写清这次改了什么。", file=sys.stderr)
@@ -82,6 +87,11 @@ def main():
                  input_path=req)
         entries.append({"path": path, "mode": "100644", "type": "blob", "sha": sha})
         print(f"  blob {sha[:10]}  {path}  ({len(raw)} 字节)")
+
+    # 删除：tree 条目里 sha 为 null 即表示删除该路径
+    for path in DELETE:
+        entries.append({"path": path, "mode": "100644", "type": "blob", "sha": None})
+        print(f"  delete        {path}")
 
     if DRY_RUN:
         print("\n[dry-run] 到此为止：未创建 tree / commit，也未移动 ref。")

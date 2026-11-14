@@ -114,7 +114,7 @@ Jekyll 是静态站点生成器：把 Markdown + YAML 数据 + Liquid 模板编�
 └── .github/workflows/         # GitHub Actions 自动部署配置
 ```
 
-> `DEPLOY.md`、`CONTENT-GUIDE.md`、`TROUBLESHOOTING.md`、`AUDIT-REPORT.md`、`docs/`、`README*` 等内部文档已在 `_config.yml` 的 `exclude` 中，不会发布到线上。
+> `DEPLOY.md`、`CONTENT-GUIDE.md`、`TROUBLESHOOTING.md`、`docs/`、`README*` 等内部文档已在 `_config.yml` 的 `exclude` 中，不会发布到线上。
 
 ---
 

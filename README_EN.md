@@ -34,10 +34,11 @@ A personal homepage built with Jekyll. **Cloudflare Pages is the primary site**,
 │   └── detail.html      # detail page layout (projects / publications)
 ├── _projects/           # project detail pages (Markdown, bilingual via <!-- PAGE_ENGLISH_SPLIT_2026 --> separator)
 ├── _publications/       # publication detail pages (same as above)
-├── docs/                # internal plans / audit docs (not published)
-├── AUDIT-REPORT.md      # round-1 audit report (not published)
-├── AUDIT-REPORT-2.md    # round-2 audit report (not published)
-├── AUDIT-REPORT-3.md    # round-3 security scan report (not published)
+├── docs/                # internal docs (not published), see docs/README.md
+│   ├── acceptance-*.md  #   migration acceptance record & decision rationale
+│   ├── history/         #   audit conclusions, completed implementation plans
+│   ├── reference/       #   general reference material (e.g. Cloudflare migration)
+│   └── push-via-api.py  #   Git Data API fallback when local git push is blocked
 ├── CONTENT-GUIDE.md     # content maintenance guide (not published)
 ├── DEPLOY.md            # deployment guide (not published)
 ├── TROUBLESHOOTING.md   # troubleshooting guide (not published)

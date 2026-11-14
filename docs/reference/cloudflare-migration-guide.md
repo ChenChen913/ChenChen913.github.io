@@ -9,14 +9,14 @@
 > - 官方文档核实与线上实测：**2026-11-14**
 > - 配套文档：部署操作看 `DEPLOY.md`；排障看 `TROUBLESHOOTING.md`；验收数据看 `docs/acceptance-2026-10-27-cloudflare.md`
 
-## ⚠️ 先读这段：2026 年的 Pages 已不是「新建项目的默认选择」
+## ⚠️ 先读这段：2026 年了，Pages 和 Workers 怎么选
 
-Cloudflare 现在把新项目的推荐路径指向 **Workers + Static Assets**，Pages 进入「继续支持、只修 bug、不再加新功能」的状态：
+Cloudflare 已经为 **Workers + Static Assets** 提供了[官方迁移指南](https://developers.cloudflare.com/workers/static-assets/compatibility-matrix/)，平台新增能力的重心明显在向 Workers 转移。Pages 仍在正常维护、**没有强制迁移期限**，但下面这些能力只在 Workers 上：
 
 | | Cloudflare Pages | Workers + Static Assets |
 |---|---|---|
 | 定位 | Git 连接的静态站托管 | 静态资源 + 服务端逻辑合一 |
-| 新功能 | 基本停止 | Durable Objects、Cron、Queues、渐进部署、完整可观测性、Vite 插件 |
+| 新能力 | 以维护为主 | Durable Objects、Cron、Queues、渐进部署、完整可观测性、Vite 插件 |
 | 纯静态站 | **仍是最省事的选择**（git push 即部署） | 可以，但要自己维护 `wrangler` 配置 |
 | 已有项目 | **没有强制迁移期限** | 有具体需求时再迁 |
 
@@ -54,7 +54,7 @@ Cloudflare 现在把新项目的推荐路径指向 **Workers + Static Assets**�
 
 ### 1. 推荐的整体策略
 
-对绝大多数个人项目，推荐：
+对绝大多数**已经有 GitHub Pages、想加一个更快的入口**的个人项目，推荐：
 
 - **Cloudflare 做主站**；
 - **GitHub Pages 继续保留**，作为只读备用入口；
@@ -114,7 +114,7 @@ Cloudflare 现在把新项目的推荐路径指向 **Workers + Static Assets**�
 | GitHub Actions 构建/部署 | Pages Git 集成、Wrangler 或 Actions | 可保留 GitHub Actions |
 | GitHub 仓库 | GitHub 仓库 + Cloudflare Git 集成 | 代码源不变 |
 | GitHub Pages 自定义域名 | Pages Custom domains | 建议保留 `github.io` 作备用 |
-| GitHub Pages 的 404/重定向 | `_redirects` / `_headers` | SPA 需要额外配置 |
+| GitHub Pages 的 404/重定向 | `_redirects` / `_headers` | 两家规则不同，细节见第 4 章 |
 | GitHub API / Issues 作为数据源 | 保留 GitHub API 或迁移 D1/KV | 注意速率限制和 Token |
 | GitHub Releases 文件 | R2 或继续用 Releases | 文件多时建议 R2 |
 | 外部 REST API | Workers / Pages Functions 或继续保留 | 先保持接口兼容 |
@@ -139,6 +139,7 @@ Cloudflare 现在把新项目的推荐路径指向 **Workers + Static Assets**�
 | `Access-Control-Allow-Origin` | `*` |
 | `Referrer-Policy` | `strict-origin-when-cross-origin` |
 | `X-Content-Type-Options` | `nosniff` |
+| `Content-Type` | 按文件类型推断 |
 | `Etag` | 每个 200 响应 |
 | `Server` | `cloudflare` |
 | `Cf-Ray` | 请求 ID |
@@ -149,13 +150,14 @@ Cloudflare 现在把新项目的推荐路径指向 **Workers + Static Assets**�
 - 请求可缓存（不带 `Authorization` / `Range`）：`Cache-Control: public, max-age=0, must-revalidate`
 - 预览 URL：`X-Robots-Tag: noindex`
 
-**这意味着**：在 `_headers` 里重复配 `Referrer-Policy` 或 `X-Content-Type-Options` 属于冗余（无害）；而 `HSTS`、`X-Frame-Options`、`Permissions-Policy`、`CSP` 确实要自己配。
+**这意味着**：在 `_headers` 里配同名 header 会**覆盖**默认值（官方明确：`_headers` 优先于 Pages 默认响应头），配成一样的值就看不出差别；而 `HSTS`、`X-Frame-Options`、`Permissions-Policy`、`CSP` 确实要自己配。
 
 ### 2. URL 处理：`.html` 会被重定向掉
 
 - `/contact.html` → 重定向到 `/contact`
 - `/about/index.html` → 重定向到 `/about/`
 - 官方文档只写 "redirect"；**实测返回 308**，且 **query 参数保留**（`/en.html?v=1` → `/en?v=1`）
+- **这是 Pages 的内置行为，不受 `_redirects` 控制**——你没法把它改成 301，只能选择接受或改内链
 
 后果：站内链接如果写死 `.html`，每次点击都多一跳。
 
@@ -174,7 +176,7 @@ Cloudflare 现在把新项目的推荐路径指向 **Workers + Static Assets**�
 
 第二条是隐形炸弹：**产物里少一个 `404.html`，整站就变成「任何路径都返回首页」**，不报任何错，但搜索引擎会认为你有无限多个重复页面。
 
-> 真实案例：Jekyll 项目把 `404.html` 误加进 `exclude`，构建成功、CI 全绿，线上却所有不存在的 URL 都返回 200 + 首页内容，直到用 `curl` 探 404 才发现。
+> 这个失效之所以危险，是因为所有常规信号都正常：构建成功、CI 全绿、首页能打开、内链能点。只有主动请求一个**不存在的路径**才会暴露。
 
 **自查**：
 
@@ -282,7 +284,7 @@ Cache-Control: public, max-age=604800, public, max-age=0, s-maxage=86400
 | 静态请求 / 带宽 | 不计费 | |
 | 上传（Wrangler） | 20,000 文件 / 25 MiB | 拖拽式只有 1,000 文件 |
 
-> **500 次构建/月**算的是**部署到 Cloudflare 的次数**，不是 CI 里的构建次数。同一个 job 内构建两次、只上传一次，仍只计 1 次。真正翻倍的场景是给两个 Cloudflare 项目各配一次上传。
+> **500 次/月**按 Cloudflare 侧的部署次数计（Direct Upload 模式下即每次 `wrangler pages deploy`），不是 CI 里的构建次数：同一个 job 内构建两次、只上传一次，仍只计 1 次。真正翻倍的场景是给两个 Cloudflare 项目各配一次上传。
 
 ### 8. Direct Upload 与 Git 集成的取舍
 
@@ -295,7 +297,7 @@ Cache-Control: public, max-age=604800, public, max-age=0, s-maxage=86400
 | 预览部署 | 每分支/PR 自动 | `wrangler pages deploy --branch=<名>` |
 | 构建产物 | Cloudflare 决定 | 完全由你控制 |
 
-**本项目为什么选 Direct Upload**：需要在 GitHub Actions 里构建两次（一次给 GitHub Pages、一次给 Cloudflare），两次产物的绝对地址不同。交给 Cloudflare 构建会用另一套 Ruby 环境，无法保证两站产物一致。
+**本项目为什么选 Direct Upload**：需要在 GitHub Actions 里构建两次（一次给 GitHub Pages、一次给 Cloudflare），两次产物的绝对地址不同。交给 Cloudflare 构建会用另一套 Ruby 环境，产物可能与 GitHub 侧不一致；而且现场安装 `3.3.12` 还有构建超时风险。
 
 **代价**：失去 Git 集成的便利，全靠自己的 workflow；而且这个决定**不可逆**。
 
@@ -582,7 +584,7 @@ npx wrangler r2 object put my-project-assets/path/example.jpg --file=./example.j
 
 - [ ] Cloudflare Dashboard → Workers & Pages → 创建 Pages 项目；
 - [ ] 选择 Git 集成，或使用 Direct Upload / Wrangler；
-- [ ] 配置构建命令、输出目录、Node 版本；
+- [ ] 若用 Git 集成：配置构建命令、输出目录、Node 版本（**Direct Upload 跳过这步**——产物在自己的 CI 或本地生成）
 - [ ] 配置环境变量和 Secrets；
 - [ ] 如需 Functions，创建 `functions/` 目录；
 - [ ] 如需 KV/D1/R2，创建资源并绑定；
@@ -760,6 +762,8 @@ Git 集成方式：
 - 不要把回滚当成“删掉新站”，保留新站用于排查；
 - 旧后端至少保留到新站稳定运行后。
 
+**如果是纯静态站**（没有后端数据要回滚），最有效的手段其实是**回滚代码**让 CI 重新构建，或直接用 Cloudflare 控制台的部署级回滚。两者的范围与持续性不同，见第 17 章第 6 节。
+
 ## 十一、安全注意事项
 
 - 不要把 GitHub Token、Cloudflare API Token、数据库密码写进前端或仓库；
@@ -844,6 +848,8 @@ Git 集成方式：
 - 修正 `baseURL` / `basePath`；
 - 迁移评论、搜索、统计等第三方脚本；
 - GitHub Pages 保留旧文章 URL 兼容。
+
+> 如果用 **Direct Upload**（本项目的方式），构建命令不用配在 Cloudflare——产物在自己的 CI 里生成，`wrangler pages deploy` 只负责上传。这样做的好处是构建环境完全可控、两站产物能保持一致；代价是没有 Git 集成的预览部署，且**这个选择不可逆**。详见第 17 章。
 
 ## 十四、单项目迁移记录模板
 
@@ -1380,9 +1386,9 @@ bundle exec jekyll build \
 
 `_config.cloudflare.yml` 只覆盖两件事：`url` 和 `include: [_headers]`。
 
-**踩过的坑**：`--destination` 不能省。两个构建输出到同一目录会互相覆盖，而且是**静默覆盖**——后构建的把先构建的盖掉，CI 全绿，但其中一站内容是错的。
+**易错点**：`--destination` 不能省。两个构建输出到同一目录会互相覆盖，而且是**静默覆盖**——后构建的把先构建的盖掉，CI 全绿，但其中一站内容是错的。本项目一开始就用了独立输出目录，没踩到这条，但它是这类「构建两次」最常见的翻车方式。
 
-### 1.5 关键决策与理由（防止后来者重复讨论）
+### 关键决策与理由（防止后来者重复讨论）
 
 | 决策 | 理由 | 代价 |
 |---|---|---|
@@ -1420,7 +1426,10 @@ curl -sI https://chenchen913.pages.dev/ | grep -iE "strict-transport|x-frame|per
 
 只查 ① 很可能把 Cloudflare 的安全头一起弄没了。
 
-### 3. 实测数据（2026-10-27 验收）
+### 3. 实测数据
+
+> 跳转行为与性能数字来自 **2026-10-27 正式验收**；页面字节数为 **2026-11-14 复测值**
+> （这期间站内内容有更新，比验收当时更大）。
 
 #### 跳转行为
 
@@ -1466,10 +1475,10 @@ curl -sI https://chenchen913.pages.dev/ | grep -iE "strict-transport|x-frame|per
 
 GitHub Pages 不认无扩展名路径，Cloudflare 又把 `.html` 308 掉。
 
-| 尝试的方案 | 结果 |
+| 评估过的方案 | 结论 |
 |---|---|
-| 用 `_redirects` 让 `/en.html` 直接返回 200 | ❌ 同一内容出现两个 200 地址，制造真正的重复内容 |
-| 内链改无扩展名 | ❌ GitHub Pages 上 404 |
+| 用 `_redirects` 让 `/en.html` 直接返回 200 | ❌ 未实施。同一内容出现两个 200 地址，制造真正的重复内容 |
+| 内链改无扩展名 | ❌ 不可行。GitHub Pages 上 404 |
 | 保留 `.html`，接受多一跳 | ✅ 采用 |
 
 **结论**：308 是正确行为（把非规范地址收敛到规范地址），多出的一跳由 CDN 承担，不值得为它让两站产物分叉。
@@ -1511,15 +1520,16 @@ Google 会跟随后索引最终地址，属轻微问题。**没有强行修改**
 
 **通用教训**：**监控必须覆盖真实部署路径。** 只检查「站点可达」会漏掉「根本推不上去」。
 
-#### 坑 6 · Jekyll 项目特有的三个坑
+#### 坑 6 · Jekyll 项目特有的坑
 
-| 现象 | 原因 | 修法 |
-|---|---|---|
-| 构建报 `Liquid syntax error` | 根目录的 `.md` 里有 Liquid 示例代码，被当模板解析 | 加进 `_config.yml` 的 `exclude` |
-| 反向：从 exclude 移除但文件还在 | 中间态文件仍在根目录，Jekyll 照样解析它 | **exclude 的增删必须与文件增删在同一个提交里完成** |
-| 不存在的路径返回 200 | `404.html` 被误 exclude，Pages 把整站当成 SPA | 确认产物根目录有 `404.html` |
+| 现象 | 原因 | 修法 | 本项目 |
+|---|---|---|---|
+| 构建报 `Liquid syntax error` | 根目录的 `.md` 里有 Liquid 示例代码，被当模板解析 | 加进 `_config.yml` 的 `exclude` | 踩过 |
+| 反向：从 exclude 移除但文件还在 | 中间态文件仍在根目录，Jekyll 照样解析它 | **exclude 的增删必须与文件增删在同一个提交里完成** | 踩过 |
+| 不存在的路径返回 200 | `404.html` 被误 exclude，Pages 把整站当成 SPA | 用 `curl` 探一个不存在的路径，确认返回 404 | 未踩过，属预防项 |
 
-> 第二条是真踩过的：先改 exclude、打算下个提交再删文件，结果中间那次构建直接失败（`'unless' tag was never closed`）。
+> 第二条发生在 2026-11-14：先改 exclude、打算下个提交再删文件，中间那次构建直接失败
+> （`'unless' tag was never closed`）。
 
 ### 5. 监控
 
@@ -1546,13 +1556,13 @@ Google 会跟随后索引最终地址，属轻微问题。**没有强行修改**
 
 ### 7. 成本核算
 
-免费额度 500 次构建/月，算的是**部署到 Cloudflare 的次数**。
+免费额度 500 次/月，按 **Cloudflare 侧的部署次数**计。
 
 - 本项目每次 push 只做 **1 次** Cloudflare 部署（两次 `jekyll build` 都在同一个 CI job 内，只有一次 `wrangler pages deploy`），所以计 1 次
 - 按每天 2–3 次 push 算：约 60–90 次/月
 - 加上手动触发与定时巡检，远低于上限
 
-**注意**：如果给两个站点各配一个独立 workflow、各自上传一次，消耗才会翻倍。本项目把两次构建放进同一个 job，正是为了省这个额度。
+**注意**：如果给两个站点各配一个独立 workflow、各自上传一次，消耗才会翻倍。本项目把两次构建放在同一个 job，主要理由是保证「GitHub Pages 先、Cloudflare 后」的部署顺序（CF 失败不影响备用站）；顺带也只消耗 1 次额度。
 
 ## 十八、可选扩展：SEO 与 GEO
 

@@ -16,3 +16,14 @@
 # 将来换成自定义域名时，只改这里的 url 一行，模板与 GitHub Pages 侧都不用动。
 
 url: "https://chenchen913.pages.dev"
+
+# _headers 必须被复制进构建产物根目录，Cloudflare Pages 才读得到响应头配置。
+# Jekyll 默认忽略所有以 _ 开头的文件，靠 include 强制复制。
+#
+# 为什么写在这里而不是 _config.yml：`include` 会同时作用于 GitHub Pages 的产物，
+# 让 github.io/_headers 变成可公开下载的明文文件（实测 200）。放在本文件后，
+# 只有 Cloudflare 的构建（追加本文件）才包含它，GitHub Pages 侧恢复 404。
+#
+# 注：Jekyll 多配置合并时数组整体替换而非追加，故本项会覆盖 _config.yml 的默认值。
+include:
+  - _headers

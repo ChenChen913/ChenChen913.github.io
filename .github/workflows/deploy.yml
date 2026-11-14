@@ -43,6 +43,14 @@ jobs:
           ruby-version: '3.3.12'
           bundler-cache: true
 
+      # 显式固定 Python 版本：ubuntu-latest 的默认 Python 会随镜像升级
+      # （2026-11 已升到 3.14），而 requirements-ci.txt 里的 PyYAML 6.0.2
+      # 没有 cp314 wheel，会回退到 sdist 触发 hash 校验失败，导致部署中断。
+      # 固定 3.13 即可命中官方 wheel，构建快且结果确定。
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.13'
+
       - name: Static checks
         run: |
           node --check script.js
@@ -108,8 +116,13 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: npx --yes wrangler@4.152.0 pages deploy _site_cf --project-name=chenchen913 --branch=main --commit-dirty=true
 
-  # 只读链接巡检：仅定时/手动触发，独立于部署（不阻断 Pages）。
+  # 只读巡检：仅定时/手动触发，独立于部署（不阻断 Pages）。
   # 所有 htmlproofer 调用统一 --disable-external，CI 不向外部站点发起未验证请求。
+  #
+  # 该 job 同时充当「部署健康度哨兵」。build-and-deploy 在定时触发时是 skip 的，
+  # 若部署链路坏掉（如 2026-11 PyYAML hash 失效），只有 push 才会暴露，而静态站
+  # 可能数周没有 push——故障就会长期静默。因此这里复跑一遍依赖安装与内容同步校验，
+  # 让周一凌晨的定时任务成为兜底报警。
   check-internal-links:
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -126,6 +139,15 @@ jobs:
         with:
           ruby-version: '3.3.12'
           bundler-cache: true
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.13'
+      # 与 build-and-deploy 使用同一份 requirements-ci.txt：一旦依赖 hash 失效，
+      # 这里会先于下一次 push 报警，而不是等站点真的推不上去才发现。
+      - name: Check portfolio sync freshness
+        run: |
+          python -m pip install --require-hashes -r requirements-ci.txt --quiet
+          python check_portfolio_sync.py
       - name: Build site
         run: bundle exec jekyll build
       - name: Check internal links (non-blocking for deploy)

@@ -37,17 +37,23 @@ markdown_ext: "markdown,mkdown,mkdn,mkd,md"
 kramdown:
   input: GFM
 
-# 需要强制复制的下划线文件。
-# Jekyll 默认忽略所有以 _ 开头的文件，不写在这里的 _headers / _redirects
-# 永远不会进入 _site，Cloudflare Pages 也就读不到——这是"配了却不生效"的典型原因。
-# 注：GitHub Pages 会忽略这两个文件，不影响现有部署。
-include:
-  - _headers
+# 下划线文件（_headers）的强制复制**不在这里配置**，而是放在 _config.cloudflare.yml。
+#
+# 原因：`include` 会同时作用于 GitHub Pages 的产物 _site，使
+#   https://chenchen913.github.io/_headers
+# 变成可公开下载的明文文件（2026-11-14 实测返回 200，1554 字节），内部注释与
+# 安全策略取舍全部外泄。而 _headers 是 Cloudflare 专有机制，只应出现在 _site_cf。
+#
+# Jekyll 多配置合并时数组是整体替换（不是追加），所以：
+#   GitHub Pages 构建（仅 _config.yml）→ 默认 include，不含 _headers ✔
+#   Cloudflare 构建（追加 _config.cloudflare.yml）→ include: [_headers] ✔
+# 详见 _config.cloudflare.yml。
 
 # 排除
 exclude:
   - backups/
   - _site_cf
+  - __pycache__/
   - index_empty.html
   - portfolio-single-file.html
   - vendor/

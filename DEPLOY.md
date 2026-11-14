@@ -248,9 +248,11 @@ git push -u origin main
 
 ### 6.2 自动构建流程
 
-每次 push 到 `main`，GitHub Actions（`.github/workflows/deploy.yml`）自动执行：静态检查（node/Python/YAML）→ `check_portfolio_sync.py`（Python 依赖按 `requirements-ci.txt` 固定版本 + 哈希安装）→ `jekyll build` → 内部链接检查 → 上传产物 → 部署到 Pages。**不需要 gh-pages 分支，不需要手动点任何按钮。**
+每次 push 到 `main`，GitHub Actions（`.github/workflows/deploy.yml`）自动执行：静态检查（node/YAML）→ `check_portfolio_sync.py`（Python 依赖按 `requirements-ci.txt` 固定版本 + 哈希安装，Python 版本由 `actions/setup-python` 固定为 3.13）→ `jekyll build` → 内部链接检查 → 上传产物 → 部署到 GitHub Pages → 用追加配置再构建一次并上传 Cloudflare Pages。**不需要 gh-pages 分支，不需要手动点任何按钮。**
 
-手动触发：仓库 Actions 页面可手动运行该工作流；勾选 **deploy** 输入可强制重新部署（不勾则只跑只读链接检查）。
+手动触发：仓库 Actions 页面可手动运行该工作流；勾选 **deploy** 输入可强制重新部署（不勾则只跑只读巡检）。
+
+定时触发：每周一 03:00 UTC 跑只读巡检（`check-internal-links` job）。该 job 不部署，但会完整复跑一遍依赖安装、`check_portfolio_sync.py`、`jekyll build` 和内部链接检查——它是部署链路的哨兵：即使长期没有 push，依赖 hash 失效或数据不同步也会在周一暴露，而不是等下次推送才发现。
 
 ### 6.3 部署后验证（push ≠ 部署成功）
 
@@ -307,7 +309,7 @@ bundle exec jekyll build --config _config.yml,_config.cloudflare.yml --destinati
 | 现象 | 说明 |
 |---|---|
 | `/xxx.html` 返回 308 跳到 `/xxx` | Cloudflare Pages 的干净 URL 规则。站内仍保留 `.html` 链接，因为 GitHub Pages 不认无扩展名路径。多出的一跳由 CDN 承担，`?lang=` 等查询参数在跳转中会保留（实测 `/en.html?v=1` → `/en?v=1`） |
-| `_headers` 不生效 | 检查 `_config.yml` 的 `include:` 是否包含 `_headers`。Jekyll 默认忽略下划线文件，不 include 就永远进不了 `_site` |
+| `_headers` 不生效 | 检查 `_config.cloudflare.yml` 的 `include:` 是否包含 `_headers`。Jekyll 默认忽略下划线文件，不 include 就永远进不了 `_site_cf`。**该配置刻意不放在 `_config.yml`**：include 会同时作用于 GitHub Pages 的产物，让 `github.io/_headers` 变成可公开下载的明文文件 |
 | 站内链接多一跳 | 同上，属双站并存的既定代价 |
 
 **限额（免费版）**：500 次构建/月、20,000 文件、单文件 25 MiB、`_headers` 最多 100 条规则。
@@ -414,6 +416,8 @@ git tag -l
 - **邮箱**：线上页面源码不含明文邮箱（JS 字符码拼装，仅防简单抓取）；离线备案页保留明文。
 - **链接**：模板对 github/demo/社交链接只放行 `http`/`https` 协议（按 `://` 前的协议段锚定判断），其余协议一律输出 `#`。
 - **CI 依赖**：Python 依赖在 `requirements-ci.txt` 固定版本并做 sha256 哈希校验（`pip --require-hashes`），Actions 全部固定到完整 commit SHA；htmlproofer 统一 `--disable-external`，CI 不向外部站点发起未验证请求。
+  - Python 版本在 workflow 里显式固定为 **3.13**。这不是随意选的：`ubuntu-latest` 的默认 Python 会随镜像升级，而 PyYAML 6.0.2 没有 cp314 wheel，一旦 runner 升到 3.14，pip 就会回退到源码包并撞上 hash 校验失败，直接打断部署（2026-11 实际发生过一次，静默了两周）。
+  - 若将来必须升级 Python 版本，先确认 `requirements-ci.txt` 里有对应 `cpXXX` 的 wheel hash，否则会被迫走 sdist 编译。
 
 ---
 
@@ -433,6 +437,22 @@ A：(1) `_data/navigation.yml` 加导航项；(2) `_data/` 新建数据文件；
 
 **Q：GitHub Actions 构建失败且日志提示 Liquid 语法错误？**
 A：多半是新增的内部文档（Markdown）被 Jekyll 当作页面解析。确认文件已加入 `_config.yml` 的 `exclude`，或去掉 front matter。
+
+**Q：Actions 报 `THESE PACKAGES DO NOT MATCH THE HASHES FROM THE REQUIREMENTS FILE`？**
+A：`requirements-ci.txt` 里的 sha256 与 PyPI 上现存的文件对不上。两种常见成因：
+
+1. **runner 的 Python 版本变了**，没有匹配的 wheel，pip 回退去下源码包。先看日志里 pip 实际尝试的文件名（`.whl` 还是 `.tar.gz`），确认 `actions/setup-python` 固定的版本仍被支持。
+2. **PyPI 上的包被重新打包**（同一个版本号换了文件名或内容）。此时需要用当前文件的真实 hash 更新白名单：
+
+```bash
+# 查出某版本所有文件及其 sha256，挑出报错里提到的那个文件
+curl -s https://pypi.org/pypi/PyYAML/<版本>/json | python -c "
+import json,sys
+d=json.load(sys.stdin)
+[print(u['filename'], u['digests']['sha256']) for u in d['urls']]"
+```
+
+**不要**图省事去掉 `--require-hashes`——那会把「部署环境被投毒」的防线一起拆掉。
 
 ---
 

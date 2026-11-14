@@ -1,6 +1,15 @@
 # CI 专用 Python 依赖：固定版本 + sha256 哈希校验。
-# 由 .github/workflows/deploy.yml 的 "Check portfolio sync freshness" 步骤使用
-# （--require-hashes），避免部署任务从 PyPI 拉到未审计的新版本。
+# 由 .github/workflows/deploy.yml 使用（--require-hashes），
+# 避免部署任务从 PyPI 拉到未审计的新版本。
+#
+# ⚠️ 2026-11 故障记录（勿重复踩坑）：
+#   GitHub Actions runner 的默认 Python 升到 3.14 后，PyYAML 6.0.2 没有对应的
+#   cp314 wheel，pip 只能回退到 sdist；而本文件当时只登记了旧的
+#   PyYAML-6.0.2.tar.gz 的 hash（0833f869…），PyPI 后来把 sdist 重新打包成
+#   pyyaml-6.0.2.tar.gz（d584d9ec…），导致 `--require-hashes` 直接报
+#   "THESE PACKAGES DO NOT MATCH THE HASHES"，整条部署链路中断。
+#   两个 sdist hash 因此都要保留；同时在 deploy.yml 里用 actions/setup-python
+#   把 Python 固定到 3.13，命中官方 wheel，不必现场编译。
 PyYAML==6.0.2 \
     --hash=sha256:0a9a2848a5b7feac301353437eb7d5957887edbf81d56e903999a75a3d743086 \
     --hash=sha256:ec031d5d2feb36d1d1a24380e4db6d43695f3748343d99434e6f5f9156aaa2ed \
@@ -21,4 +30,5 @@ PyYAML==6.0.2 \
     --hash=sha256:41e4e3953a79407c794916fa277a82531dd93aad34e29c2a514c2c0c5fe971cc \
     --hash=sha256:e10ce637b18caea04431ce14fabcf5c64a1c61ec9c56b071a4b7ca131ca52d44 \
     --hash=sha256:7e7401d0de89a9a855c839bc697c079a4af81cf878373abd7dc625847d25cbd8 \
-    --hash=sha256:8388ee1976c416731879ac16da0aff3f63b286ffdd57cdeb95f3f2e085687563
+    --hash=sha256:8388ee1976c416731879ac16da0aff3f63b286ffdd57cdeb95f3f2e085687563 \
+    --hash=sha256:d584d9ec91ad65861cc08d42e834324ef890a082e591037abe114850ff7bbc3e

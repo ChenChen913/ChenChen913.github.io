@@ -19,8 +19,9 @@
 
 ```
 ├── _config.yml          # Jekyll 全局配置（url、collections、exclude 等）
-├── _config.cloudflare.yml # Cloudflare 专用覆盖：只把 url 指向 pages.dev（含构建说明）
-├── _headers             # Cloudflare Pages 响应头；必须写进 _config.yml 的 include，否则不会进产物
+├── _config.cloudflare.yml # Cloudflare 专用覆盖：url 指向 pages.dev，并在此 include _headers
+├── _headers             # Cloudflare Pages 响应头；只在 _config.cloudflare.yml 的 include 里
+│                        # （不能放进 _config.yml，否则 github.io/_headers 会变成可下载的明文）
 ├── _data/               # 站点数据（改内容主要在这里）
 │   ├── personal.yml     #   姓名、简介、页脚日期等
 │   ├── education.yml    #   教育经历

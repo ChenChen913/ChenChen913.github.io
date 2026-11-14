@@ -19,8 +19,9 @@ A personal homepage built with Jekyll. **Cloudflare Pages is the primary site**,
 
 ```
 ├── _config.yml          # Jekyll global config (url, collections, exclude, etc.)
-├── _config.cloudflare.yml # Cloudflare override: points url to pages.dev
-├── _headers             # Cloudflare Pages response headers
+├── _config.cloudflare.yml # Cloudflare override: url → pages.dev, and includes _headers
+├── _headers             # Cloudflare Pages response headers; included only from
+│                        # _config.cloudflare.yml (never _config.yml, or github.io/_headers leaks)
 ├── _data/               # Site data (edit content mostly here)
 │   ├── personal.yml     #   name, intro, footer date, etc.
 │   ├── education.yml    #   education history
